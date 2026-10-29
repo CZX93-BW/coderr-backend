@@ -19,3 +19,17 @@ class UserProfileModelTests(TestCase):
 
         self.assertEqual(profile.user_id, user.pk)
         self.assertEqual(profile.type, "customer")
+
+    def test_new_profile_has_no_upload_timestamp(self):
+        user = get_user_model().objects.create_user(
+            username="customer_without_image",
+            password="TestPassword123!",
+        )
+
+        profile = UserProfile.objects.create(
+            user=user,
+            type="customer",
+        )
+        profile.refresh_from_db()
+
+        self.assertIsNone(profile.uploaded_at)

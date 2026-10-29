@@ -16,6 +16,11 @@ class UserProfile(models.Model):
         max_length=8,
         choices=AccountType.choices,
     )
+    uploaded_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        default=None,
+    )
 
     def __str__(self):
         return self.user.username
