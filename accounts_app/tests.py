@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.test import TestCase
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APITestCase
 
 from .models import UserProfile
 
@@ -67,3 +70,56 @@ class UserProfileModelTests(TestCase):
         self.assertTrue(
             UserProfile.objects.filter(pk=other_profile.pk).exists()
         )
+
+
+class RegistrationAPITests(APITestCase):
+    def setUp(self):
+        self.url = "/api/registration/"
+        self.payload = {
+            "username": "new_customer",
+            "email": "customer@example.com",
+            "password": "TestPassword123!",
+            "repeated_password": "TestPassword123!",
+            "type": "customer",
+        }
+
+    def test_customer_registration_creates_account_profile_and_token(self):
+        response = self.client.post(self.url, self.payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(get_user_model().objects.count(), 1)
+        self.assertEqual(UserProfile.objects.count(), 1)
+        self.assertEqual(Token.objects.count(), 1)
+        user = get_user_model().objects.get(username=self.payload["username"])
+        profile = UserProfile.objects.get(user=user)
+        token = Token.objects.get(user=user)
+        self.assertEqual(profile.type, "customer")
+        self.assert_registration_response(response, user, token)
+        self.assert_registered_user(user)
+
+    def test_password_mismatch_creates_no_registration_data(self):
+        self.payload["repeated_password"] = "DifferentPassword123!"
+
+        response = self.client.post(self.url, self.payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("repeated_password", response.json())
+        self.assertEqual(get_user_model().objects.count(), 0)
+        self.assertEqual(UserProfile.objects.count(), 0)
+        self.assertEqual(Token.objects.count(), 0)
+
+    def assert_registration_response(self, response, user, token):
+        expected = {
+            "token": token.key,
+            "username": self.payload["username"],
+            "email": self.payload["email"],
+            "user_id": user.pk,
+        }
+        self.assertEqual(response.json(), expected)
+
+    def assert_registered_user(self, user):
+        self.assertEqual(user.email, self.payload["email"])
+        self.assertTrue(user.check_password(self.payload["password"]))
+        self.assertNotEqual(user.password, self.payload["password"])
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_superuser)
