@@ -16,6 +16,25 @@ class UserProfile(models.Model):
         max_length=8,
         choices=AccountType.choices,
     )
+    location = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+    )
+    tel = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+    )
+    description = models.TextField(
+        blank=True,
+        default="",
+    )
+    working_hours = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+    )
     uploaded_at = models.DateTimeField(
         null=True,
         blank=True,

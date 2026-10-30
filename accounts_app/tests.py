@@ -33,3 +33,19 @@ class UserProfileModelTests(TestCase):
         profile.refresh_from_db()
 
         self.assertIsNone(profile.uploaded_at)
+
+    def test_optional_profile_texts_default_to_empty_strings(self):
+        user = get_user_model().objects.create_user(
+            username="customer_without_details",
+            password="TestPassword123!",
+        )
+        profile = UserProfile.objects.create(
+            user=user,
+            type="customer",
+        )
+        profile.refresh_from_db()
+
+        fields = ("location", "tel", "description", "working_hours")
+        for field in fields:
+            with self.subTest(field=field):
+                self.assertEqual(getattr(profile, field), "")
