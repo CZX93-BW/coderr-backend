@@ -143,8 +143,14 @@ The current model tests cover:
 - At most one profile per user
 - Deleting a user's profile with that user while preserving other accounts
 
-Postman collection and environment files will be added during API
-development. They are not available yet.
+Postman collection and environment files are available in `postman/`.
+Import both JSON files and select the `Coderr Local` environment.
+
+The initial collection contains two CORS preflight requests with ten
+automated checks. Both requests passed in a local collection run.
+Business API tests will be added as the endpoints are implemented.
+
+See `postman/README.md` for setup and execution instructions.
 
 ## Project structure
 

@@ -1,0 +1,148 @@
+{
+  "info": {
+    "_postman_id": "95074e26-f8b5-44af-a0f0-c58f755fde20",
+    "name": "Coderr Backend",
+    "description": "C09 initial setup: two CORS preflight requests, ten tests. No business API operations implemented in this collection yet.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "item": [
+    {
+      "name": "00 - Setup and CORS",
+      "item": [
+        {
+          "name": "SETUP-01 | Allowed frontend origin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Preflight response body is empty\", function () {",
+                  "    pm.expect(pm.response.text()).to.equal(\"\");",
+                  "});",
+                  "",
+                  "pm.test(\"Vary includes origin\", function () {",
+                  "    const vary = pm.response.headers.get(\"Vary\") || \"\";",
+                  "    const values = vary.toLowerCase().split(\",\").map(value => value.trim());",
+                  "    pm.expect(values).to.include(\"origin\");",
+                  "});",
+                  "",
+                  "pm.test(\"Allowed origin is returned exactly\", function () {",
+                  "    const origin = pm.environment.get(\"frontend_origin\");",
+                  "    pm.expect(origin).to.equal(\"http://127.0.0.1:5500\");",
+                  "    pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\"))",
+                  "        .to.equal(origin);",
+                  "});",
+                  "",
+                  "pm.test(\"Authorization header is allowed\", function () {",
+                  "    const header = pm.response.headers.get(\"Access-Control-Allow-Headers\") || \"\";",
+                  "    const values = header.toLowerCase().split(\",\").map(value => value.trim());",
+                  "    pm.expect(values).to.include(\"authorization\");",
+                  "});",
+                  "",
+                  "pm.test(\"GET method is allowed\", function () {",
+                  "    const header = pm.response.headers.get(\"Access-Control-Allow-Methods\") || \"\";",
+                  "    const values = header.toUpperCase().split(\",\").map(value => value.trim());",
+                  "    pm.expect(values).to.include(\"GET\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "OPTIONS",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{frontend_origin}}",
+                "type": "text"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "GET",
+                "type": "text"
+              },
+              {
+                "key": "Access-Control-Request-Headers",
+                "value": "authorization",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/",
+            "description": "Setup check only. The CORS middleware answers this preflight even before business API routes exist. This does not test endpoint authentication or browser enforcement."
+          },
+          "response": []
+        },
+        {
+          "name": "SETUP-02 | Unapproved origin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Preflight response body is empty\", function () {",
+                  "    pm.expect(pm.response.text()).to.equal(\"\");",
+                  "});",
+                  "",
+                  "pm.test(\"Vary includes origin\", function () {",
+                  "    const vary = pm.response.headers.get(\"Vary\") || \"\";",
+                  "    const values = vary.toLowerCase().split(\",\").map(value => value.trim());",
+                  "    pm.expect(values).to.include(\"origin\");",
+                  "});",
+                  "",
+                  "pm.test(\"Unapproved origin receives no allow-origin header\", function () {",
+                  "    pm.expect(pm.environment.get(\"unapproved_origin\"))",
+                  "        .to.equal(\"http://127.0.0.1:5501\");",
+                  "    pm.expect(pm.response.headers.has(\"Access-Control-Allow-Origin\"))",
+                  "        .to.equal(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "OPTIONS",
+            "header": [
+              {
+                "key": "Origin",
+                "value": "{{unapproved_origin}}",
+                "type": "text"
+              },
+              {
+                "key": "Access-Control-Request-Method",
+                "value": "GET",
+                "type": "text"
+              },
+              {
+                "key": "Access-Control-Request-Headers",
+                "value": "authorization",
+                "type": "text"
+              }
+            ],
+            "url": "{{base_url}}/",
+            "description": "Setup check only. The CORS middleware answers this preflight even before business API routes exist. This does not test endpoint authentication or browser enforcement."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
