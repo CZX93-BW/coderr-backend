@@ -144,6 +144,79 @@ class RegistrationAPITests(APITestCase):
                 self.assertEqual(UserProfile.objects.count(), 0)
                 self.assertEqual(Token.objects.count(), 0)
 
+    def test_missing_required_fields_create_no_registration_data(self):
+        for field in self.payload:
+            with self.subTest(field=field):
+                payload = self.payload.copy()
+                payload.pop(field)
+
+                self.assert_invalid_registration(payload, field)
+
+    def test_empty_required_fields_create_no_registration_data(self):
+        for field in self.payload:
+            for value in ("", None):
+                with self.subTest(field=field, value=value):
+                    payload = self.payload.copy()
+                    payload[field] = value
+
+                    self.assert_invalid_registration(payload, field)
+
+    def test_invalid_email_creates_no_registration_data(self):
+        payload = self.payload.copy()
+        payload["email"] = "not-an-email"
+
+        self.assert_invalid_registration(payload, "email")
+
+    def test_duplicate_username_preserves_existing_registration(self):
+        original_response = self.client.post(
+            self.url, self.payload, format="json"
+        )
+        self.assertEqual(
+            original_response.status_code, status.HTTP_201_CREATED
+        )
+        original_state = self.get_registration_state()
+        duplicate_payload = self.build_duplicate_username_payload()
+
+        response = self.client.post(
+            self.url, duplicate_payload, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("username", response.json())
+        self.assertEqual(self.get_registration_state(), original_state)
+
+    def build_duplicate_username_payload(self):
+        payload = self.payload.copy()
+        payload.update(
+            email="different@example.com",
+            password="DifferentPassword123!",
+            repeated_password="DifferentPassword123!",
+            type="business",
+        )
+        return payload
+
+    def get_registration_state(self):
+        return {
+            "users": list(
+                get_user_model().objects.order_by("pk").values()
+            ),
+            "profiles": list(
+                UserProfile.objects.order_by("pk").values()
+            ),
+            "tokens": list(
+                Token.objects.order_by("pk").values()
+            ),
+        }
+
+    def assert_invalid_registration(self, payload, field):
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(field, response.json())
+        self.assertEqual(get_user_model().objects.count(), 0)
+        self.assertEqual(UserProfile.objects.count(), 0)
+        self.assertEqual(Token.objects.count(), 0)
+
     def assert_registration_response(self, response, user, token):
         expected = {
             "token": token.key,

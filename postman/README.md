@@ -1,97 +1,147 @@
 # Coderr Postman Tests
 
-## Current scope
+## Scope and expected results
 
-This initial collection contains two CORS preflight requests with ten named
-tests. It does not yet cover E01-E23 or implement account creation.
+This collection contains 25 requests and 106 named tests per full run:
 
-- SETUP-01: approved origin, six tests.
-- SETUP-02: unapproved origin, four tests.
+| Folder | Requests | Tests |
+| --- | ---: | ---: |
+| 00 - Setup and CORS | 2 | 10 |
+| 01 - Registration | 23 | 96 |
 
-Both requests use OPTIONS against `{{base_url}}/` and do not modify data.
-The middleware can answer them before business API routes exist. A successful
-preflight does not prove that a business endpoint exists or is authorized.
+The registration folder covers two successful registrations, duplicate
+username, password mismatch, three invalid account types, five missing fields,
+ten empty/null field cases and one invalid email address.
 
-## Prerequisites
+These counts are expected results, not a record of a completed Postman run.
+The initial CORS folder previously passed ten checks. The expanded registration
+collection must be executed against the local backend before recording success.
 
-1. Use the Postman desktop application.
-2. Start the Django development server in the backend project:
+## Local prerequisites
+
+Start the backend from an activated virtual environment:
 
 ```bat
-.venv\Scripts\activate.bat
 python manage.py runserver
 ```
 
-3. Configure `DJANGO_CORS_ALLOWED_ORIGINS=http://127.0.0.1:5500` in the local
-   backend `.env`, with CORS enabled for `/api/` in Django settings.
-4. Restart the server after environment changes.
+Use the Postman desktop application and the backend URL
+`http://127.0.0.1:8000/api`. The collection skips requests if a different
+base_url is selected. Keep the Django development server running.
 
-Live Server does not need to run for these checks: the requests supply the
-Origin header explicitly. No staff account or token is needed for this setup
-folder. Staff credentials will be required only when staff API tests are added.
+CORS expects `http://127.0.0.1:5500` to be allowed and port 5501 not to be
+allowed. Live Server itself need not run for these header checks.
 
-## Import and run
+## Files and import
 
-1. Import `Coderr_Backend.postman_collection.json` into Postman.
-2. Import `Coderr_Local.postman_environment.json`.
-3. Select the `Coderr Local` environment.
-4. Open `Coderr Backend` > `00 - Setup and CORS`.
-5. Send SETUP-01 and inspect the test results: expected six passes.
-6. Send SETUP-02 and inspect the test results: expected four passes.
-7. Run the entire collection once with one iteration: expected two requests,
-   ten passed tests and zero failures.
+Keep these files in the backend repository's `postman` folder:
 
-These are expected outcomes, not a record of an executed local Postman run.
+- Coderr_Backend.postman_collection.json
+- Coderr_Local.postman_environment.json
+- README.md
+
+Replace the previous template files with the complete new files.
+Import both JSON files into Postman. Replace/update the existing collection
+and environment if offered. If Postman creates duplicates, use the newly
+imported collection containing both folders and its matching environment.
+Avoid running the old CORS-only collection by mistake.
+
+Select the `Coderr Local` environment. In the Collection Runner select both
+folders in their supplied order, use one iteration, and run all 25 requests.
+Expected: 106 passed tests, zero failed tests, zero skipped requests.
+Inspect request errors as well as assertion failures.
+
+## Run order and test data
+
+E01-01 generates a fresh GUID-based run_id and creates unique customer and
+business usernames and email addresses. It clears the old customer_a and
+business_a tokens and IDs before executing.
+
+E01-01 registers customer_a. E01-02 registers business_a. Their responses
+populate the corresponding token and ID environment variables.
+The duplicate-username request depends on successful E01-01 registration.
+Error requests require an initialized run_id.
+
+For repeated testing, rerun the complete collection from the beginning.
+Every successful full run creates two new accounts in the development
+database. Accounts are not automatically deleted; there is no user-deletion
+endpoint in the supplied API contract. No cleanup request is included.
+Do not clear the entire development database to clean up these accounts.
+
+The password included in request bodies is a public, local test fixture.
+It must never be reused for personal, administrator or production accounts.
+No real token, administrator password or fixed database ID is shipped.
 
 ## Variables
 
-`base_url` is `http://127.0.0.1:8000/api`, without a trailing slash.
-`frontend_origin` is `http://127.0.0.1:5500`.
-`unapproved_origin` is `http://127.0.0.1:5501`.
+- base_url: local API root, without a trailing slash
+- frontend_origin: approved origin, port 5500
+- unapproved_origin: unapproved origin, port 5501
+- run_id: generated by E01-01
+- customer_a_username / customer_a_email: generated test identity
+- business_a_username / business_a_email: generated test identity
+- customer_a_token / customer_a_id: captured from successful registration
+- business_a_token / business_a_id: captured from successful registration
+- customer_b, business_b and staff token/ID variables: reserved empty slots
 
-The scripts deliberately check these two origins against the agreed local
-configuration. If the local frontend address changes, update the Django
-configuration, environment and the corresponding assertions together.
+This version creates only customer_a and business_a. Additional identities
+will be implemented with the workflows that need them. No staff setup is
+required for the current collection.
 
-`run_id` and the customer/business/staff ID and token variables are empty
-placeholders for future API tests. They are not used or populated in this
-initial version. There are no hard-coded database IDs or real credentials.
+Token and ID capture runs only for a successful response containing matching
+account details, a nonempty token and a positive integer user ID.
+A token is not displayed by test scripts or written into repository files.
+The HTTP response itself contains the token, so avoid sharing full response
+bodies or environment exports with populated token values.
 
-## What the assertions mean
+Keep the blank-token environment file in Git. Postman updates its imported
+environment, not the template file on disk. Do not replace the repository
+template with a populated environment export.
 
-`pm.test` defines a named test. `pm.response` reads the HTTP response.
-`pm.expect` checks that actual values match the expected contract.
+## Assertions and limitations
 
-The approved request checks status, empty body, Vary, exact allowed origin,
-allowed authorization header and allowed GET method.
+Successful registrations check status 201, JSON object response, exact
+response keys, matching username/email, token string and positive integer ID.
 
-The unapproved request checks status, empty body, Vary and the absence of an
-Access-Control-Allow-Origin header. A 200 response is expected even when
-an origin has no CORS permission; the missing header is decisive.
+Rejected registrations check status 400, JSON object response, a nonempty
+error array for the affected field, no returned token/user ID, and no echoed
+test passwords. Password field names may legitimately occur in validation
+errors; the secret values must not be echoed.
 
-Postman does not enforce browser CORS. These requests verify the server's
-headers. Real browser integration is a separate later check.
+CORS tests check preflight status, empty body, Vary and the required presence
+or absence of CORS headers. Postman does not enforce browser CORS rules.
 
-The response body is deliberately empty, so no JSON-body assertion is used.
-JSON response checks will be added with the business endpoints.
+The registration response does not contain the profile type or privilege
+flags. Those are verified by Django tests, not inferred from this response.
+Token usability and further account-state checks will be added when protected
+profile/login endpoints exist.
 
-## Repeated execution and troubleshooting
+HTTP 400 alone does not prove that no database write occurred. Existing Django
+API tests check database side effects, including preservation of an existing
+registration after a duplicate request. Transaction rollback on simulated
+internal failures and privilege-injection tests remain separate pending work.
 
-Run the two requests repeatedly without cleanup; they create no records.
-A connection error usually means the local server is not running on port 8000.
-Unresolved variables usually mean `Coderr Local` has not been selected.
-If SETUP-01 lacks the allow-origin header, inspect the environment value,
-Django CORS settings and server restart. If SETUP-02 receives an allow-origin
-header, check that port 5501 is not allowed and wildcard access is disabled.
+## Troubleshooting
 
-## Recording results
+- Connection refused: start Django on port 8000.
+- Unresolved variables: select the imported Coderr Local environment.
+- Missing run_id: start with E01-01, preferably run the full collection.
+- Duplicate username on the first success request: ensure its pre-request
+  script ran and that no higher-priority variables override the generated
+  account names.
+- Skipped duplicate test: the initial customer registration failed; inspect it.
+- 404 for registration: check the backend URL routing and current source files.
+- A failed assertion: record the request name, expected/actual value and error,
+  without sharing live tokens.
 
-Record date, backend commit, Postman request/test counts and failures on C09.
-Do not merge Postman counts with the five existing Django model tests.
-Commit the template files only. Keep future live token/password values local;
-do not overwrite the repository template with an export containing secrets.
+## Evidence
 
-## Sources
+Record date, backend commit, request count, passed/failed assertions and
+skipped/error requests. Keep Django and Postman results separate.
+Do not report C10 as complete based solely on this collection run.
+
+## References
 
 https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-examples/
+https://learning.postman.com/docs/tests-and-scripts/write-scripts/postman-sandbox-reference/pm-execution/
 https://github.com/adamchainz/django-cors-headers
