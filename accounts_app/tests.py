@@ -97,6 +97,22 @@ class RegistrationAPITests(APITestCase):
         self.assert_registration_response(response, user, token)
         self.assert_registered_user(user)
 
+    def test_business_registration_creates_account_profile_and_token(self):
+        self.payload["type"] = "business"
+
+        response = self.client.post(self.url, self.payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(get_user_model().objects.count(), 1)
+        self.assertEqual(UserProfile.objects.count(), 1)
+        self.assertEqual(Token.objects.count(), 1)
+        user = get_user_model().objects.get(username=self.payload["username"])
+        profile = UserProfile.objects.get(user=user)
+        token = Token.objects.get(user=user)
+        self.assertEqual(profile.type, "business")
+        self.assert_registration_response(response, user, token)
+        self.assert_registered_user(user)
+
     def test_password_mismatch_creates_no_registration_data(self):
         self.payload["repeated_password"] = "DifferentPassword123!"
 
@@ -107,6 +123,26 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(get_user_model().objects.count(), 0)
         self.assertEqual(UserProfile.objects.count(), 0)
         self.assertEqual(Token.objects.count(), 0)
+
+    def test_invalid_account_type_creates_no_registration_data(self):
+        for account_type in ("admin", "staff", "invalid"):
+            with self.subTest(account_type=account_type):
+                self.payload["type"] = account_type
+
+                response = self.client.post(
+                    self.url,
+                    self.payload,
+                    format="json",
+                )
+
+                self.assertEqual(
+                    response.status_code,
+                    status.HTTP_400_BAD_REQUEST,
+                )
+                self.assertIn("type", response.json())
+                self.assertEqual(get_user_model().objects.count(), 0)
+                self.assertEqual(UserProfile.objects.count(), 0)
+                self.assertEqual(Token.objects.count(), 0)
 
     def assert_registration_response(self, response, user, token):
         expected = {
