@@ -323,21 +323,11 @@ class LoginAPITests(APITestCase):
         self.url = "/api/login/"
 
     def test_valid_login_returns_existing_token_and_user_data(self):
-        payload = {
-            "username": self.user.username,
-            "password": self.password,
-        }
+        response = self.client.post(
+            self.url, self.build_valid_payload(), format="json"
+        )
 
-        response = self.client.post(self.url, payload, format="json")
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        expected = {
-            "token": self.token.key,
-            "username": self.user.username,
-            "email": self.user.email,
-            "user_id": self.user.pk,
-        }
-        self.assertEqual(response.json(), expected)
+        self.assert_successful_login(response, self.token.key)
         self.assertEqual(Token.objects.filter(user=self.user).count(), 1)
 
     def test_wrong_password_is_rejected_without_changing_tokens(self):
@@ -356,13 +346,64 @@ class LoginAPITests(APITestCase):
 
         self.assert_login_is_rejected(payload)
 
-    def assert_login_is_rejected(self, payload):
+    def test_missing_login_fields_are_rejected(self):
+        for field in ("username", "password"):
+            with self.subTest(field=field):
+                payload = self.build_valid_payload()
+                payload.pop(field)
+
+                self.assert_login_is_rejected(payload, field)
+
+    def test_empty_login_fields_are_rejected(self):
+        for field in ("username", "password"):
+            for value in ("", None):
+                with self.subTest(field=field, value=value):
+                    payload = self.build_valid_payload()
+                    payload[field] = value
+
+                    self.assert_login_is_rejected(payload, field)
+
+    def test_inactive_user_cannot_log_in(self):
+        self.user.is_active = False
+        self.user.save(update_fields=["is_active"])
+
+        self.assert_login_is_rejected(self.build_valid_payload())
+
+    def test_valid_login_creates_token_when_missing(self):
+        self.token.delete()
+
+        response = self.client.post(
+            self.url, self.build_valid_payload(), format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Token.objects.filter(user=self.user).count(), 1)
+        token = Token.objects.get(user=self.user)
+        self.assert_successful_login(response, token.key)
+
+    def build_valid_payload(self):
+        return {
+            "username": self.user.username,
+            "password": self.password,
+        }
+
+    def assert_successful_login(self, response, token_key):
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected = {
+            "token": token_key,
+            "username": self.user.username,
+            "email": self.user.email,
+            "user_id": self.user.pk,
+        }
+        self.assertEqual(response.json(), expected)
+
+    def assert_login_is_rejected(self, payload, error_field="non_field_errors"):
         original_tokens = list(Token.objects.order_by("pk").values())
 
         response = self.client.post(self.url, payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("non_field_errors", response.json())
+        self.assertIn(error_field, response.json())
         self.assertNotIn("token", response.json())
         self.assertEqual(
             list(Token.objects.order_by("pk").values()),

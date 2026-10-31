@@ -1,0 +1,169 @@
+{
+  "info": {
+    "_postman_id": "2397013c-914e-4210-8336-02f1764583a9",
+    "name": "Coderr Login - Manual Preconditions",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Do not run this collection as a batch. Run each request separately after its documented admin precondition. Use only the generated local customer account."
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.variables.get(\"base_url\") !== \"http://127.0.0.1:8000/api\") {",
+          "    pm.execution.skipRequest();",
+          "    throw new Error(\"Select Coderr Local with the expected local base_url.\");",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "E02-M01 | Inactive customer (deactivate in admin first)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const role = \"customer_a\";",
+              "for (const suffix of [\"_username\", \"_email\", \"_id\", \"_token\"]) {",
+              "    if (!pm.environment.get(role + suffix)) {",
+              "        pm.execution.skipRequest();",
+              "        throw new Error(\"Run the complete registration folder first with Coderr Local selected.\");",
+              "    }",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "let data;",
+              "try { data = pm.response.json(); } catch (error) { data = null; }",
+              "pm.test(\"Invalid login returns 400\", function () { pm.response.to.have.status(400); });",
+              "pm.test(\"Error response is a JSON object\", function () {",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.include(\"application/json\");",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "});",
+              "pm.test(\"Expected validation error is present\", function () {",
+              "    pm.expect(data[\"non_field_errors\"]).to.be.an(\"array\").and.not.empty;",
+              "});",
+              "pm.test(\"No token or password is returned\", function () {",
+              "    pm.expect(data).not.to.have.property(\"token\");",
+              "    pm.expect(data).not.to.have.property(\"password_hash\");",
+              "    pm.expect(pm.response.text()).not.to.include(\"CoderrTest!83_TestOnly\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{customer_a_username}}\",\n  \"password\": \"CoderrTest!83_TestOnly\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/login/",
+        "description": "After a complete main run: deactivate only the generated customer_a user in Django admin. Keep its token. Send this request, expect 400. Reactivate the user afterwards."
+      },
+      "response": []
+    },
+    {
+      "name": "E02-M02 | Missing token (reactivate and delete token first)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const role = \"customer_a\";",
+              "for (const suffix of [\"_username\", \"_email\", \"_id\", \"_token\"]) {",
+              "    if (!pm.environment.get(role + suffix)) {",
+              "        pm.execution.skipRequest();",
+              "        throw new Error(\"Run the complete registration folder first with Coderr Local selected.\");",
+              "    }",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "let data;",
+              "try { data = pm.response.json(); } catch (error) { data = null; }",
+              "const role = \"customer_a\";",
+              "pm.test(\"Login returns 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response is JSON with exactly the documented fields\", function () {",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\") || \"\").to.include(\"application/json\");",
+              "    pm.expect(data).to.have.all.keys(\"token\", \"username\", \"email\", \"user_id\");",
+              "});",
+              "pm.test(\"Response identifies the prepared account\", function () {",
+              "    pm.expect(data.username).to.equal(pm.environment.get(role + \"_username\"));",
+              "    pm.expect(data.email).to.equal(pm.environment.get(role + \"_email\"));",
+              "    pm.expect(data.user_id).to.equal(Number(pm.environment.get(role + \"_id\")));",
+              "});",
+              "pm.test(\"User ID is a positive integer\", function () {",
+              "    pm.expect(Number.isInteger(data.user_id)).to.equal(true);",
+              "    pm.expect(data.user_id).to.be.above(0);",
+              "});",
+              "pm.test(\"A new token is returned after deletion\", function () {",
+              "    pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(data.token).not.to.equal(pm.environment.get(role + \"_token\"));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{customer_a_username}}\",\n  \"password\": \"CoderrTest!83_TestOnly\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{base_url}}/login/",
+        "description": "Reactivate the generated customer_a user. Delete ONLY its token in Django admin; leave customer_a_token unchanged in Postman so the test can compare the old value. Send once, expect 200 and a different token. Then rerun the main collection to refresh all environment data."
+      },
+      "response": []
+    }
+  ]
+}

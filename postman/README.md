@@ -145,3 +145,30 @@ Do not report C10 as complete based solely on this collection run.
 https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-examples/
 https://learning.postman.com/docs/tests-and-scripts/write-scripts/postman-sandbox-reference/pm-execution/
 https://github.com/adamchainz/django-cors-headers
+
+
+## C11 login extension — 2026-10-31
+
+This section supersedes earlier request/assertion totals. The main collection now has 36 requests and 153 named assertions: the existing 25 requests/106 assertions plus 11 login requests/47 assertions.
+
+Replace the collection JSON and this README in the backend postman directory. The environment template is unchanged and contains no live tokens. Use your existing Coderr Local environment; reimporting the template resets its generated values. Update the existing collection when importing, or delete the old collection after importing if Postman creates a duplicate.
+
+Start the backend with `python manage.py runserver`. Run the entire main collection, one iteration, in folder order: Setup/CORS, Registration, Login. Registration prepares unique customer/business accounts and stores IDs and tokens. Login compares the exact fields, identity and existing tokens. The final login confirms the customer token is unchanged after invalid attempts. Each complete run creates two local accounts, with no automatic cleanup.
+
+New routine cases: customer login, business login, wrong password, unknown username, missing username/password, empty username/password, null username/password, successful login after invalid attempts. Missing/null/empty field cases check field errors; invalid credentials check non_field_errors. No production credentials are used.
+
+### Optional manual preconditions
+
+Import Coderr_Login_Manual.postman_collection.json separately. Do not run both requests as a batch: each requires a different database state. Select the same Coderr Local environment and use only its generated customer_a account.
+
+1. Complete the main collection first. In Django admin, find the user whose username equals customer_a_username. Uncheck Active and save. Send E02-M01 only: expect four passing assertions and 400. Reactivate this user and save.
+2. In Django admin's token list, delete only that generated user's token. Keep the old customer_a_token value in Postman. Send E02-M02 once: expect five passing assertions, 200 and a new token. Confirm in admin that the user has one token. Rerunning this request without deleting the token again is expected to fail the new-token comparison.
+3. Rerun the main collection to refresh account variables and return to an ordinary state.
+
+These two cases are also covered automatically in Django tests. Postman cannot deactivate users or delete tokens through this project's public API, so admin preparation is explicit. No test-only endpoint is required.
+
+### Verification boundary
+
+The reported Django run passed 23 tests. This delivered collection was structurally checked and its JavaScript syntax checked; it has not been run against Basti's local backend by the assistant. Record the actual Postman result after execution.
+
+Login response tests do not prove token access to a protected endpoint. That check remains for the profile API. Database rollback and stored privilege flags are verified in Django tests; ordinary HTTP responses alone cannot prove them. C11 remains open until its remaining token-access and frontend checks are complete.
