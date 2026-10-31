@@ -279,3 +279,92 @@ class RegistrationTransactionTests(APITestCase):
         self.assertEqual(get_user_model().objects.count(), 0)
         self.assertEqual(UserProfile.objects.count(), 0)
         self.assertEqual(Token.objects.count(), 0)
+
+class LoginAPITests(APITestCase):
+    def setUp(self):
+        self.password = "TestPassword123!"
+        self.user = get_user_model().objects.create_user(
+            username="login_customer",
+            email="login@example.com",
+            password=self.password,
+        )
+        UserProfile.objects.create(user=self.user, type="customer")
+        self.token = Token.objects.create(user=self.user)
+        self.url = "/api/login/"
+
+    def test_valid_login_returns_existing_token_and_user_data(self):
+        payload = {
+            "username": self.user.username,
+            "password": self.password,
+        }
+
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected = {
+            "token": self.token.key,
+            "username": self.user.username,
+            "email": self.user.email,
+            "user_id": self.user.pk,
+        }
+        self.assertEqual(response.json(), expected)
+        self.assertEqual(Token.objects.filter(user=self.user).count(), 1)
+
+class LoginAPITests(APITestCase):
+    def setUp(self):
+        self.password = "TestPassword123!"
+        self.user = get_user_model().objects.create_user(
+            username="login_customer",
+            email="login@example.com",
+            password=self.password,
+        )
+        UserProfile.objects.create(user=self.user, type="customer")
+        self.token = Token.objects.create(user=self.user)
+        self.url = "/api/login/"
+
+    def test_valid_login_returns_existing_token_and_user_data(self):
+        payload = {
+            "username": self.user.username,
+            "password": self.password,
+        }
+
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected = {
+            "token": self.token.key,
+            "username": self.user.username,
+            "email": self.user.email,
+            "user_id": self.user.pk,
+        }
+        self.assertEqual(response.json(), expected)
+        self.assertEqual(Token.objects.filter(user=self.user).count(), 1)
+
+    def test_wrong_password_is_rejected_without_changing_tokens(self):
+        payload = {
+            "username": self.user.username,
+            "password": "WrongPassword123!",
+        }
+
+        self.assert_login_is_rejected(payload)
+
+    def test_unknown_username_is_rejected_without_changing_tokens(self):
+        payload = {
+            "username": "unknown_customer",
+            "password": self.password,
+        }
+
+        self.assert_login_is_rejected(payload)
+
+    def assert_login_is_rejected(self, payload):
+        original_tokens = list(Token.objects.order_by("pk").values())
+
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("non_field_errors", response.json())
+        self.assertNotIn("token", response.json())
+        self.assertEqual(
+            list(Token.objects.order_by("pk").values()),
+            original_tokens,
+        )
