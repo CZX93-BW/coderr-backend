@@ -16,6 +16,11 @@ class UserProfile(models.Model):
         max_length=8,
         choices=AccountType.choices,
     )
+    file = models.ImageField(
+        upload_to="profiles/",
+        blank=True,
+        default="",
+    )
     location = models.CharField(
         max_length=255,
         blank=True,

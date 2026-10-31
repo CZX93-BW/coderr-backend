@@ -1,11 +1,15 @@
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from accounts_app.models import UserProfile
+
 from .serializers import (
+    ProfileDetailSerializer,
     RegistrationResponseSerializer,
     RegistrationSerializer,
 )
@@ -43,3 +47,12 @@ class LoginView(generics.GenericAPIView):
             response_serializer.data,
             status=status.HTTP_200_OK,
         )
+
+
+class ProfileDetailView(generics.RetrieveAPIView):
+    queryset = UserProfile.objects.select_related("user")
+    serializer_class = ProfileDetailSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = "user_id"
+    lookup_url_kwarg = "pk"

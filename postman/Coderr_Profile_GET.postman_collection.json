@@ -1,0 +1,346 @@
+{
+  "info": {
+    "name": "Coderr Profile GET",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run the main backend collection first to prepare fresh accounts. Then run this read-only collection using the same Coderr Local environment."
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "",
+          "if (pm.environment.get(\"base_url\") !== \"http://127.0.0.1:8000/api\") {",
+          "    throw new Error(\"Select Coderr Local with the local backend URL.\");",
+          "}",
+          "[\"customer_a_id\", \"business_a_id\", \"customer_a_token\", \"business_a_token\",",
+          " \"customer_a_username\", \"business_a_username\", \"customer_a_email\", \"business_a_email\"].forEach(key => {",
+          "    if (!pm.environment.get(key)) {",
+          "        throw new Error(\"Run the main Coderr Backend collection first. Missing variable: \" + key);",
+          "    }",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "E03-01 | Customer reads own profile",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{customer_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{customer_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Response has exactly the documented fields\", () => {",
+              "    pm.expect(pm.response.json()).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\", \"email\", \"created_at\"]);",
+              "});",
+              "pm.test(\"Response identifies the requested account\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.user).to.eql(Number(pm.environment.get(\"customer_a_id\")));",
+              "    pm.expect(data.username).to.eql(pm.environment.get(\"customer_a_username\"));",
+              "    pm.expect(data.email).to.eql(pm.environment.get(\"customer_a_email\"));",
+              "    pm.expect(data.type).to.eql(\"customer\");",
+              "});",
+              "pm.test(\"New account has no profile image\", () => {",
+              "    pm.expect(pm.response.json().file).to.eql(null);",
+              "});",
+              "pm.test(\"New account has empty optional texts\", () => {",
+              "    const data = pm.response.json();",
+              "    [\"first_name\", \"last_name\", \"location\", \"tel\", \"description\", \"working_hours\"].forEach(field => {",
+              "        pm.expect(data[field], field).to.eql(\"\");",
+              "    });",
+              "});",
+              "pm.test(\"Created at is a valid timestamp\", () => {",
+              "    const value = pm.response.json().created_at;",
+              "    pm.expect(value).to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E03-02 | Business reads own profile",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{business_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{business_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Response has exactly the documented fields\", () => {",
+              "    pm.expect(pm.response.json()).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\", \"email\", \"created_at\"]);",
+              "});",
+              "pm.test(\"Response identifies the requested account\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.user).to.eql(Number(pm.environment.get(\"business_a_id\")));",
+              "    pm.expect(data.username).to.eql(pm.environment.get(\"business_a_username\"));",
+              "    pm.expect(data.email).to.eql(pm.environment.get(\"business_a_email\"));",
+              "    pm.expect(data.type).to.eql(\"business\");",
+              "});",
+              "pm.test(\"New account has no profile image\", () => {",
+              "    pm.expect(pm.response.json().file).to.eql(null);",
+              "});",
+              "pm.test(\"New account has empty optional texts\", () => {",
+              "    const data = pm.response.json();",
+              "    [\"first_name\", \"last_name\", \"location\", \"tel\", \"description\", \"working_hours\"].forEach(field => {",
+              "        pm.expect(data[field], field).to.eql(\"\");",
+              "    });",
+              "});",
+              "pm.test(\"Created at is a valid timestamp\", () => {",
+              "    const value = pm.response.json().created_at;",
+              "    pm.expect(value).to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E03-03 | Customer reads business profile",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{customer_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{business_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Response has exactly the documented fields\", () => {",
+              "    pm.expect(pm.response.json()).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\", \"email\", \"created_at\"]);",
+              "});",
+              "pm.test(\"Response identifies the requested account\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.user).to.eql(Number(pm.environment.get(\"business_a_id\")));",
+              "    pm.expect(data.username).to.eql(pm.environment.get(\"business_a_username\"));",
+              "    pm.expect(data.email).to.eql(pm.environment.get(\"business_a_email\"));",
+              "    pm.expect(data.type).to.eql(\"business\");",
+              "});",
+              "pm.test(\"New account has no profile image\", () => {",
+              "    pm.expect(pm.response.json().file).to.eql(null);",
+              "});",
+              "pm.test(\"New account has empty optional texts\", () => {",
+              "    const data = pm.response.json();",
+              "    [\"first_name\", \"last_name\", \"location\", \"tel\", \"description\", \"working_hours\"].forEach(field => {",
+              "        pm.expect(data[field], field).to.eql(\"\");",
+              "    });",
+              "});",
+              "pm.test(\"Created at is a valid timestamp\", () => {",
+              "    const value = pm.response.json().created_at;",
+              "    pm.expect(value).to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E03-04 | Business reads customer profile",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{business_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{customer_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Response has exactly the documented fields\", () => {",
+              "    pm.expect(pm.response.json()).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\", \"email\", \"created_at\"]);",
+              "});",
+              "pm.test(\"Response identifies the requested account\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data.user).to.eql(Number(pm.environment.get(\"customer_a_id\")));",
+              "    pm.expect(data.username).to.eql(pm.environment.get(\"customer_a_username\"));",
+              "    pm.expect(data.email).to.eql(pm.environment.get(\"customer_a_email\"));",
+              "    pm.expect(data.type).to.eql(\"customer\");",
+              "});",
+              "pm.test(\"New account has no profile image\", () => {",
+              "    pm.expect(pm.response.json().file).to.eql(null);",
+              "});",
+              "pm.test(\"New account has empty optional texts\", () => {",
+              "    const data = pm.response.json();",
+              "    [\"first_name\", \"last_name\", \"location\", \"tel\", \"description\", \"working_hours\"].forEach(field => {",
+              "        pm.expect(data[field], field).to.eql(\"\");",
+              "    });",
+              "});",
+              "pm.test(\"Created at is a valid timestamp\", () => {",
+              "    const value = pm.response.json().created_at;",
+              "    pm.expect(value).to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E03-05 | No token",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/profile/{{customer_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "",
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error contains a detail message\", () => {",
+              "    pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty;",
+              "});",
+              "pm.test(\"No profile or credentials are exposed\", () => {",
+              "    const data = pm.response.json();",
+              "    [\"user\", \"username\", \"email\", \"token\", \"password\"].forEach(field => {",
+              "        pm.expect(data).not.to.have.property(field);",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E03-06 | Invalid token",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token invalid-profile-test-token"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{customer_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "",
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error contains a detail message\", () => {",
+              "    pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty;",
+              "});",
+              "pm.test(\"No profile or credentials are exposed\", () => {",
+              "    const data = pm.response.json();",
+              "    [\"user\", \"username\", \"email\", \"token\", \"password\"].forEach(field => {",
+              "        pm.expect(data).not.to.have.property(field);",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E03-07 | Missing profile",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{customer_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/0/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "",
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Error contains a detail message\", () => {",
+              "    pm.expect(pm.response.json().detail).to.be.a(\"string\").and.not.empty;",
+              "});",
+              "pm.test(\"No profile or credentials are exposed\", () => {",
+              "    const data = pm.response.json();",
+              "    [\"user\", \"username\", \"email\", \"token\", \"password\"].forEach(field => {",
+              "        pm.expect(data).not.to.have.property(field);",
+              "    });",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
