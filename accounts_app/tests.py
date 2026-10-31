@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.test import TestCase
@@ -127,22 +129,10 @@ class RegistrationAPITests(APITestCase):
     def test_invalid_account_type_creates_no_registration_data(self):
         for account_type in ("admin", "staff", "invalid"):
             with self.subTest(account_type=account_type):
-                self.payload["type"] = account_type
+                payload = self.payload.copy()
+                payload["type"] = account_type
 
-                response = self.client.post(
-                    self.url,
-                    self.payload,
-                    format="json",
-                )
-
-                self.assertEqual(
-                    response.status_code,
-                    status.HTTP_400_BAD_REQUEST,
-                )
-                self.assertIn("type", response.json())
-                self.assertEqual(get_user_model().objects.count(), 0)
-                self.assertEqual(UserProfile.objects.count(), 0)
-                self.assertEqual(Token.objects.count(), 0)
+                self.assert_invalid_registration(payload, "type")
 
     def test_missing_required_fields_create_no_registration_data(self):
         for field in self.payload:
@@ -232,3 +222,60 @@ class RegistrationAPITests(APITestCase):
         self.assertNotEqual(user.password, self.payload["password"])
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
+
+
+class RegistrationPermissionTests(APITestCase):
+    def test_registration_cannot_grant_staff_or_superuser_privileges(self):
+        payload = {
+            "username": "privilege_attempt",
+            "email": "privilege@example.com",
+            "password": "TestPassword123!",
+            "repeated_password": "TestPassword123!",
+            "type": "customer",
+            "is_staff": True,
+            "is_superuser": True,
+        }
+
+        response = self.client.post(
+            "/api/registration/", payload, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = get_user_model().objects.get(pk=response.data["user_id"])
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_superuser)
+        self.assertEqual(user.profile.type, "customer")
+        self.assertNotIn("is_staff", response.data)
+        self.assertNotIn("is_superuser", response.data)
+
+
+class RegistrationTransactionTests(APITestCase):
+    def setUp(self):
+        self.payload = {
+            "username": "rollback_customer",
+            "email": "rollback@example.com",
+            "password": "TestPassword123!",
+            "repeated_password": "TestPassword123!",
+            "type": "customer",
+        }
+
+    def test_profile_creation_failure_rolls_back_registration(self):
+        self.assert_registration_is_rolled_back(
+            "accounts_app.services.UserProfile.objects.create"
+        )
+
+    def test_token_creation_failure_rolls_back_registration(self):
+        self.assert_registration_is_rolled_back(
+            "accounts_app.services.Token.objects.create"
+        )
+
+    def assert_registration_is_rolled_back(self, target):
+        with patch(target, side_effect=RuntimeError("Simulated failure")):
+            with self.assertRaises(RuntimeError):
+                self.client.post(
+                    "/api/registration/", self.payload, format="json"
+                )
+
+        self.assertEqual(get_user_model().objects.count(), 0)
+        self.assertEqual(UserProfile.objects.count(), 0)
+        self.assertEqual(Token.objects.count(), 0)
