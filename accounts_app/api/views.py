@@ -8,8 +8,10 @@ from rest_framework.response import Response
 
 from accounts_app.models import UserProfile
 
+from .permissions import IsProfileOwnerOrReadOnly
 from .serializers import (
     ProfileDetailSerializer,
+    ProfileUpdateSerializer,
     RegistrationResponseSerializer,
     RegistrationSerializer,
 )
@@ -53,6 +55,18 @@ class ProfileDetailView(generics.RetrieveAPIView):
     queryset = UserProfile.objects.select_related("user")
     serializer_class = ProfileDetailSerializer
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsProfileOwnerOrReadOnly]
     lookup_field = "user_id"
     lookup_url_kwarg = "pk"
+
+    def patch(self, request, *args, **kwargs):
+        profile = self.get_object()
+        serializer = ProfileUpdateSerializer(
+            profile,
+            data=request.data,
+            partial=True,
+            context=self.get_serializer_context(),
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(self.get_serializer(profile).data)

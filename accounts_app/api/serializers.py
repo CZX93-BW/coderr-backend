@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from django.db import transaction
+from django.utils import timezone
 
 from accounts_app.models import UserProfile
 from accounts_app.services import create_registered_user
@@ -97,3 +99,55 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = fields
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(
+        source="user.first_name",
+        max_length=150,
+        required=False,
+        allow_blank=True,
+    )
+    last_name = serializers.CharField(
+        source="user.last_name",
+        max_length=150,
+        required=False,
+        allow_blank=True,
+    )
+    email = serializers.EmailField(
+        source="user.email",
+        max_length=254,
+        required=False,
+        allow_blank=True,
+    )
+    file = serializers.ImageField(
+        required=False,
+        allow_null=False,
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "first_name",
+            "last_name",
+            "location",
+            "tel",
+            "description",
+            "working_hours",
+            "email",
+            "file",
+        ]
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", {})
+        if "file" in validated_data:
+            validated_data["uploaded_at"] = timezone.now()
+        self.update_user_fields(instance.user, user_data)
+        return super().update(instance, validated_data)
+
+    def update_user_fields(self, user, user_data):
+        if not user_data:
+            return
+        for field, value in user_data.items():
+            setattr(user, field, value)
+        user.save(update_fields=list(user_data))
