@@ -1,17 +1,17 @@
+from datetime import datetime, timedelta
+from io import BytesIO
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.utils import timezone
+from PIL import Image
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
-from datetime import datetime
-from io import BytesIO
-from tempfile import TemporaryDirectory
-from django.core.files.uploadedfile import SimpleUploadedFile
-from PIL import Image
 
 from .models import UserProfile
 
@@ -835,3 +835,47 @@ class ProfileUpdateAPITests(APITestCase):
                 )
 
                 self.assert_uploaded_image_is_saved(response)
+
+    def test_invalid_image_prevents_profile_changes(self):
+        invalid_image = SimpleUploadedFile(
+            "invalid.png",
+            b"This is not an image.",
+            content_type="image/png",
+        )
+        response = self.client.patch(
+            self.url,
+            {"file": invalid_image, "location": "Hamburg"},
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("file", response.data)
+        self.profile.refresh_from_db()
+        self.assertFalse(self.profile.file.name)
+        self.assertIsNone(self.profile.uploaded_at)
+        self.assertEqual(self.profile.location, "Berlin")
+
+    def upload_image_at(self, uploaded_at):
+        with patch(
+            "accounts_app.api.serializers.timezone.now",
+            return_value=uploaded_at,
+        ):
+            response = self.client.patch(
+                self.url,
+                {"file": self.create_test_image()},
+                format="multipart",
+            )
+        self.assert_uploaded_image_is_saved(response)
+        self.assertEqual(self.profile.uploaded_at, uploaded_at)
+        return self.profile.file.name
+
+    def test_owner_can_replace_profile_image(self):
+        first_upload_at = timezone.now()
+        second_upload_at = first_upload_at + timedelta(minutes=1)
+        with TemporaryDirectory() as media_directory:
+            with self.settings(MEDIA_ROOT=media_directory):
+                first_name = self.upload_image_at(first_upload_at)
+                second_name = self.upload_image_at(second_upload_at)
+
+                self.assertNotEqual(first_name, second_name)
+                self.assertEqual(self.profile.file.name, second_name)
