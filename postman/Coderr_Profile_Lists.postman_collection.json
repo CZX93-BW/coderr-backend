@@ -1,0 +1,542 @@
+{
+  "info": {
+    "name": "Coderr Profile Lists",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "C14: isolated local test accounts, role lists and token protection. Run all requests in order."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.variables.get('base_url') !== 'http://127.0.0.1:8000/api') {",
+          " throw new Error('Select Coderr Local with base_url http://127.0.0.1:8000/api');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "PREP | Register customer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/registration/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"lists_customer_{{lists_run}}\",\n  \"email\": \"lists_customer_{{lists_run}}@example.com\",\n  \"password\": \"CoderrTest!83_TestOnly\",\n  \"repeated_password\": \"CoderrTest!83_TestOnly\",\n  \"type\": \"customer\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "['customer','business'].forEach(r => ['token','id','username'].forEach(k => pm.collectionVariables.unset('lists_'+r+'_'+k)));",
+              "pm.collectionVariables.set('lists_run', pm.variables.replaceIn('{{$guid}}'));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('Registration returns 201', () => pm.response.to.have.status(201));",
+              "pm.test('Registration returns documented fields and valid credentials', () => {",
+              " pm.expect(data).to.have.all.keys('token','username','email','user_id');",
+              " pm.expect(data.token).to.be.a('string').and.match(/^[a-f0-9]{40}$/);",
+              " pm.expect(data.user_id).to.be.a('number').and.above(0);",
+              "});",
+              "if (pm.response.code === 201) {",
+              " ['token','username'].forEach(k => pm.collectionVariables.set('lists_customer_'+k, data[k]));",
+              " pm.collectionVariables.set('lists_customer_id', data.user_id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register business",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/registration/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"lists_business_{{lists_run}}\",\n  \"email\": \"lists_business_{{lists_run}}@example.com\",\n  \"password\": \"CoderrTest!83_TestOnly\",\n  \"repeated_password\": \"CoderrTest!83_TestOnly\",\n  \"type\": \"business\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('Registration returns 201', () => pm.response.to.have.status(201));",
+              "pm.test('Registration returns documented fields and valid credentials', () => {",
+              " pm.expect(data).to.have.all.keys('token','username','email','user_id');",
+              " pm.expect(data.token).to.be.a('string').and.match(/^[a-f0-9]{40}$/);",
+              " pm.expect(data.user_id).to.be.a('number').and.above(0);",
+              "});",
+              "if (pm.response.code === 201) {",
+              " ['token','username'].forEach(k => pm.collectionVariables.set('lists_business_'+k, data[k]));",
+              " pm.collectionVariables.set('lists_business_id', data.user_id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Set customer profile data",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{lists_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/profile/{{lists_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"Clara\",\n  \"last_name\": \"Customer\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('Profile update returns 200', () => pm.response.to.have.status(200));",
+              "pm.test('Prepared profile values are saved', () => {",
+              " const expected = {\"first_name\": \"Clara\", \"last_name\": \"Customer\"};",
+              " Object.entries(expected).forEach(([key,value]) => pm.expect(data[key], key).to.eql(value));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Set business profile data",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{lists_business_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/profile/{{lists_business_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"Ben\",\n  \"last_name\": \"Business\",\n  \"location\": \"Dortmund\",\n  \"tel\": \"+49 123 456789\",\n  \"description\": \"Profile list test provider.\",\n  \"working_hours\": \"Monday to Friday\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('Profile update returns 200', () => pm.response.to.have.status(200));",
+              "pm.test('Prepared profile values are saved', () => {",
+              " const expected = {\"first_name\": \"Ben\", \"last_name\": \"Business\", \"location\": \"Dortmund\", \"tel\": \"+49 123 456789\", \"description\": \"Profile list test provider.\", \"working_hours\": \"Monday to Friday\"};",
+              " Object.entries(expected).forEach(([key,value]) => pm.expect(data[key], key).to.eql(value));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST | customer reads customer profiles",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{lists_customer_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/profiles/customer/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('List returns 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response is an unpaginated array', () => pm.expect(data).to.be.an('array'));",
+              "pm.test('Every profile has exactly the documented fields', () => {",
+              " pm.expect(data).to.be.an('array');",
+              " data.forEach(p => pm.expect(p).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"uploaded_at\", \"type\"]));",
+              "});",
+              "pm.test('Only customer profiles are returned', () => {",
+              " pm.expect(data).to.be.an('array');",
+              " data.forEach(p => pm.expect(p.type).to.eql('customer'));",
+              "});",
+              "pm.test('Prepared profile is present exactly once with correct values', () => {",
+              " const matches = data.filter(p => p.user === Number(pm.collectionVariables.get('lists_customer_id')));",
+              " pm.expect(matches).to.have.lengthOf(1);",
+              " const p = matches[0];",
+              " pm.expect(p.username).to.eql(pm.collectionVariables.get('lists_customer_username'));",
+              " Object.entries({\"first_name\": \"Clara\", \"last_name\": \"Customer\"}).forEach(([key,value]) => pm.expect(p[key], key).to.eql(value));",
+              " pm.expect(p.file).to.eql(null);",
+              " pm.expect(p.uploaded_at).to.eql(null);",
+              "});",
+              "pm.test('Prepared opposite role is excluded', () => {",
+              " const other = Number(pm.collectionVariables.get('lists_business_id'));",
+              " pm.expect(data.map(p => p.user)).not.to.include(other);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST | business reads customer profiles",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{lists_business_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/profiles/customer/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('List returns 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response is an unpaginated array', () => pm.expect(data).to.be.an('array'));",
+              "pm.test('Every profile has exactly the documented fields', () => {",
+              " pm.expect(data).to.be.an('array');",
+              " data.forEach(p => pm.expect(p).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"uploaded_at\", \"type\"]));",
+              "});",
+              "pm.test('Only customer profiles are returned', () => {",
+              " pm.expect(data).to.be.an('array');",
+              " data.forEach(p => pm.expect(p.type).to.eql('customer'));",
+              "});",
+              "pm.test('Prepared profile is present exactly once with correct values', () => {",
+              " const matches = data.filter(p => p.user === Number(pm.collectionVariables.get('lists_customer_id')));",
+              " pm.expect(matches).to.have.lengthOf(1);",
+              " const p = matches[0];",
+              " pm.expect(p.username).to.eql(pm.collectionVariables.get('lists_customer_username'));",
+              " Object.entries({\"first_name\": \"Clara\", \"last_name\": \"Customer\"}).forEach(([key,value]) => pm.expect(p[key], key).to.eql(value));",
+              " pm.expect(p.file).to.eql(null);",
+              " pm.expect(p.uploaded_at).to.eql(null);",
+              "});",
+              "pm.test('Prepared opposite role is excluded', () => {",
+              " const other = Number(pm.collectionVariables.get('lists_business_id'));",
+              " pm.expect(data.map(p => p.user)).not.to.include(other);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST | customer reads business profiles",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{lists_customer_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/profiles/business/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('List returns 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response is an unpaginated array', () => pm.expect(data).to.be.an('array'));",
+              "pm.test('Every profile has exactly the documented fields', () => {",
+              " pm.expect(data).to.be.an('array');",
+              " data.forEach(p => pm.expect(p).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\"]));",
+              "});",
+              "pm.test('Only business profiles are returned', () => {",
+              " pm.expect(data).to.be.an('array');",
+              " data.forEach(p => pm.expect(p.type).to.eql('business'));",
+              "});",
+              "pm.test('Prepared profile is present exactly once with correct values', () => {",
+              " const matches = data.filter(p => p.user === Number(pm.collectionVariables.get('lists_business_id')));",
+              " pm.expect(matches).to.have.lengthOf(1);",
+              " const p = matches[0];",
+              " pm.expect(p.username).to.eql(pm.collectionVariables.get('lists_business_username'));",
+              " Object.entries({\"first_name\": \"Ben\", \"last_name\": \"Business\", \"location\": \"Dortmund\", \"tel\": \"+49 123 456789\", \"description\": \"Profile list test provider.\", \"working_hours\": \"Monday to Friday\"}).forEach(([key,value]) => pm.expect(p[key], key).to.eql(value));",
+              " pm.expect(p.file).to.eql(null);",
+              " ",
+              "});",
+              "pm.test('Prepared opposite role is excluded', () => {",
+              " const other = Number(pm.collectionVariables.get('lists_customer_id'));",
+              " pm.expect(data.map(p => p.user)).not.to.include(other);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST | business reads business profiles",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{lists_business_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/profiles/business/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('List returns 200', () => pm.response.to.have.status(200));",
+              "pm.test('Response is an unpaginated array', () => pm.expect(data).to.be.an('array'));",
+              "pm.test('Every profile has exactly the documented fields', () => {",
+              " pm.expect(data).to.be.an('array');",
+              " data.forEach(p => pm.expect(p).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\"]));",
+              "});",
+              "pm.test('Only business profiles are returned', () => {",
+              " pm.expect(data).to.be.an('array');",
+              " data.forEach(p => pm.expect(p.type).to.eql('business'));",
+              "});",
+              "pm.test('Prepared profile is present exactly once with correct values', () => {",
+              " const matches = data.filter(p => p.user === Number(pm.collectionVariables.get('lists_business_id')));",
+              " pm.expect(matches).to.have.lengthOf(1);",
+              " const p = matches[0];",
+              " pm.expect(p.username).to.eql(pm.collectionVariables.get('lists_business_username'));",
+              " Object.entries({\"first_name\": \"Ben\", \"last_name\": \"Business\", \"location\": \"Dortmund\", \"tel\": \"+49 123 456789\", \"description\": \"Profile list test provider.\", \"working_hours\": \"Monday to Friday\"}).forEach(([key,value]) => pm.expect(p[key], key).to.eql(value));",
+              " pm.expect(p.file).to.eql(null);",
+              " ",
+              "});",
+              "pm.test('Prepared opposite role is excluded', () => {",
+              " const other = Number(pm.collectionVariables.get('lists_customer_id'));",
+              " pm.expect(data.map(p => p.user)).not.to.include(other);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | customer list with no token",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/profiles/customer/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('Unauthorized request returns 401', () => pm.response.to.have.status(401));",
+              "pm.test('Error contains detail and no profile data', () => {",
+              " pm.expect(data).to.be.an('object');",
+              " pm.expect(data).to.have.all.keys('detail');",
+              " pm.expect(data.detail).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | customer list with invalid token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token invalid-list-token"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/profiles/customer/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('Unauthorized request returns 401', () => pm.response.to.have.status(401));",
+              "pm.test('Error contains detail and no profile data', () => {",
+              " pm.expect(data).to.be.an('object');",
+              " pm.expect(data).to.have.all.keys('detail');",
+              " pm.expect(data.detail).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | business list with no token",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/profiles/business/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('Unauthorized request returns 401', () => pm.response.to.have.status(401));",
+              "pm.test('Error contains detail and no profile data', () => {",
+              " pm.expect(data).to.be.an('object');",
+              " pm.expect(data).to.have.all.keys('detail');",
+              " pm.expect(data.detail).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | business list with invalid token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token invalid-list-token"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/profiles/business/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.test('Unauthorized request returns 401', () => pm.response.to.have.status(401));",
+              "pm.test('Error contains detail and no profile data', () => {",
+              " pm.expect(data).to.be.an('object');",
+              " pm.expect(data).to.have.all.keys('detail');",
+              " pm.expect(data.detail).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
