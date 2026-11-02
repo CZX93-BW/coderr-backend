@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
 from django.db import transaction
 from django.utils import timezone
+from rest_framework import serializers
 
 from accounts_app.models import UserProfile
 from accounts_app.services import create_registered_user
@@ -100,6 +100,7 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(
         source="user.first_name",
@@ -151,3 +152,61 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         for field, value in user_data.items():
             setattr(user, field, value)
         user.save(update_fields=list(user_data))
+
+
+class CustomerProfileListSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        source="user.username",
+        read_only=True,
+    )
+    first_name = serializers.CharField(
+        source="user.first_name",
+        read_only=True,
+    )
+    last_name = serializers.CharField(
+        source="user.last_name",
+        read_only=True,
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "user",
+            "username",
+            "first_name",
+            "last_name",
+            "file",
+            "uploaded_at",
+            "type",
+        ]
+        read_only_fields = fields
+
+class BusinessProfileListSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        source="user.username",
+        read_only=True,
+    )
+    first_name = serializers.CharField(
+        source="user.first_name",
+        read_only=True,
+    )
+    last_name = serializers.CharField(
+        source="user.last_name",
+        read_only=True,
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "user",
+            "username",
+            "first_name",
+            "last_name",
+            "file",
+            "location",
+            "tel",
+            "description",
+            "working_hours",
+            "type",
+        ]
+        read_only_fields = fields

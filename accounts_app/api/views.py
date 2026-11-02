@@ -10,6 +10,8 @@ from accounts_app.models import UserProfile
 
 from .permissions import IsProfileOwnerOrReadOnly
 from .serializers import (
+    BusinessProfileListSerializer,
+    CustomerProfileListSerializer,
     ProfileDetailSerializer,
     ProfileUpdateSerializer,
     RegistrationResponseSerializer,
@@ -70,3 +72,26 @@ class ProfileDetailView(generics.RetrieveAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(self.get_serializer(profile).data)
+
+
+class CustomerProfileListView(generics.ListAPIView):
+    queryset = (
+        UserProfile.objects.filter(type=UserProfile.AccountType.CUSTOMER)
+        .select_related("user")
+        .order_by("user_id")
+    )
+    serializer_class = CustomerProfileListSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = None
+
+class BusinessProfileListView(generics.ListAPIView):
+    queryset = (
+        UserProfile.objects.filter(type=UserProfile.AccountType.BUSINESS)
+        .select_related("user")
+        .order_by("user_id")
+    )
+    serializer_class = BusinessProfileListSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = None
