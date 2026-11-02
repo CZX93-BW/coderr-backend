@@ -1,0 +1,1397 @@
+{
+  "info": {
+    "name": "Coderr Profile PATCH",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run the complete collection in order. Creates two fresh test accounts and uploads local fixture images. Select the four upload files before running. See PROFILE_PATCH.md."
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.variables.get(\"base_url\") !== \"http://127.0.0.1:8000/api\") {",
+          " throw new Error(\"This collection requires the local Coderr backend.\");",
+          "}",
+          "if (!pm.info.requestName.startsWith(\"PREP |\")) {",
+          " [\"customer\",\"business\"].forEach(role => {",
+          "  if (!pm.collectionVariables.get(\"patch_\" + role + \"_token\") ||",
+          "      !pm.collectionVariables.get(\"patch_\" + role + \"_id\")) {",
+          "   throw new Error(\"Run both PREP requests first.\");",
+          "  }",
+          " });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "PREP | Register customer",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"patch_customer_{{patch_run}}\", \"email\": \"patch_customer_{{patch_run}}@example.com\", \"password\": \"CoderrTest!83_TestOnly\", \"repeated_password\": \"CoderrTest!83_TestOnly\", \"type\": \"customer\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "[\"customer\", \"business\"].forEach(role => {",
+              "    pm.collectionVariables.unset(\"patch_\" + role + \"_token\");",
+              "    pm.collectionVariables.unset(\"patch_\" + role + \"_id\");",
+              "});",
+              "pm.collectionVariables.unset(\"patch_snapshot\");",
+              "pm.collectionVariables.unset(\"patch_previous_image\");",
+              "pm.collectionVariables.set(\"patch_run\", pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Registration returns 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns credentials and ID\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.have.all.keys(\"token\", \"username\", \"email\", \"user_id\");",
+              "    pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(data.user_id).to.be.a(\"number\").above(0);",
+              "});",
+              "if (pm.response.code === 201) {",
+              "    const data = pm.response.json();",
+              "    pm.collectionVariables.set(\"patch_customer_token\", data.token);",
+              "    pm.collectionVariables.set(\"patch_customer_id\", data.user_id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register business",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"patch_business_{{patch_run}}\", \"email\": \"patch_business_{{patch_run}}@example.com\", \"password\": \"CoderrTest!83_TestOnly\", \"repeated_password\": \"CoderrTest!83_TestOnly\", \"type\": \"business\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Registration returns 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns credentials and ID\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.have.all.keys(\"token\", \"username\", \"email\", \"user_id\");",
+              "    pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(data.user_id).to.be.a(\"number\").above(0);",
+              "});",
+              "if (pm.response.code === 201) {",
+              "    const data = pm.response.json();",
+              "    pm.collectionVariables.set(\"patch_business_token\", data.token);",
+              "    pm.collectionVariables.set(\"patch_business_id\", data.user_id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04-01 | Update customer texts",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"first_name\": \"Bastian\", \"last_name\": \"Example\", \"email\": \"patch_updated@example.com\", \"location\": \"Dortmund\", \"tel\": \"+49 123 456789\", \"description\": \"Web development services.\", \"working_hours\": \"Monday to Friday\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "",
+              "pm.test(\"Exact profile fields\", () => {",
+              "    pm.expect(pm.response.json()).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\", \"email\", \"created_at\"]);",
+              "});",
+              "pm.test(\"Requested values are returned\", () => {",
+              "const data = pm.response.json();",
+              "pm.expect(data[\"first_name\"]).to.eql(\"Bastian\");",
+              "pm.expect(data[\"last_name\"]).to.eql(\"Example\");",
+              "pm.expect(data[\"email\"]).to.eql(\"patch_updated@example.com\");",
+              "pm.expect(data[\"location\"]).to.eql(\"Dortmund\");",
+              "pm.expect(data[\"tel\"]).to.eql(\"+49 123 456789\");",
+              "pm.expect(data[\"description\"]).to.eql(\"Web development services.\");",
+              "pm.expect(data[\"working_hours\"]).to.eql(\"Monday to Friday\");",
+              "pm.expect(data[\"type\"]).to.eql(\"customer\");",
+              "pm.expect(data[\"file\"]).to.eql(null);",
+              "});",
+              "",
+              "if (pm.response.code === 200) {",
+              "    pm.collectionVariables.set(\"patch_snapshot\", JSON.stringify(pm.response.json()));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04-02 | Verify saved customer texts",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04-03 | Business updates own profile",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_business_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_business_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"location\": \"Hamburg\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Business profile was updated\", () => { const d=pm.response.json(); pm.expect(d.location).to.eql(\"Hamburg\"); pm.expect(d.type).to.eql(\"business\"); pm.expect(d.user).to.eql(Number(pm.collectionVariables.get(\"patch_business_id\"))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04-04 | Clear location only",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"location\": \"\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "",
+              "pm.test(\"Exact profile fields\", () => {",
+              "    pm.expect(pm.response.json()).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\", \"email\", \"created_at\"]);",
+              "});",
+              "pm.test(\"Requested values are returned\", () => {",
+              "const data = pm.response.json();",
+              "pm.expect(data[\"location\"]).to.eql(\"\");",
+              "});",
+              "",
+              "pm.test(\"Other fields are preserved\", () => {",
+              " const before = JSON.parse(pm.collectionVariables.get(\"patch_snapshot\"));",
+              " const after = pm.response.json();",
+              " delete before.location; delete after.location;",
+              " pm.expect(after).to.deep.eql(before);",
+              "});",
+              "",
+              "if (pm.response.code === 200) {",
+              "    pm.collectionVariables.set(\"patch_snapshot\", JSON.stringify(pm.response.json()));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04 | Invalid email",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"invalid-email\", \"location\": \"Rejected\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Expected error is present\", () => {",
+              "    pm.expect(pm.response.json()).to.have.property(\"email\");",
+              "});",
+              "pm.test(\"No credentials returned\", () => {",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"token\");",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"password\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Invalid email preserves customer",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04 | Null location",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"location\": null, \"first_name\": \"Rejected\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Expected error is present\", () => {",
+              "    pm.expect(pm.response.json()).to.have.property(\"location\");",
+              "});",
+              "pm.test(\"No credentials returned\", () => {",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"token\");",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"password\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Null location preserves customer",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04 | Location too long",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"location\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Expected error is present\", () => {",
+              "    pm.expect(pm.response.json()).to.have.property(\"location\");",
+              "});",
+              "pm.test(\"No credentials returned\", () => {",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"token\");",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"password\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Location too long preserves customer",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04 | Missing token",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"location\": \"Rejected\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Expected error is present\", () => {",
+              "    pm.expect(pm.response.json()).to.have.property(\"detail\");",
+              "});",
+              "pm.test(\"No credentials returned\", () => {",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"token\");",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"password\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Missing token preserves customer",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04 | Invalid token",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token invalid-profile-token"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"location\": \"Rejected\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Expected error is present\", () => {",
+              "    pm.expect(pm.response.json()).to.have.property(\"detail\");",
+              "});",
+              "pm.test(\"No credentials returned\", () => {",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"token\");",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"password\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Invalid token preserves customer",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04 | Foreign business cannot edit customer",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_business_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"location\": \"Rejected\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Expected error is present\", () => {",
+              "    pm.expect(pm.response.json()).to.have.property(\"detail\");",
+              "});",
+              "pm.test(\"No credentials returned\", () => {",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"token\");",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"password\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Foreign business cannot edit customer preserves customer",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04 | Missing profile",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/0/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"location\": \"Rejected\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Expected error is present\", () => {",
+              "    pm.expect(pm.response.json()).to.have.property(\"detail\");",
+              "});",
+              "pm.test(\"No credentials returned\", () => {",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"token\");",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"password\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Missing profile preserves customer",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04 | Protected fields are ignored",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"type\": \"business\", \"is_staff\": true, \"is_superuser\": true, \"location\": \"Berlin\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "",
+              "pm.test(\"Exact profile fields\", () => {",
+              "    pm.expect(pm.response.json()).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\", \"email\", \"created_at\"]);",
+              "});",
+              "pm.test(\"Requested values are returned\", () => {",
+              "const data = pm.response.json();",
+              "pm.expect(data[\"type\"]).to.eql(\"customer\");",
+              "pm.expect(data[\"location\"]).to.eql(\"Berlin\");",
+              "});",
+              "",
+              "pm.test(\"User association is unchanged\", () => {",
+              " pm.expect(pm.response.json().user).to.eql(Number(pm.collectionVariables.get(\"patch_customer_id\")));",
+              "});",
+              "",
+              "if (pm.response.code === 200) {",
+              "    pm.collectionVariables.set(\"patch_snapshot\", JSON.stringify(pm.response.json()));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Saved allowed change",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "UPLOAD-01 | First image - select profile-blue.png",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "postman/fixtures/profile-blue.png"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "",
+              "pm.test(\"Exact profile fields\", () => {",
+              "    pm.expect(pm.response.json()).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\", \"email\", \"created_at\"]);",
+              "});",
+              "",
+              "pm.test(\"Image URL is returned\", () => {",
+              " const value = pm.response.json().file;",
+              " pm.expect(value).to.be.a(\"string\").and.not.empty;",
+              " pm.expect(value).to.match(/^http:\\/\\/127\\.0\\.0\\.1:8000\\/media\\/profiles\\//);",
+              "});",
+              "",
+              "if (pm.response.code === 200) {",
+              "    pm.collectionVariables.set(\"patch_snapshot\", JSON.stringify(pm.response.json()));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | First image persisted",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "UPLOAD-02 | Replacement - select profile-red.png",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "postman/fixtures/profile-red.png"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"patch_previous_image\", JSON.parse(pm.collectionVariables.get(\"patch_snapshot\")).file);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "",
+              "pm.test(\"Exact profile fields\", () => {",
+              "    pm.expect(pm.response.json()).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\", \"email\", \"created_at\"]);",
+              "});",
+              "",
+              "pm.test(\"Image URL is returned\", () => {",
+              " const value = pm.response.json().file;",
+              " pm.expect(value).to.be.a(\"string\").and.not.empty;",
+              " pm.expect(value).to.match(/^http:\\/\\/127\\.0\\.0\\.1:8000\\/media\\/profiles\\//);",
+              "});",
+              "",
+              "pm.test(\"Replacement has a different URL\", () => {",
+              " pm.expect(pm.response.json().file).not.to.eql(pm.collectionVariables.get(\"patch_previous_image\"));",
+              "});",
+              "",
+              "if (pm.response.code === 200) {",
+              "    pm.collectionVariables.set(\"patch_snapshot\", JSON.stringify(pm.response.json()));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Replacement persisted",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "UPLOAD-03 | Invalid replacement - select invalid-image.png",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "postman/fixtures/invalid-image.png"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Expected error is present\", () => {",
+              "    pm.expect(pm.response.json()).to.have.property(\"file\");",
+              "});",
+              "pm.test(\"No credentials returned\", () => {",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"token\");",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"password\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Invalid replacement preserves image and profile",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "UPLOAD-04 | Foreign upload - select profile-blue.png",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_business_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "postman/fixtures/profile-blue.png"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Expected error is present\", () => {",
+              "    pm.expect(pm.response.json()).to.have.property(\"detail\");",
+              "});",
+              "pm.test(\"No credentials returned\", () => {",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"token\");",
+              "    pm.expect(pm.response.json()).not.to.have.property(\"password\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Foreign upload preserves image and profile",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E04 | Text change preserves uploaded image",
+      "request": {
+        "method": "PATCH",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"location\": \"Bremen\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "",
+              "pm.test(\"Exact profile fields\", () => {",
+              "    pm.expect(pm.response.json()).to.have.all.keys([\"user\", \"username\", \"first_name\", \"last_name\", \"file\", \"location\", \"tel\", \"description\", \"working_hours\", \"type\", \"email\", \"created_at\"]);",
+              "});",
+              "pm.test(\"Requested values are returned\", () => {",
+              "const data = pm.response.json();",
+              "pm.expect(data[\"location\"]).to.eql(\"Bremen\");",
+              "});",
+              "",
+              "pm.test(\"Existing image is unchanged\", () => {",
+              " pm.expect(pm.response.json().file).to.eql(JSON.parse(pm.collectionVariables.get(\"patch_snapshot\")).file);",
+              "});",
+              "",
+              "if (pm.response.code === 200) {",
+              "    pm.collectionVariables.set(\"patch_snapshot\", JSON.stringify(pm.response.json()));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Final profile persisted",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{patch_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/profile/{{patch_customer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Stored profile is unchanged\", () => {",
+              "    const previous = pm.collectionVariables.get(\"patch_snapshot\");",
+              "    pm.expect(previous, \"A preceding successful request is required\").to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(pm.response.json()).to.deep.eql(JSON.parse(previous));",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
