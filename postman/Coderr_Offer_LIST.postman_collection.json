@@ -1,0 +1,2562 @@
+{
+  "info": {
+    "name": "Coderr Offer LIST",
+    "description": "E07: public offer listing with fresh isolated fixtures, filters, search, ordering and pagination. Run the entire collection once in sequence. Creates two business accounts and seven offers per run. No deletion.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "PREP | Register business A",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"ol_a_{{ol_run}}\",\n  \"email\": \"ol_a_{{ol_run}}@example.com\",\n  \"password\": \"CoderrTest!83_TestOnly\",\n  \"repeated_password\": \"CoderrTest!83_TestOnly\",\n  \"type\": \"business\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"ol_run\", pm.variables.replaceIn(\"{{$guid}}\").replace(/-/g, \"\"));",
+              "pm.collectionVariables.set(\"ol_fixtures\", \"[]\");",
+              "[\"ol_a_token\", \"ol_b_token\", \"ol_a_id\", \"ol_b_id\", \"ol_a_username\", \"ol_b_username\",",
+              " \"ol_next_url\", \"ol_first_ids\"].forEach(key => pm.collectionVariables.unset(key));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Registration status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fresh business account returned\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"token\", \"username\", \"email\", \"user_id\");",
+              "  pm.expect(data.username).to.eql(sent.username);",
+              "  pm.expect(data.email).to.eql(sent.email);",
+              "  pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "  pm.expect(data.user_id).to.be.a(\"number\").and.above(0);",
+              "});",
+              "if (pm.response.code === 201 && data.token) {",
+              "  pm.collectionVariables.set(\"ol_a_token\", data.token);",
+              "  pm.collectionVariables.set(\"ol_a_id\", data.user_id);",
+              "  pm.collectionVariables.set(\"ol_a_username\", data.username);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register business B",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"ol_b_{{ol_run}}\",\n  \"email\": \"ol_b_{{ol_run}}@example.com\",\n  \"password\": \"CoderrTest!83_TestOnly\",\n  \"repeated_password\": \"CoderrTest!83_TestOnly\",\n  \"type\": \"business\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Registration status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fresh business account returned\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"token\", \"username\", \"email\", \"user_id\");",
+              "  pm.expect(data.username).to.eql(sent.username);",
+              "  pm.expect(data.email).to.eql(sent.email);",
+              "  pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "  pm.expect(data.user_id).to.be.a(\"number\").and.above(0);",
+              "});",
+              "if (pm.response.code === 201 && data.token) {",
+              "  pm.collectionVariables.set(\"ol_b_token\", data.token);",
+              "  pm.collectionVariables.set(\"ol_b_id\", data.user_id);",
+              "  pm.collectionVariables.set(\"ol_b_username\", data.username);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Offer 0: minimum price 0, days 0",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{ol_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"List {{ol_run}} offer 0\",\n  \"description\": \"Pagination and filter fixture.\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"Basic package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 9,\n      \"price\": 0,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"Standard package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 0,\n      \"price\": 50,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"Premium package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 2,\n      \"price\": 100,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Offer status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fixture has three saved packages\", () => {",
+              "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+              "  pm.expect(data.title).to.eql(sent.title);",
+              "  pm.expect(data.description).to.eql(sent.description);",
+              "  pm.expect(data.details).to.be.an(\"array\").with.lengthOf(3);",
+              "  pm.expect(data.details.map(d => d.offer_type).sort()).to.eql([\"basic\", \"premium\", \"standard\"]);",
+              "  data.details.forEach(d => pm.expect(d.id).to.be.a(\"number\").and.above(0));",
+              "});",
+              "if (pm.response.code === 201 && Array.isArray(data.details)) {",
+              "  const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "  fixtures.push({id: data.id, title: sent.title, description: sent.description,",
+              "    price: 0, days: 0, user: Number(pm.collectionVariables.get(\"ol_a_id\")),",
+              "    username: pm.collectionVariables.get(\"ol_a_username\"),",
+              "    detailIds: data.details.map(d => d.id).sort((a, b) => a - b)});",
+              "  pm.collectionVariables.set(\"ol_fixtures\", JSON.stringify(fixtures));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Offer 1: minimum price 20, days 1",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{ol_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"List {{ol_run}} offer 1\",\n  \"description\": \"Pagination and filter fixture.\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"Basic package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 10,\n      \"price\": 20,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"Standard package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 1,\n      \"price\": 70,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"Premium package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 3,\n      \"price\": 120,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Offer status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fixture has three saved packages\", () => {",
+              "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+              "  pm.expect(data.title).to.eql(sent.title);",
+              "  pm.expect(data.description).to.eql(sent.description);",
+              "  pm.expect(data.details).to.be.an(\"array\").with.lengthOf(3);",
+              "  pm.expect(data.details.map(d => d.offer_type).sort()).to.eql([\"basic\", \"premium\", \"standard\"]);",
+              "  data.details.forEach(d => pm.expect(d.id).to.be.a(\"number\").and.above(0));",
+              "});",
+              "if (pm.response.code === 201 && Array.isArray(data.details)) {",
+              "  const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "  fixtures.push({id: data.id, title: sent.title, description: sent.description,",
+              "    price: 20, days: 1, user: Number(pm.collectionVariables.get(\"ol_a_id\")),",
+              "    username: pm.collectionVariables.get(\"ol_a_username\"),",
+              "    detailIds: data.details.map(d => d.id).sort((a, b) => a - b)});",
+              "  pm.collectionVariables.set(\"ol_fixtures\", JSON.stringify(fixtures));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Offer 2: minimum price 80, days 3",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{ol_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"List {{ol_run}} offer 2\",\n  \"description\": \"Pagination and filter fixture.\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"Basic package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 12,\n      \"price\": 80,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"Standard package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 3,\n      \"price\": 130,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"Premium package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 5,\n      \"price\": 180,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Offer status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fixture has three saved packages\", () => {",
+              "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+              "  pm.expect(data.title).to.eql(sent.title);",
+              "  pm.expect(data.description).to.eql(sent.description);",
+              "  pm.expect(data.details).to.be.an(\"array\").with.lengthOf(3);",
+              "  pm.expect(data.details.map(d => d.offer_type).sort()).to.eql([\"basic\", \"premium\", \"standard\"]);",
+              "  data.details.forEach(d => pm.expect(d.id).to.be.a(\"number\").and.above(0));",
+              "});",
+              "if (pm.response.code === 201 && Array.isArray(data.details)) {",
+              "  const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "  fixtures.push({id: data.id, title: sent.title, description: sent.description,",
+              "    price: 80, days: 3, user: Number(pm.collectionVariables.get(\"ol_a_id\")),",
+              "    username: pm.collectionVariables.get(\"ol_a_username\"),",
+              "    detailIds: data.details.map(d => d.id).sort((a, b) => a - b)});",
+              "  pm.collectionVariables.set(\"ol_fixtures\", JSON.stringify(fixtures));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Offer 3: minimum price 120, days 7",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{ol_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"List {{ol_run}} offer 3\",\n  \"description\": \"Pagination and filter fixture.\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"Basic package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 16,\n      \"price\": 120,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"Standard package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 7,\n      \"price\": 170,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"Premium package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 9,\n      \"price\": 220,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Offer status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fixture has three saved packages\", () => {",
+              "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+              "  pm.expect(data.title).to.eql(sent.title);",
+              "  pm.expect(data.description).to.eql(sent.description);",
+              "  pm.expect(data.details).to.be.an(\"array\").with.lengthOf(3);",
+              "  pm.expect(data.details.map(d => d.offer_type).sort()).to.eql([\"basic\", \"premium\", \"standard\"]);",
+              "  data.details.forEach(d => pm.expect(d.id).to.be.a(\"number\").and.above(0));",
+              "});",
+              "if (pm.response.code === 201 && Array.isArray(data.details)) {",
+              "  const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "  fixtures.push({id: data.id, title: sent.title, description: sent.description,",
+              "    price: 120, days: 7, user: Number(pm.collectionVariables.get(\"ol_a_id\")),",
+              "    username: pm.collectionVariables.get(\"ol_a_username\"),",
+              "    detailIds: data.details.map(d => d.id).sort((a, b) => a - b)});",
+              "  pm.collectionVariables.set(\"ol_fixtures\", JSON.stringify(fixtures));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Offer 4: minimum price 200, days 14",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{ol_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"List {{ol_run}} offer 4\",\n  \"description\": \"Pagination and filter fixture.\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"Basic package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 23,\n      \"price\": 200,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"Standard package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 14,\n      \"price\": 250,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"Premium package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 16,\n      \"price\": 300,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Offer status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fixture has three saved packages\", () => {",
+              "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+              "  pm.expect(data.title).to.eql(sent.title);",
+              "  pm.expect(data.description).to.eql(sent.description);",
+              "  pm.expect(data.details).to.be.an(\"array\").with.lengthOf(3);",
+              "  pm.expect(data.details.map(d => d.offer_type).sort()).to.eql([\"basic\", \"premium\", \"standard\"]);",
+              "  data.details.forEach(d => pm.expect(d.id).to.be.a(\"number\").and.above(0));",
+              "});",
+              "if (pm.response.code === 201 && Array.isArray(data.details)) {",
+              "  const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "  fixtures.push({id: data.id, title: sent.title, description: sent.description,",
+              "    price: 200, days: 14, user: Number(pm.collectionVariables.get(\"ol_a_id\")),",
+              "    username: pm.collectionVariables.get(\"ol_a_username\"),",
+              "    detailIds: data.details.map(d => d.id).sort((a, b) => a - b)});",
+              "  pm.collectionVariables.set(\"ol_fixtures\", JSON.stringify(fixtures));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Offer 5: minimum price 300, days 2",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{ol_b_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"List {{ol_run}} offer 5\",\n  \"description\": \"Pagination and filter fixture.\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"Basic package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 11,\n      \"price\": 300,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"Standard package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 2,\n      \"price\": 350,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"Premium package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 4,\n      \"price\": 400,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Offer status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fixture has three saved packages\", () => {",
+              "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+              "  pm.expect(data.title).to.eql(sent.title);",
+              "  pm.expect(data.description).to.eql(sent.description);",
+              "  pm.expect(data.details).to.be.an(\"array\").with.lengthOf(3);",
+              "  pm.expect(data.details.map(d => d.offer_type).sort()).to.eql([\"basic\", \"premium\", \"standard\"]);",
+              "  data.details.forEach(d => pm.expect(d.id).to.be.a(\"number\").and.above(0));",
+              "});",
+              "if (pm.response.code === 201 && Array.isArray(data.details)) {",
+              "  const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "  fixtures.push({id: data.id, title: sent.title, description: sent.description,",
+              "    price: 300, days: 2, user: Number(pm.collectionVariables.get(\"ol_b_id\")),",
+              "    username: pm.collectionVariables.get(\"ol_b_username\"),",
+              "    detailIds: data.details.map(d => d.id).sort((a, b) => a - b)});",
+              "  pm.collectionVariables.set(\"ol_fixtures\", JSON.stringify(fixtures));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Offer 6: minimum price 500, days 5",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{ol_b_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Description-only search fixture\",\n  \"description\": \"List {{ol_run}} description-only match\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"Basic package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 14,\n      \"price\": 500,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"Standard package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 5,\n      \"price\": 550,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"Premium package\",\n      \"revisions\": 1,\n      \"delivery_time_in_days\": 7,\n      \"price\": 600,\n      \"features\": [\n        \"Development\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Offer status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fixture has three saved packages\", () => {",
+              "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+              "  pm.expect(data.title).to.eql(sent.title);",
+              "  pm.expect(data.description).to.eql(sent.description);",
+              "  pm.expect(data.details).to.be.an(\"array\").with.lengthOf(3);",
+              "  pm.expect(data.details.map(d => d.offer_type).sort()).to.eql([\"basic\", \"premium\", \"standard\"]);",
+              "  data.details.forEach(d => pm.expect(d.id).to.be.a(\"number\").and.above(0));",
+              "});",
+              "if (pm.response.code === 201 && Array.isArray(data.details)) {",
+              "  const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "  fixtures.push({id: data.id, title: sent.title, description: sent.description,",
+              "    price: 500, days: 5, user: Number(pm.collectionVariables.get(\"ol_b_id\")),",
+              "    username: pm.collectionVariables.get(\"ol_b_username\"),",
+              "    detailIds: data.details.map(d => d.id).sort((a, b) => a - b)});",
+              "  pm.collectionVariables.set(\"ol_fixtures\", JSON.stringify(fixtures));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST | Anonymous access and all seven fixtures",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [0, 1, 2, 3, 4, 5, 6].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST | Authenticated business access",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{ol_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [0, 1, 2, 3, 4, 5, 6].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "SEARCH | Case-insensitive title match",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search=lIsT+{{ol_run}}+OfFeR&page_size=100"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [0, 1, 2, 3, 4, 5].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "SEARCH | Case-insensitive description match",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search=lIsT+{{ol_run}}+DeScRiPtIoN-OnLy&page_size=100"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [6].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "SEARCH | No matching offers returns empty page",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}_no_match&page_size=100"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Creator A",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&creator_id={{ol_a_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [0, 1, 2, 3, 4].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Creator B",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&creator_id={{ol_b_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [5, 6].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Minimum price 80 includes equality",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&min_price=80"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [2, 3, 4, 5, 6].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Price uses cheapest package",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&min_price=1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [1, 2, 3, 4, 5, 6].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Maximum delivery 3 includes equality",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&max_delivery_time=3"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [0, 1, 2, 5].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Zero delivery time",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&max_delivery_time=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [0].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Price zero keeps all offers",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&min_price=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [0, 1, 2, 3, 4, 5, 6].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Creator, price, delivery and search combined",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&creator_id={{ol_a_id}}&min_price=80&max_delivery_time=3"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [2].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Valid combined filters with no matches",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&creator_id={{ol_b_id}}&max_delivery_time=1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDER | Price ascending",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&ordering=min_price"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [0, 1, 2, 3, 4, 5, 6].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDER | Price descending",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&ordering=-min_price"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [6, 5, 4, 3, 2, 1, 0].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDER | updated_at",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&ordering=updated_at"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"All fixtures appear in requested update-time order\", () => {",
+              "  pm.expect(data.count).to.eql(7);",
+              "  pm.expect(data.results.map(o => o.id).sort((a, b) => a - b)).to.eql(fixtures.map(f => f.id).sort((a, b) => a - b));",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "  for (let i = 1; i < data.results.length; i++) {",
+              "    const before = data.results[i - 1], after = data.results[i];",
+              "    pm.expect((Date.parse(after.updated_at) - Date.parse(before.updated_at)) * 1).to.be.at.least(0);",
+              "  }",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDER | -updated_at",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&ordering=-updated_at"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"All fixtures appear in requested update-time order\", () => {",
+              "  pm.expect(data.count).to.eql(7);",
+              "  pm.expect(data.results.map(o => o.id).sort((a, b) => a - b)).to.eql(fixtures.map(f => f.id).sort((a, b) => a - b));",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "  for (let i = 1; i < data.results.length; i++) {",
+              "    const before = data.results[i - 1], after = data.results[i];",
+              "    pm.expect((Date.parse(after.updated_at) - Date.parse(before.updated_at)) * -1).to.be.at.least(0);",
+              "  }",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PAGE | Default six per page",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"First page has 6 items and a next link\", () => {",
+              "  pm.expect(data.count).to.eql(7);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(fixtures.slice(0, 6).map(f => f.id));",
+              "  pm.expect(data.previous).to.eql(null);",
+              "  pm.expect(data.next).to.be.a(\"string\").and.include(\"page=2\");",
+              "  pm.expect(data.next).to.match(/^https?:\\/\\//);",
+              "});",
+              "pm.collectionVariables.set(\"ol_next_url\", data.next || \"\");",
+              "pm.collectionVariables.set(\"ol_first_ids\", JSON.stringify(data.results.map(o => o.id)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PAGE | Follow next link after page size 6",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{ol_next_url}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Following the next link returns the expected page without overlap\", () => {",
+              "  const ids = data.results.map(o => o.id);",
+              "  const first = JSON.parse(pm.collectionVariables.get(\"ol_first_ids\"));",
+              "  pm.expect(data.count).to.eql(7);",
+              "  pm.expect(ids).to.eql(fixtures.slice(6, 7).map(f => f.id));",
+              "  pm.expect(ids.some(id => first.includes(id))).to.eql(false);",
+              "  pm.expect(data.previous).to.be.a(\"string\");",
+              "  pm.expect(data.next).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PAGE | Custom page size two",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=2"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"First page has 2 items and a next link\", () => {",
+              "  pm.expect(data.count).to.eql(7);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(fixtures.slice(0, 2).map(f => f.id));",
+              "  pm.expect(data.previous).to.eql(null);",
+              "  pm.expect(data.next).to.be.a(\"string\").and.include(\"page=2\");",
+              "  pm.expect(data.next).to.match(/^https?:\\/\\//);",
+              "});",
+              "pm.collectionVariables.set(\"ol_next_url\", data.next || \"\");",
+              "pm.collectionVariables.set(\"ol_first_ids\", JSON.stringify(data.results.map(o => o.id)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PAGE | Follow next link after page size 2",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{ol_next_url}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Following the next link returns the expected page without overlap\", () => {",
+              "  const ids = data.results.map(o => o.id);",
+              "  const first = JSON.parse(pm.collectionVariables.get(\"ol_first_ids\"));",
+              "  pm.expect(data.count).to.eql(7);",
+              "  pm.expect(ids).to.eql(fixtures.slice(2, 4).map(f => f.id));",
+              "  pm.expect(ids.some(id => first.includes(id))).to.eql(false);",
+              "  pm.expect(data.previous).to.be.a(\"string\");",
+              "  pm.expect(data.next).to.be.a(\"string\").and.include(\"page=3\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PAGE | Large positive page size is accepted",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=101"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [0, 1, 2, 3, 4, 5, 6].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Empty frontend fields are ignored",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=&creator_id=&min_price=&max_delivery_time=&ordering="
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Blank filters retain all matches and default pagination\", () => {",
+              "  pm.expect(data.count).to.eql(7);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(fixtures.slice(0, 6).map(f => f.id));",
+              "  pm.expect(data.next).to.be.a(\"string\");",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | creator_id = abc",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&creator_id=abc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"creator_id\");",
+              "  pm.expect(data.creator_id).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | creator_id = -1",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&creator_id=-1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"creator_id\");",
+              "  pm.expect(data.creator_id).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | creator_id = 1.5",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&creator_id=1.5"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"creator_id\");",
+              "  pm.expect(data.creator_id).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | min_price = abc",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&min_price=abc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"min_price\");",
+              "  pm.expect(data.min_price).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | min_price = -0.01",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&min_price=-0.01"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"min_price\");",
+              "  pm.expect(data.min_price).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | min_price = NaN",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&min_price=NaN"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"min_price\");",
+              "  pm.expect(data.min_price).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | min_price = Infinity",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&min_price=Infinity"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"min_price\");",
+              "  pm.expect(data.min_price).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | max_delivery_time = abc",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&max_delivery_time=abc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"max_delivery_time\");",
+              "  pm.expect(data.max_delivery_time).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | max_delivery_time = -1",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&max_delivery_time=-1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"max_delivery_time\");",
+              "  pm.expect(data.max_delivery_time).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | max_delivery_time = 1.5",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&max_delivery_time=1.5"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"max_delivery_time\");",
+              "  pm.expect(data.max_delivery_time).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | ordering = unknown",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&ordering=unknown"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"ordering\");",
+              "  pm.expect(data.ordering).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | ordering = -password",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100&ordering=-password"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"ordering\");",
+              "  pm.expect(data.ordering).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | page_size = abc",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=abc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"page_size\");",
+              "  pm.expect(data.page_size).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | page_size = 0",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"page_size\");",
+              "  pm.expect(data.page_size).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | page_size = -1",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=-1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"page_size\");",
+              "  pm.expect(data.page_size).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | page_size = 1.5",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=1.5"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid query returns 400\", () => pm.response.to.have.status(400));",
+              "const data = pm.response.json();",
+              "pm.test(\"Field-specific validation error is returned\", () => {",
+              "  pm.expect(data).to.have.property(\"page_size\");",
+              "  pm.expect(data.page_size).to.be.an(\"array\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST | Valid request still succeeds after rejected queries",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{ol_run}}&page_size=100"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = JSON.parse(pm.collectionVariables.get(\"ol_fixtures\"));",
+              "pm.test(\"Fixture setup is complete and response is paginated\", () => {",
+              "  pm.expect(fixtures).to.have.lengthOf(7);",
+              "  pm.expect(new Set(fixtures.map(f => f.id)).size).to.eql(7);",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.results).to.be.an(\"array\");",
+              "});",
+              "pm.test(\"Returned offers have exact fields, values and relative package links\", () => {",
+              "  data.results.forEach(offer => {",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    pm.expect(fixture, \"Unexpected offer \" + offer.id).to.be.an(\"object\");",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    pm.expect(offer.title).to.eql(fixture.title);",
+              "    pm.expect(offer.description).to.eql(fixture.description);",
+              "    pm.expect(offer.user).to.eql(fixture.user);",
+              "    pm.expect(offer.image).to.eql(null);",
+              "    pm.expect(offer.min_price).to.eql(fixture.price);",
+              "    pm.expect(offer.min_delivery_time).to.eql(fixture.days);",
+              "    pm.expect(offer.user_details).to.eql({first_name: \"\", last_name: \"\", username: fixture.username});",
+              "    [offer.created_at, offer.updated_at].forEach(value => {",
+              "      pm.expect(value).to.be.a(\"string\");",
+              "      pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "    });",
+              "    pm.expect(offer.details).to.have.lengthOf(3);",
+              "    pm.expect(offer.details.map(d => d.id).sort((a, b) => a - b)).to.eql(fixture.detailIds);",
+              "    offer.details.forEach(detail => {",
+              "      pm.expect(detail).to.have.all.keys(\"id\", \"url\");",
+              "      pm.expect(detail.url).to.eql(\"/offerdetails/\" + detail.id + \"/\");",
+              "    });",
+              "  });",
+              "});",
+              "",
+              "pm.test(\"Exact matching offers, count and completed page\", () => {",
+              "  const expected = [0, 1, 2, 3, 4, 5, 6].map(index => fixtures[index].id);",
+              "  pm.expect(data.count).to.eql(expected.length);",
+              "  pm.expect(data.results.map(o => o.id)).to.eql(expected);",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
