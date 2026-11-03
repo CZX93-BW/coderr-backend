@@ -8,12 +8,13 @@ from offers_app.models import Offer, OfferDetail
 
 from .filters import OfferFilterBackend
 from .pagination import OfferPagination
-from .permissions import IsBusinessUser
+from .permissions import IsBusinessUser, IsOfferOwner
 from .serializers import (
     OfferCreateSerializer,
     OfferDetailSerializer,
     OfferListSerializer,
     OfferRetrieveSerializer,
+    OfferUpdateSerializer,
 )
 
 
@@ -32,19 +33,24 @@ class OfferViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, IsBusinessUser]
     pagination_class = OfferPagination
     filter_backends = [OfferFilterBackend]
-    http_method_names = ["get", "post", "head", "options"]
+    http_method_names = [
+        "get", "post", "patch", "delete", "head", "options",
+    ]
 
     def get_permissions(self):
         if self.action == "list":
             return [AllowAny()]
         if self.action == "retrieve":
             return [IsAuthenticated()]
+        if self.action in ("partial_update", "destroy"):
+            return [IsAuthenticated(), IsOfferOwner()]
         return super().get_permissions()
 
     def get_serializer_class(self):
         serializers_by_action = {
             "list": OfferListSerializer,
             "retrieve": OfferRetrieveSerializer,
+            "partial_update": OfferUpdateSerializer,
         }
         return serializers_by_action.get(
             self.action,

@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from offers_app.models import Offer, OfferDetail
 from offers_app.services import create_offer_with_details
+from offers_app.services import update_offer
 
 
 class OfferDetailSerializer(serializers.ModelSerializer):
@@ -130,3 +131,22 @@ class OfferRetrieveSerializer(OfferListSerializer):
             "min_delivery_time",
         ]
         read_only_fields = fields
+
+class OfferUpdateSerializer(OfferCreateSerializer):
+    def validate_details(self, value):
+        package_types = [item.get("offer_type") for item in value]
+        if None in package_types:
+            raise serializers.ValidationError(
+                "Every supplied package must include offer_type.",
+            )
+        if len(package_types) != len(set(package_types)):
+            raise serializers.ValidationError("Duplicate package types.")
+        existing_types = set(
+            self.instance.details.values_list("offer_type", flat=True),
+        )
+        if not set(package_types).issubset(existing_types):
+            raise serializers.ValidationError("Unknown package type.")
+        return value
+
+    def update(self, instance, validated_data):
+        return update_offer(instance, validated_data)

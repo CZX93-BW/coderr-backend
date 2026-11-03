@@ -13,7 +13,11 @@ urlpatterns = [
     ),
     path(
         "offers/<int:pk>/",
-        OfferViewSet.as_view({"get": "retrieve"}),
+        OfferViewSet.as_view({
+            "get": "retrieve",
+            "patch": "partial_update",
+            "delete": "destroy",
+        }),
         name="offer-detail",
     ),
     path(
