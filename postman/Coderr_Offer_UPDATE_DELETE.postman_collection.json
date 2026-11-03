@@ -1,0 +1,4141 @@
+{
+  "info": {
+    "name": "Coderr Offer UPDATE DELETE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run folders in order once. Set the Postman working directory to the backend project root before the upload folder. Creates three disposable accounts and three offers; deletes only this run's A and C offers."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api"
+    },
+    {
+      "key": "missing_id",
+      "value": "2147483647"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 JSON - update permissions and deletion",
+      "item": [
+        {
+          "name": "PREP | Register owner",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/registration/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"ow_owner_{{ow_run}}\",\n  \"email\": \"ow_owner_{{ow_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrWrite!83_TestOnly\",\n  \"repeated_password\": \"CoderrWrite!83_TestOnly\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "Object.keys(pm.collectionVariables.toObject()).filter(k => k.startsWith(\"ow_\")).forEach(k => pm.collectionVariables.unset(k));",
+                  "pm.collectionVariables.set(\"ow_run\", pm.variables.replaceIn(\"{{$guid}}\").replace(/-/g, \"\"));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "pm.test(\"Registration returns the requested account and token\", () => {",
+                  "  pm.expect(data.username).to.eql(sent.username);",
+                  "  pm.expect(data.email).to.eql(sent.email);",
+                  "  pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+                  "  pm.expect(data.user_id).to.be.a(\"number\").and.above(0);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set(\"ow_owner_token\", data.token);",
+                  "  pm.collectionVariables.set(\"ow_owner_user\", data.user_id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PREP | Register customer",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/registration/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"ow_customer_{{ow_run}}\",\n  \"email\": \"ow_customer_{{ow_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrWrite!83_TestOnly\",\n  \"repeated_password\": \"CoderrWrite!83_TestOnly\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "pm.test(\"Registration returns the requested account and token\", () => {",
+                  "  pm.expect(data.username).to.eql(sent.username);",
+                  "  pm.expect(data.email).to.eql(sent.email);",
+                  "  pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+                  "  pm.expect(data.user_id).to.be.a(\"number\").and.above(0);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set(\"ow_customer_token\", data.token);",
+                  "  pm.collectionVariables.set(\"ow_customer_user\", data.user_id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PREP | Register other",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/registration/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"ow_other_{{ow_run}}\",\n  \"email\": \"ow_other_{{ow_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrWrite!83_TestOnly\",\n  \"repeated_password\": \"CoderrWrite!83_TestOnly\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "pm.test(\"Registration returns the requested account and token\", () => {",
+                  "  pm.expect(data.username).to.eql(sent.username);",
+                  "  pm.expect(data.email).to.eql(sent.email);",
+                  "  pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+                  "  pm.expect(data.user_id).to.be.a(\"number\").and.above(0);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set(\"ow_other_token\", data.token);",
+                  "  pm.collectionVariables.set(\"ow_other_user\", data.user_id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PREP | Create offer A",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Write fixture A {{ow_run}}\",\n  \"description\": \"Original offer A\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"Basic package\",\n      \"offer_type\": \"basic\",\n      \"price\": 50,\n      \"delivery_time_in_days\": 7,\n      \"revisions\": 1,\n      \"features\": [\n        \"Responsive layout\",\n        \"basic feature\"\n      ]\n    },\n    {\n      \"title\": \"Standard package\",\n      \"offer_type\": \"standard\",\n      \"price\": 150,\n      \"delivery_time_in_days\": 4,\n      \"revisions\": 2,\n      \"features\": [\n        \"Responsive layout\",\n        \"standard feature\"\n      ]\n    },\n    {\n      \"title\": \"Premium package\",\n      \"offer_type\": \"premium\",\n      \"price\": 500,\n      \"delivery_time_in_days\": 2,\n      \"revisions\": -1,\n      \"features\": [\n        \"Responsive layout\",\n        \"premium feature\"\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "const expected = {...sent, id:data.id, details:sent.details.map(d => ({...d, id:data.details.find(p => p.offer_type === d.offer_type).id}))};",
+                  "pm.test(\"New offer and distinct package IDs are positive\", () => {",
+                  "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+                  "  pm.expect(new Set(expected.details.map(d => d.id)).size).to.eql(3);",
+                  "  expected.details.forEach(d => pm.expect(d.id).to.be.a(\"number\").and.above(0));",
+                  "});",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set(\"ow_a_expected\",JSON.stringify(expected));",
+                  "  pm.collectionVariables.set(\"ow_a_id\",data.id);",
+                  "  pm.collectionVariables.set(\"ow_a_owner\",pm.collectionVariables.get(\"ow_owner_user\"));",
+                  "  expected.details.forEach(d => pm.collectionVariables.set(\"ow_a_\"+d.offer_type+\"_id\",d.id));",
+                  "  pm.collectionVariables.unset(\"ow_a_meta\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PREP | Create offer B",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_other_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Write fixture B {{ow_run}}\",\n  \"description\": \"Original offer B\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"Basic package\",\n      \"offer_type\": \"basic\",\n      \"price\": 50,\n      \"delivery_time_in_days\": 7,\n      \"revisions\": 1,\n      \"features\": [\n        \"Responsive layout\",\n        \"basic feature\"\n      ]\n    },\n    {\n      \"title\": \"Standard package\",\n      \"offer_type\": \"standard\",\n      \"price\": 150,\n      \"delivery_time_in_days\": 4,\n      \"revisions\": 2,\n      \"features\": [\n        \"Responsive layout\",\n        \"standard feature\"\n      ]\n    },\n    {\n      \"title\": \"Premium package\",\n      \"offer_type\": \"premium\",\n      \"price\": 500,\n      \"delivery_time_in_days\": 2,\n      \"revisions\": -1,\n      \"features\": [\n        \"Responsive layout\",\n        \"premium feature\"\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "const expected = {...sent, id:data.id, details:sent.details.map(d => ({...d, id:data.details.find(p => p.offer_type === d.offer_type).id}))};",
+                  "pm.test(\"New offer and distinct package IDs are positive\", () => {",
+                  "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+                  "  pm.expect(new Set(expected.details.map(d => d.id)).size).to.eql(3);",
+                  "  expected.details.forEach(d => pm.expect(d.id).to.be.a(\"number\").and.above(0));",
+                  "});",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set(\"ow_b_expected\",JSON.stringify(expected));",
+                  "  pm.collectionVariables.set(\"ow_b_id\",data.id);",
+                  "  pm.collectionVariables.set(\"ow_b_owner\",pm.collectionVariables.get(\"ow_other_user\"));",
+                  "  expected.details.forEach(d => pm.collectionVariables.set(\"ow_b_\"+d.offer_type+\"_id\",d.id));",
+                  "  pm.collectionVariables.unset(\"ow_b_meta\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Initial A - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_a_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_a_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Initial A - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Initial A - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Initial A - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Initial B - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_b_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_b_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_b_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Initial B - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_b_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Initial B - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_b_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Initial B - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_b_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH | Title only",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated write fixture {{ow_run}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\"));",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "[\"title\",\"description\",\"image\"].forEach(k => { if (Object.hasOwn(sent,k)) expected[k]=sent[k]; });",
+                  "(sent.details || []).forEach(change => {",
+                  "  const detail = expected.details.find(d => d.offer_type === change.offer_type);",
+                  "  [\"title\",\"price\",\"delivery_time_in_days\",\"revisions\",\"features\"].forEach(k => {",
+                  "    if (Object.hasOwn(change,k)) detail[k] = [\"price\",\"delivery_time_in_days\",\"revisions\"].includes(k) ? Number(change[k]) : change[k];",
+                  "  });",
+                  "});",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"ow_a_expected\",JSON.stringify(expected));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH | Single package price",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"details\": [\n    {\n      \"offer_type\": \"standard\",\n      \"price\": \"125.50\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\"));",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "[\"title\",\"description\",\"image\"].forEach(k => { if (Object.hasOwn(sent,k)) expected[k]=sent[k]; });",
+                  "(sent.details || []).forEach(change => {",
+                  "  const detail = expected.details.find(d => d.offer_type === change.offer_type);",
+                  "  [\"title\",\"price\",\"delivery_time_in_days\",\"revisions\",\"features\"].forEach(k => {",
+                  "    if (Object.hasOwn(change,k)) detail[k] = [\"price\",\"delivery_time_in_days\",\"revisions\"].includes(k) ? Number(change[k]) : change[k];",
+                  "  });",
+                  "});",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"ow_a_expected\",JSON.stringify(expected));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH | Two packages in reverse order and zero values",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"details\": [\n    {\n      \"offer_type\": \"premium\",\n      \"price\": \"0.00\",\n      \"delivery_time_in_days\": \"0\",\n      \"revisions\": \"-1\"\n    },\n    {\n      \"offer_type\": \"basic\",\n      \"price\": \"20.00\",\n      \"delivery_time_in_days\": \"1\",\n      \"revisions\": \"0\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\"));",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "[\"title\",\"description\",\"image\"].forEach(k => { if (Object.hasOwn(sent,k)) expected[k]=sent[k]; });",
+                  "(sent.details || []).forEach(change => {",
+                  "  const detail = expected.details.find(d => d.offer_type === change.offer_type);",
+                  "  [\"title\",\"price\",\"delivery_time_in_days\",\"revisions\",\"features\"].forEach(k => {",
+                  "    if (Object.hasOwn(change,k)) detail[k] = [\"price\",\"delivery_time_in_days\",\"revisions\"].includes(k) ? Number(change[k]) : change[k];",
+                  "  });",
+                  "});",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"ow_a_expected\",JSON.stringify(expected));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH | Package title and feature list",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated description\",\n  \"details\": [\n    {\n      \"offer_type\": \"standard\",\n      \"title\": \"Updated Standard\",\n      \"features\": [\n        \"Contact form\",\n        \"Mobile layout\"\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\"));",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "[\"title\",\"description\",\"image\"].forEach(k => { if (Object.hasOwn(sent,k)) expected[k]=sent[k]; });",
+                  "(sent.details || []).forEach(change => {",
+                  "  const detail = expected.details.find(d => d.offer_type === change.offer_type);",
+                  "  [\"title\",\"price\",\"delivery_time_in_days\",\"revisions\",\"features\"].forEach(k => {",
+                  "    if (Object.hasOwn(change,k)) detail[k] = [\"price\",\"delivery_time_in_days\",\"revisions\"].includes(k) ? Number(change[k]) : change[k];",
+                  "  });",
+                  "});",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"ow_a_expected\",JSON.stringify(expected));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH | Protected owner and foreign package ID are ignored",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": \"{{ow_other_user}}\",\n  \"details\": [\n    {\n      \"offer_type\": \"basic\",\n      \"id\": \"{{ow_b_basic_id}}\",\n      \"price\": \"35.00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\"));",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "[\"title\",\"description\",\"image\"].forEach(k => { if (Object.hasOwn(sent,k)) expected[k]=sent[k]; });",
+                  "(sent.details || []).forEach(change => {",
+                  "  const detail = expected.details.find(d => d.offer_type === change.offer_type);",
+                  "  [\"title\",\"price\",\"delivery_time_in_days\",\"revisions\",\"features\"].forEach(k => {",
+                  "    if (Object.hasOwn(change,k)) detail[k] = [\"price\",\"delivery_time_in_days\",\"revisions\"].includes(k) ? Number(change[k]) : change[k];",
+                  "  });",
+                  "});",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"ow_a_expected\",JSON.stringify(expected));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Successful changes persisted - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_a_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_a_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Successful changes persisted - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Successful changes persisted - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Successful changes persisted - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Foreign offer preserved - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_b_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_b_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "",
+                  "pm.test(\"Rejected requests did not alter timestamps\", () => {",
+                  "  const previous = JSON.parse(pm.collectionVariables.get(\"ow_b_meta\"));",
+                  "  pm.expect([data.created_at,data.updated_at]).to.eql(previous);",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_b_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Foreign offer preserved - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_b_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Foreign offer preserved - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_b_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Foreign offer preserved - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_b_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | Missing package type",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Must never be saved\",\n  \"details\": [\n    {\n      \"price\": \"10.00\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | Duplicate package type",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Must never be saved\",\n  \"details\": [\n    {\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"offer_type\": \"basic\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | Unknown package type",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Must never be saved\",\n  \"details\": [\n    {\n      \"offer_type\": \"unknown\",\n      \"price\": 10\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | Null details",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Must never be saved\",\n  \"details\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | Blank title",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | price = -0.01",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Must never be saved\",\n  \"details\": [\n    {\n      \"offer_type\": \"basic\",\n      \"price\": 12\n    },\n    {\n      \"offer_type\": \"standard\",\n      \"price\": \"-0.01\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | delivery_time_in_days = -1",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Must never be saved\",\n  \"details\": [\n    {\n      \"offer_type\": \"basic\",\n      \"price\": 12\n    },\n    {\n      \"offer_type\": \"standard\",\n      \"delivery_time_in_days\": -1\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | delivery_time_in_days = 1.5",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Must never be saved\",\n  \"details\": [\n    {\n      \"offer_type\": \"basic\",\n      \"price\": 12\n    },\n    {\n      \"offer_type\": \"standard\",\n      \"delivery_time_in_days\": 1.5\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | revisions = -2",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Must never be saved\",\n  \"details\": [\n    {\n      \"offer_type\": \"basic\",\n      \"price\": 12\n    },\n    {\n      \"offer_type\": \"standard\",\n      \"revisions\": -2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | revisions = 1.5",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Must never be saved\",\n  \"details\": [\n    {\n      \"offer_type\": \"basic\",\n      \"price\": 12\n    },\n    {\n      \"offer_type\": \"standard\",\n      \"revisions\": 1.5\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "INVALID | features = not-an-array",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Must never be saved\",\n  \"details\": [\n    {\n      \"offer_type\": \"basic\",\n      \"price\": 12\n    },\n    {\n      \"offer_type\": \"standard\",\n      \"features\": \"not-an-array\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Invalid requests preserved all data - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_a_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "",
+                  "pm.test(\"Rejected requests did not alter timestamps\", () => {",
+                  "  const previous = JSON.parse(pm.collectionVariables.get(\"ow_a_meta\"));",
+                  "  pm.expect([data.created_at,data.updated_at]).to.eql(previous);",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_a_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Invalid requests preserved all data - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Invalid requests preserved all data - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Invalid requests preserved all data - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUTH | other PATCH",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_other_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Unauthorized change\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUTH | other DELETE",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_other_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUTH | customer PATCH",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Unauthorized change\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUTH | customer DELETE",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUTH | missing token PATCH",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Unauthorized change\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUTH | missing token DELETE",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUTH | invalid PATCH",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token invalid-offer-write-token"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Unauthorized change\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "AUTH | invalid DELETE",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token invalid-offer-write-token"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Unauthorized requests preserved all data - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_a_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "",
+                  "pm.test(\"Rejected requests did not alter timestamps\", () => {",
+                  "  const previous = JSON.parse(pm.collectionVariables.get(\"ow_a_meta\"));",
+                  "  pm.expect([data.created_at,data.updated_at]).to.eql(previous);",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_a_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Unauthorized requests preserved all data - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Unauthorized requests preserved all data - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Unauthorized requests preserved all data - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_a_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "MISSING | Unknown offer PATCH",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{missing_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Missing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "MISSING | Unknown offer DELETE",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{missing_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE | Owner deletes A",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));",
+                  "pm.test(\"204 response has zero body bytes\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Deleted offer A is missing",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Deleted A basic is missing",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Deleted A standard is missing",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Deleted A premium is missing",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_a_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE | Repeated deletion is 404",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_a_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Other offer survives deletion - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_b_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_b_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "",
+                  "pm.test(\"Rejected requests did not alter timestamps\", () => {",
+                  "  const previous = JSON.parse(pm.collectionVariables.get(\"ow_b_meta\"));",
+                  "  pm.expect([data.created_at,data.updated_at]).to.eql(previous);",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_b_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Other offer survives deletion - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_b_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Other offer survives deletion - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_b_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Other offer survives deletion - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_b_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_b_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 FILES - image upload replacement and deletion",
+      "item": [
+        {
+          "name": "PREP | Create offer C",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Write fixture C {{ow_run}}\",\n  \"description\": \"Original offer C\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"Basic package\",\n      \"offer_type\": \"basic\",\n      \"price\": 50,\n      \"delivery_time_in_days\": 7,\n      \"revisions\": 1,\n      \"features\": [\n        \"Responsive layout\",\n        \"basic feature\"\n      ]\n    },\n    {\n      \"title\": \"Standard package\",\n      \"offer_type\": \"standard\",\n      \"price\": 150,\n      \"delivery_time_in_days\": 4,\n      \"revisions\": 2,\n      \"features\": [\n        \"Responsive layout\",\n        \"standard feature\"\n      ]\n    },\n    {\n      \"title\": \"Premium package\",\n      \"offer_type\": \"premium\",\n      \"price\": 500,\n      \"delivery_time_in_days\": 2,\n      \"revisions\": -1,\n      \"features\": [\n        \"Responsive layout\",\n        \"premium feature\"\n      ]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "const expected = {...sent, id:data.id, details:sent.details.map(d => ({...d, id:data.details.find(p => p.offer_type === d.offer_type).id}))};",
+                  "pm.test(\"New offer and distinct package IDs are positive\", () => {",
+                  "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+                  "  pm.expect(new Set(expected.details.map(d => d.id)).size).to.eql(3);",
+                  "  expected.details.forEach(d => pm.expect(d.id).to.be.a(\"number\").and.above(0));",
+                  "});",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set(\"ow_c_expected\",JSON.stringify(expected));",
+                  "  pm.collectionVariables.set(\"ow_c_id\",data.id);",
+                  "  pm.collectionVariables.set(\"ow_c_owner\",pm.collectionVariables.get(\"ow_owner_user\"));",
+                  "  expected.details.forEach(d => pm.collectionVariables.set(\"ow_c_\"+d.offer_type+\"_id\",d.id));",
+                  "  pm.collectionVariables.unset(\"ow_c_meta\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Image offer baseline - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_c_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_c_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Image offer baseline - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Image offer baseline - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Image offer baseline - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UPLOAD | First image",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "postman/fixtures/offer-blue.png"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data=pm.response.json();",
+                  "const expected=JSON.parse(pm.collectionVariables.get(\"ow_c_expected\"));",
+                  "const previous=expected.image;",
+                  "pm.test(\"Image URL points to a new uploaded image\",()=>{",
+                  "  pm.expect(data.image).to.be.a(\"string\").and.not.empty;",
+                  "  pm.expect(data.image.startsWith(pm.variables.replaceIn(\"{{base_url}}\").replace(/\\/api\\/?$/, \"\")+\"/media/\")).to.eql(true);",
+                  "  pm.expect(data.image).not.eql(previous);",
+                  "});",
+                  "expected.image=data.image;",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"ow_c_expected\",JSON.stringify(expected));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | First image persisted - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_c_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_c_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | First image persisted - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | First image persisted - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | First image persisted - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UPLOAD | Replacement image",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "postman/fixtures/offer-red.png"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data=pm.response.json();",
+                  "const expected=JSON.parse(pm.collectionVariables.get(\"ow_c_expected\"));",
+                  "const previous=expected.image;",
+                  "pm.test(\"Image URL points to a new uploaded image\",()=>{",
+                  "  pm.expect(data.image).to.be.a(\"string\").and.not.empty;",
+                  "  pm.expect(data.image.startsWith(pm.variables.replaceIn(\"{{base_url}}\").replace(/\\/api\\/?$/, \"\")+\"/media/\")).to.eql(true);",
+                  "  pm.expect(data.image).not.eql(previous);",
+                  "});",
+                  "expected.image=data.image;",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"ow_c_expected\",JSON.stringify(expected));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Replacement image persisted - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_c_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_c_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Replacement image persisted - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Replacement image persisted - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Replacement image persisted - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UPLOAD | Invalid replacement",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "postman/fixtures/offer-invalid.png"
+                },
+                {
+                  "key": "title",
+                  "type": "text",
+                  "value": "Must not be saved"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Invalid replacement preserved state - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_c_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "",
+                  "pm.test(\"Rejected requests did not alter timestamps\", () => {",
+                  "  const previous = JSON.parse(pm.collectionVariables.get(\"ow_c_meta\"));",
+                  "  pm.expect([data.created_at,data.updated_at]).to.eql(previous);",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_c_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Invalid replacement preserved state - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Invalid replacement preserved state - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Invalid replacement preserved state - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "UPLOAD | Foreign business image",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_other_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "postman/fixtures/offer-blue.png"
+                },
+                {
+                  "key": "title",
+                  "type": "text",
+                  "value": "Must not be saved"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Foreign business image preserved state - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_c_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "",
+                  "pm.test(\"Rejected requests did not alter timestamps\", () => {",
+                  "  const previous = JSON.parse(pm.collectionVariables.get(\"ow_c_meta\"));",
+                  "  pm.expect([data.created_at,data.updated_at]).to.eql(previous);",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_c_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Foreign business image preserved state - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Foreign business image preserved state - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Foreign business image preserved state - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH | Text update preserves image",
+          "request": {
+            "method": "PATCH",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Image stays after text PATCH\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\"));",
+                  "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+                  "[\"title\",\"description\",\"image\"].forEach(k => { if (Object.hasOwn(sent,k)) expected[k]=sent[k]; });",
+                  "(sent.details || []).forEach(change => {",
+                  "  const detail = expected.details.find(d => d.offer_type === change.offer_type);",
+                  "  [\"title\",\"price\",\"delivery_time_in_days\",\"revisions\",\"features\"].forEach(k => {",
+                  "    if (Object.hasOwn(change,k)) detail[k] = [\"price\",\"delivery_time_in_days\",\"revisions\"].includes(k) ? Number(change[k]) : change[k];",
+                  "  });",
+                  "});",
+                  "",
+                  "const sorted = values => [...values].sort((a,b) => a.offer_type.localeCompare(b.offer_type));",
+                  "pm.test(\"Exactly the documented write response fields\", () => {",
+                  "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+                  "});",
+                  "pm.test(\"Offer fields match the expected state\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "});",
+                  "pm.test(\"All packages keep their IDs and expected values\", () => {",
+                  "  pm.expect(sorted(data.details)).to.eql(sorted(expected.details));",
+                  "  data.details.forEach(d => pm.expect(d.price).to.be.a(\"number\"));",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set(\"ow_c_expected\",JSON.stringify(expected));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Text update preserves image - offer",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "const data = pm.response.json();",
+                  "const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\"));",
+                  "pm.test(\"Stored offer, owner, package IDs and minima match\", () => {",
+                  "  [\"id\",\"title\",\"description\",\"image\"].forEach(k => pm.expect(data[k]).to.eql(expected[k]));",
+                  "  pm.expect(data.user).to.eql(Number(pm.collectionVariables.get(\"ow_c_owner\")));",
+                  "  pm.expect(data.min_price).to.eql(Math.min(...expected.details.map(d => d.price)));",
+                  "  pm.expect(data.min_delivery_time).to.eql(Math.min(...expected.details.map(d => d.delivery_time_in_days)));",
+                  "  pm.expect(data.details.map(d => d.id).sort((a,b)=>a-b)).to.eql(expected.details.map(d=>d.id).sort((a,b)=>a-b));",
+                  "});",
+                  "pm.test(\"Package links and timestamps are valid\", () => {",
+                  "  data.details.forEach(d => pm.expect(d.url).to.eql(pm.variables.replaceIn(\"{{base_url}}\")+\"/offerdetails/\"+d.id+\"/\"));",
+                  "  [data.created_at,data.updated_at].forEach(t => pm.expect(Number.isNaN(Date.parse(t))).to.eql(false));",
+                  "});",
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ow_c_meta\",JSON.stringify([data.created_at,data.updated_at]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Text update preserves image - basic",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"basic\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Text update preserves image - standard",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"standard\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Text update preserves image - premium",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test(\"Stored package matches all expected fields\", () => {",
+                  "  const expected = JSON.parse(pm.collectionVariables.get(\"ow_c_expected\")).details.find(d => d.offer_type === \"premium\");",
+                  "  pm.expect(pm.response.json()).to.eql(expected);",
+                  "  pm.expect(pm.response.json().price).to.be.a(\"number\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE | Owner deletes C",
+          "request": {
+            "method": "DELETE",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_owner_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));",
+                  "pm.test(\"204 response has zero body bytes\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Deleted offer C is missing",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offers/{{ow_c_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Deleted C basic is missing",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_basic_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Deleted C standard is missing",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_standard_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "VERIFY | Deleted C premium is missing",
+          "request": {
+            "method": "GET",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{ow_customer_token}}"
+              }
+            ],
+            "url": "{{base_url}}/offerdetails/{{ow_c_premium_id}}/"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+                  "",
+                  "pm.test(\"Error response is a nonempty JSON object\", () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(typeof data).to.eql(\"object\");",
+                  "  pm.expect(data === null || Array.isArray(data)).to.eql(false);",
+                  "  pm.expect(Object.keys(data).length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
