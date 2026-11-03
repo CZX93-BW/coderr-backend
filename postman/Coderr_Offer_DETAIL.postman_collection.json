@@ -1,0 +1,984 @@
+{
+  "info": {
+    "name": "Coderr Offer DETAIL",
+    "description": "C18 / E09 + E12. Run all requests sequentially once. Creates three accounts and two offers; no deletion. Checks authenticated retrieval, exact values, links and error responses.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "missing_id",
+      "value": "2147483647",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "PREP | Register owner",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"od_owner_{{od_run}}\",\n  \"email\": \"od_owner_{{od_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrTest!83_TestOnly\",\n  \"repeated_password\": \"CoderrTest!83_TestOnly\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"od_run\", pm.variables.replaceIn(\"{{$guid}}\").replace(/-/g, \"\"));",
+              "[\"owner\", \"customer\", \"other\"].forEach(role => {",
+              "  pm.collectionVariables.unset(\"od_\" + role + \"_token\");",
+              "  pm.collectionVariables.unset(\"od_\" + role + \"_id\");",
+              "});",
+              "[\"od_a\", \"od_b\", \"od_a_id\", \"od_b_id\", \"od_snapshot\"].forEach(key => pm.collectionVariables.unset(key));",
+              "[\"basic\", \"standard\", \"premium\"].forEach(kind => {",
+              "  pm.collectionVariables.unset(\"od_\" + kind + \"_id\");",
+              "  pm.collectionVariables.unset(\"od_\" + kind + \"_url\");",
+              "});"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fresh account credentials match registration\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"token\", \"username\", \"email\", \"user_id\");",
+              "  pm.expect(data.username).to.eql(sent.username);",
+              "  pm.expect(data.email).to.eql(sent.email);",
+              "  pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "  pm.expect(data.user_id).to.be.a(\"number\").and.above(0);",
+              "});",
+              "if (pm.response.code === 201 && data.token) {",
+              "  pm.collectionVariables.set(\"od_owner_token\", data.token);",
+              "  pm.collectionVariables.set(\"od_owner_id\", data.user_id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register customer",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"od_customer_{{od_run}}\",\n  \"email\": \"od_customer_{{od_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrTest!83_TestOnly\",\n  \"repeated_password\": \"CoderrTest!83_TestOnly\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fresh account credentials match registration\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"token\", \"username\", \"email\", \"user_id\");",
+              "  pm.expect(data.username).to.eql(sent.username);",
+              "  pm.expect(data.email).to.eql(sent.email);",
+              "  pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "  pm.expect(data.user_id).to.be.a(\"number\").and.above(0);",
+              "});",
+              "if (pm.response.code === 201 && data.token) {",
+              "  pm.collectionVariables.set(\"od_customer_token\", data.token);",
+              "  pm.collectionVariables.set(\"od_customer_id\", data.user_id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register other",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"od_other_{{od_run}}\",\n  \"email\": \"od_other_{{od_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrTest!83_TestOnly\",\n  \"repeated_password\": \"CoderrTest!83_TestOnly\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Fresh account credentials match registration\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"token\", \"username\", \"email\", \"user_id\");",
+              "  pm.expect(data.username).to.eql(sent.username);",
+              "  pm.expect(data.email).to.eql(sent.email);",
+              "  pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "  pm.expect(data.user_id).to.be.a(\"number\").and.above(0);",
+              "});",
+              "if (pm.response.code === 201 && data.token) {",
+              "  pm.collectionVariables.set(\"od_other_token\", data.token);",
+              "  pm.collectionVariables.set(\"od_other_id\", data.user_id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create offer A",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_owner_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Detail fixture A {{od_run}}\",\n  \"description\": \"Offer A for authenticated detail retrieval.\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"A Basic website\",\n      \"revisions\": -1,\n      \"delivery_time_in_days\": 7,\n      \"price\": 0,\n      \"features\": [\n        \"Responsive layout\",\n        \"A basic feature\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"A Standard website\",\n      \"revisions\": 2,\n      \"delivery_time_in_days\": 0,\n      \"price\": 100.5,\n      \"features\": [\n        \"Responsive layout\",\n        \"A standard feature\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"A Premium website\",\n      \"revisions\": 5,\n      \"delivery_time_in_days\": 3,\n      \"price\": 500,\n      \"features\": [\n        \"Responsive layout\",\n        \"A premium feature\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Offer and all three packages are saved correctly\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+              "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+              "  pm.expect(data.title).to.eql(sent.title);",
+              "  pm.expect(data.description).to.eql(sent.description);",
+              "  pm.expect(data.image).to.eql(null);",
+              "  pm.expect(data.details).to.have.lengthOf(3);",
+              "  pm.expect(data.details.map(d => d.offer_type).sort()).to.eql([\"basic\", \"premium\", \"standard\"]);",
+              "  data.details.forEach(detail => {",
+              "    pm.expect(detail.id).to.be.a(\"number\").and.above(0);",
+              "    const expected = sent.details.find(d => d.offer_type === detail.offer_type);",
+              "    pm.expect(detail).to.eql({...expected, id: detail.id});",
+              "  });",
+              "});",
+              "if (pm.response.code === 201 && Array.isArray(data.details)) {",
+              "  const fixture = {...sent, id: data.id, user: Number(pm.collectionVariables.get(\"od_owner_id\")),",
+              "    details: sent.details.map(detail => ({...detail,",
+              "      id: data.details.find(d => d.offer_type === detail.offer_type).id}))};",
+              "  pm.collectionVariables.set(\"od_a\", JSON.stringify(fixture));",
+              "  pm.collectionVariables.set(\"od_a_id\", data.id);",
+              "  if (\"a\" === \"a\") data.details.forEach(d => pm.collectionVariables.set(\"od_\" + d.offer_type + \"_id\", d.id));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create offer B",
+      "request": {
+        "method": "POST",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_other_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Detail fixture B {{od_run}}\",\n  \"description\": \"Offer B for authenticated detail retrieval.\",\n  \"image\": null,\n  \"details\": [\n    {\n      \"title\": \"B Basic website\",\n      \"revisions\": 0,\n      \"delivery_time_in_days\": 8,\n      \"price\": 60,\n      \"features\": [\n        \"Responsive layout\",\n        \"B basic feature\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"B Standard website\",\n      \"revisions\": 3,\n      \"delivery_time_in_days\": 4,\n      \"price\": 150,\n      \"features\": [\n        \"Responsive layout\",\n        \"B standard feature\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"B Premium website\",\n      \"revisions\": 10,\n      \"delivery_time_in_days\": 2,\n      \"price\": 900,\n      \"features\": [\n        \"Responsive layout\",\n        \"B premium feature\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const sent = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Offer and all three packages are saved correctly\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"image\", \"description\", \"details\");",
+              "  pm.expect(data.id).to.be.a(\"number\").and.above(0);",
+              "  pm.expect(data.title).to.eql(sent.title);",
+              "  pm.expect(data.description).to.eql(sent.description);",
+              "  pm.expect(data.image).to.eql(null);",
+              "  pm.expect(data.details).to.have.lengthOf(3);",
+              "  pm.expect(data.details.map(d => d.offer_type).sort()).to.eql([\"basic\", \"premium\", \"standard\"]);",
+              "  data.details.forEach(detail => {",
+              "    pm.expect(detail.id).to.be.a(\"number\").and.above(0);",
+              "    const expected = sent.details.find(d => d.offer_type === detail.offer_type);",
+              "    pm.expect(detail).to.eql({...expected, id: detail.id});",
+              "  });",
+              "});",
+              "if (pm.response.code === 201 && Array.isArray(data.details)) {",
+              "  const fixture = {...sent, id: data.id, user: Number(pm.collectionVariables.get(\"od_other_id\")),",
+              "    details: sent.details.map(detail => ({...detail,",
+              "      id: data.details.find(d => d.offer_type === detail.offer_type).id}))};",
+              "  pm.collectionVariables.set(\"od_b\", JSON.stringify(fixture));",
+              "  pm.collectionVariables.set(\"od_b_id\", data.id);",
+              "  if (\"b\" === \"a\") data.details.forEach(d => pm.collectionVariables.set(\"od_\" + d.offer_type + \"_id\", d.id));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E09 | Customer reads foreign offer A and captures package links",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{od_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixture = JSON.parse(pm.collectionVariables.get(\"od_a\"));",
+              "pm.test(\"Exactly the ten documented offer fields\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "    \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\");",
+              "});",
+              "pm.test(\"Requested offer, owner and independent minima are correct\", () => {",
+              "  [\"id\", \"user\", \"title\", \"description\", \"image\"].forEach(key => pm.expect(data[key]).to.eql(fixture[key]));",
+              "  pm.expect(data.min_price).to.eql(Math.min(...fixture.details.map(d => d.price)));",
+              "  pm.expect(data.min_delivery_time).to.eql(Math.min(...fixture.details.map(d => d.delivery_time_in_days)));",
+              "  [data.created_at, data.updated_at].forEach(value => {",
+              "    pm.expect(value).to.be.a(\"string\");",
+              "    pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "  });",
+              "});",
+              "pm.test(\"Only this offer's packages appear, with exact absolute API links\", () => {",
+              "  const base = pm.variables.replaceIn(\"{{base_url}}\");",
+              "  pm.expect(data.details).to.have.lengthOf(3);",
+              "  const expected = fixture.details.map(d => ({id: d.id, url: base + \"/offerdetails/\" + d.id + \"/\"}));",
+              "  pm.expect([...data.details].sort((a, b) => a.id - b.id)).to.eql(expected.sort((a, b) => a.id - b.id));",
+              "});",
+              "",
+              "if (pm.response.code === 200 && Array.isArray(data.details)) {",
+              "  fixture.details.forEach(package => {",
+              "    const link = data.details.find(d => d.id === package.id);",
+              "    if (link) pm.collectionVariables.set(\"od_\" + package.offer_type + \"_url\", link.url);",
+              "  });",
+              "  pm.collectionVariables.set(\"od_snapshot\", JSON.stringify(data));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E09 | Owner reads own offer A",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{od_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixture = JSON.parse(pm.collectionVariables.get(\"od_a\"));",
+              "pm.test(\"Exactly the ten documented offer fields\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "    \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\");",
+              "});",
+              "pm.test(\"Requested offer, owner and independent minima are correct\", () => {",
+              "  [\"id\", \"user\", \"title\", \"description\", \"image\"].forEach(key => pm.expect(data[key]).to.eql(fixture[key]));",
+              "  pm.expect(data.min_price).to.eql(Math.min(...fixture.details.map(d => d.price)));",
+              "  pm.expect(data.min_delivery_time).to.eql(Math.min(...fixture.details.map(d => d.delivery_time_in_days)));",
+              "  [data.created_at, data.updated_at].forEach(value => {",
+              "    pm.expect(value).to.be.a(\"string\");",
+              "    pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "  });",
+              "});",
+              "pm.test(\"Only this offer's packages appear, with exact absolute API links\", () => {",
+              "  const base = pm.variables.replaceIn(\"{{base_url}}\");",
+              "  pm.expect(data.details).to.have.lengthOf(3);",
+              "  const expected = fixture.details.map(d => ({id: d.id, url: base + \"/offerdetails/\" + d.id + \"/\"}));",
+              "  pm.expect([...data.details].sort((a, b) => a.id - b.id)).to.eql(expected.sort((a, b) => a.id - b.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E09 | Other business reads foreign offer A",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_other_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{od_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixture = JSON.parse(pm.collectionVariables.get(\"od_a\"));",
+              "pm.test(\"Exactly the ten documented offer fields\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "    \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\");",
+              "});",
+              "pm.test(\"Requested offer, owner and independent minima are correct\", () => {",
+              "  [\"id\", \"user\", \"title\", \"description\", \"image\"].forEach(key => pm.expect(data[key]).to.eql(fixture[key]));",
+              "  pm.expect(data.min_price).to.eql(Math.min(...fixture.details.map(d => d.price)));",
+              "  pm.expect(data.min_delivery_time).to.eql(Math.min(...fixture.details.map(d => d.delivery_time_in_days)));",
+              "  [data.created_at, data.updated_at].forEach(value => {",
+              "    pm.expect(value).to.be.a(\"string\");",
+              "    pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "  });",
+              "});",
+              "pm.test(\"Only this offer's packages appear, with exact absolute API links\", () => {",
+              "  const base = pm.variables.replaceIn(\"{{base_url}}\");",
+              "  pm.expect(data.details).to.have.lengthOf(3);",
+              "  const expected = fixture.details.map(d => ({id: d.id, url: base + \"/offerdetails/\" + d.id + \"/\"}));",
+              "  pm.expect([...data.details].sort((a, b) => a.id - b.id)).to.eql(expected.sort((a, b) => a.id - b.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E09 | Customer reads distinct offer B",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{od_b_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixture = JSON.parse(pm.collectionVariables.get(\"od_b\"));",
+              "pm.test(\"Exactly the ten documented offer fields\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "    \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\");",
+              "});",
+              "pm.test(\"Requested offer, owner and independent minima are correct\", () => {",
+              "  [\"id\", \"user\", \"title\", \"description\", \"image\"].forEach(key => pm.expect(data[key]).to.eql(fixture[key]));",
+              "  pm.expect(data.min_price).to.eql(Math.min(...fixture.details.map(d => d.price)));",
+              "  pm.expect(data.min_delivery_time).to.eql(Math.min(...fixture.details.map(d => d.delivery_time_in_days)));",
+              "  [data.created_at, data.updated_at].forEach(value => {",
+              "    pm.expect(value).to.be.a(\"string\");",
+              "    pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "  });",
+              "});",
+              "pm.test(\"Only this offer's packages appear, with exact absolute API links\", () => {",
+              "  const base = pm.variables.replaceIn(\"{{base_url}}\");",
+              "  pm.expect(data.details).to.have.lengthOf(3);",
+              "  const expected = fixture.details.map(d => ({id: d.id, url: base + \"/offerdetails/\" + d.id + \"/\"}));",
+              "  pm.expect([...data.details].sort((a, b) => a.id - b.id)).to.eql(expected.sort((a, b) => a.id - b.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E12 | Customer follows returned basic link",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_customer_token}}"
+          }
+        ],
+        "url": "{{od_basic_url}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixture = JSON.parse(pm.collectionVariables.get(\"od_a\"));",
+              "const expected = fixture.details.find(d => d.offer_type === \"basic\");",
+              "pm.test(\"Exactly the eight documented package fields\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"revisions\", \"delivery_time_in_days\",",
+              "    \"price\", \"features\", \"offer_type\");",
+              "});",
+              "pm.test(\"Package ID, type, numeric price and all values match saved fixture\", () => {",
+              "  pm.expect(data).to.eql(expected);",
+              "  pm.expect(data.price).to.be.a(\"number\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E12 | Customer follows returned standard link",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_customer_token}}"
+          }
+        ],
+        "url": "{{od_standard_url}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixture = JSON.parse(pm.collectionVariables.get(\"od_a\"));",
+              "const expected = fixture.details.find(d => d.offer_type === \"standard\");",
+              "pm.test(\"Exactly the eight documented package fields\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"revisions\", \"delivery_time_in_days\",",
+              "    \"price\", \"features\", \"offer_type\");",
+              "});",
+              "pm.test(\"Package ID, type, numeric price and all values match saved fixture\", () => {",
+              "  pm.expect(data).to.eql(expected);",
+              "  pm.expect(data.price).to.be.a(\"number\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E12 | Customer follows returned premium link",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_customer_token}}"
+          }
+        ],
+        "url": "{{od_premium_url}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixture = JSON.parse(pm.collectionVariables.get(\"od_a\"));",
+              "const expected = fixture.details.find(d => d.offer_type === \"premium\");",
+              "pm.test(\"Exactly the eight documented package fields\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"revisions\", \"delivery_time_in_days\",",
+              "    \"price\", \"features\", \"offer_type\");",
+              "});",
+              "pm.test(\"Package ID, type, numeric price and all values match saved fixture\", () => {",
+              "  pm.expect(data).to.eql(expected);",
+              "  pm.expect(data.price).to.be.a(\"number\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E12 | Owner reads standard package",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offerdetails/{{od_standard_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixture = JSON.parse(pm.collectionVariables.get(\"od_a\"));",
+              "const expected = fixture.details.find(d => d.offer_type === \"standard\");",
+              "pm.test(\"Exactly the eight documented package fields\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"revisions\", \"delivery_time_in_days\",",
+              "    \"price\", \"features\", \"offer_type\");",
+              "});",
+              "pm.test(\"Package ID, type, numeric price and all values match saved fixture\", () => {",
+              "  pm.expect(data).to.eql(expected);",
+              "  pm.expect(data.price).to.be.a(\"number\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "E12 | Other reads standard package",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_other_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offerdetails/{{od_standard_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixture = JSON.parse(pm.collectionVariables.get(\"od_a\"));",
+              "const expected = fixture.details.find(d => d.offer_type === \"standard\");",
+              "pm.test(\"Exactly the eight documented package fields\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"title\", \"revisions\", \"delivery_time_in_days\",",
+              "    \"price\", \"features\", \"offer_type\");",
+              "});",
+              "pm.test(\"Package ID, type, numeric price and all values match saved fixture\", () => {",
+              "  pm.expect(data).to.eql(expected);",
+              "  pm.expect(data.price).to.be.a(\"number\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Missing token - offer",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/{{od_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "const data = pm.response.json();",
+              "pm.test(\"Error is returned without offer, package or credential data\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"detail\");",
+              "  pm.expect(data.detail).to.be.a(\"string\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Missing token - package",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offerdetails/{{od_standard_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "const data = pm.response.json();",
+              "pm.test(\"Error is returned without offer, package or credential data\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"detail\");",
+              "  pm.expect(data.detail).to.be.a(\"string\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Invalid token - offer",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token invalid-detail-test-token"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{od_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "const data = pm.response.json();",
+              "pm.test(\"Error is returned without offer, package or credential data\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"detail\");",
+              "  pm.expect(data.detail).to.be.a(\"string\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Invalid token - package",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token invalid-detail-test-token"
+          }
+        ],
+        "url": "{{base_url}}/offerdetails/{{od_standard_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "const data = pm.response.json();",
+              "pm.test(\"Error is returned without offer, package or credential data\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"detail\");",
+              "  pm.expect(data.detail).to.be.a(\"string\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MISSING | Unknown offer",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{missing_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "const data = pm.response.json();",
+              "pm.test(\"Error is returned without offer, package or credential data\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"detail\");",
+              "  pm.expect(data.detail).to.be.a(\"string\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MISSING | Unknown package",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offerdetails/{{missing_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "const data = pm.response.json();",
+              "pm.test(\"Error is returned without offer, package or credential data\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"detail\");",
+              "  pm.expect(data.detail).to.be.a(\"string\").and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "REGRESSION | Public list keeps its relative package links",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [],
+        "url": "{{base_url}}/offers/?search={{od_run}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Public list still returns 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixtures = [\"a\", \"b\"].map(key => JSON.parse(pm.collectionVariables.get(\"od_\" + key)));",
+              "pm.test(\"Run search returns exactly both fixtures\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"count\", \"next\", \"previous\", \"results\");",
+              "  pm.expect(data.count).to.eql(2);",
+              "  pm.expect(data.results.map(o => o.id).sort((a, b) => a - b)).to.eql(fixtures.map(f => f.id).sort((a, b) => a - b));",
+              "  pm.expect(data.next).to.eql(null);",
+              "  pm.expect(data.previous).to.eql(null);",
+              "});",
+              "pm.test(\"List package links remain relative without API prefix\", () => {",
+              "  data.results.forEach(offer => {",
+              "    pm.expect(offer).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "      \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\", \"user_details\");",
+              "    const fixture = fixtures.find(f => f.id === offer.id);",
+              "    const expected = fixture.details.map(d => ({id: d.id, url: \"/offerdetails/\" + d.id + \"/\"}));",
+              "    pm.expect([...offer.details].sort((a, b) => a.id - b.id)).to.eql(expected.sort((a, b) => a.id - b.id));",
+              "  });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Offer A remains unchanged after all reads",
+      "request": {
+        "method": "GET",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Token {{od_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{od_a_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "const fixture = JSON.parse(pm.collectionVariables.get(\"od_a\"));",
+              "pm.test(\"Exactly the ten documented offer fields\", () => {",
+              "  pm.expect(data).to.have.all.keys(\"id\", \"user\", \"title\", \"image\", \"description\",",
+              "    \"created_at\", \"updated_at\", \"details\", \"min_price\", \"min_delivery_time\");",
+              "});",
+              "pm.test(\"Requested offer, owner and independent minima are correct\", () => {",
+              "  [\"id\", \"user\", \"title\", \"description\", \"image\"].forEach(key => pm.expect(data[key]).to.eql(fixture[key]));",
+              "  pm.expect(data.min_price).to.eql(Math.min(...fixture.details.map(d => d.price)));",
+              "  pm.expect(data.min_delivery_time).to.eql(Math.min(...fixture.details.map(d => d.delivery_time_in_days)));",
+              "  [data.created_at, data.updated_at].forEach(value => {",
+              "    pm.expect(value).to.be.a(\"string\");",
+              "    pm.expect(Number.isNaN(Date.parse(value))).to.eql(false);",
+              "  });",
+              "});",
+              "pm.test(\"Only this offer's packages appear, with exact absolute API links\", () => {",
+              "  const base = pm.variables.replaceIn(\"{{base_url}}\");",
+              "  pm.expect(data.details).to.have.lengthOf(3);",
+              "  const expected = fixture.details.map(d => ({id: d.id, url: base + \"/offerdetails/\" + d.id + \"/\"}));",
+              "  pm.expect([...data.details].sort((a, b) => a.id - b.id)).to.eql(expected.sort((a, b) => a.id - b.id));",
+              "});",
+              "",
+              "pm.test(\"Read requests preserve offer data and timestamps\", () => {",
+              "  const before = JSON.parse(pm.collectionVariables.get(\"od_snapshot\"));",
+              "  before.details.sort((a, b) => a.id - b.id);",
+              "  const after = {...data, details: [...data.details].sort((a, b) => a.id - b.id)};",
+              "  pm.expect(after).to.eql(before);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
