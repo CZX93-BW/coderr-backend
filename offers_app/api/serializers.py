@@ -51,3 +51,53 @@ class OfferCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return create_offer_with_details(validated_data)
+
+class OfferUserSerializer(serializers.Serializer):
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
+    username = serializers.CharField(read_only=True)
+
+
+class OfferDetailLinkSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OfferDetail
+        fields = ["id", "url"]
+        read_only_fields = fields
+
+    def get_url(self, obj):
+        return f"/offerdetails/{obj.pk}/"
+
+
+class OfferListSerializer(serializers.ModelSerializer):
+    details = OfferDetailLinkSerializer(many=True, read_only=True)
+    min_price = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        coerce_to_string=False,
+        read_only=True,
+        allow_null=True,
+    )
+    min_delivery_time = serializers.IntegerField(
+        read_only=True,
+        allow_null=True,
+    )
+    user_details = OfferUserSerializer(source="user", read_only=True)
+
+    class Meta:
+        model = Offer
+        fields = [
+            "id",
+            "user",
+            "title",
+            "image",
+            "description",
+            "created_at",
+            "updated_at",
+            "details",
+            "min_price",
+            "min_delivery_time",
+            "user_details",
+        ]
+        read_only_fields = fields

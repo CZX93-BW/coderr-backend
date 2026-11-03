@@ -8,7 +8,7 @@ app_name = "offers"
 urlpatterns = [
     path(
         "offers/",
-        OfferViewSet.as_view({"post": "create"}),
+        OfferViewSet.as_view({"get": "list", "post": "create"}),
         name="offer-list",
     ),
 ]
