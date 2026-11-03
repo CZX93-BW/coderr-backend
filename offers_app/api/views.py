@@ -1,14 +1,20 @@
 from django.db.models import Min
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from offers_app.models import Offer
+from offers_app.models import Offer, OfferDetail
 
 from .filters import OfferFilterBackend
 from .pagination import OfferPagination
 from .permissions import IsBusinessUser
-from .serializers import OfferCreateSerializer, OfferListSerializer
+from .serializers import (
+    OfferCreateSerializer,
+    OfferDetailSerializer,
+    OfferListSerializer,
+    OfferRetrieveSerializer,
+)
 
 
 class OfferViewSet(ModelViewSet):
@@ -31,12 +37,32 @@ class OfferViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action == "list":
             return [AllowAny()]
+        if self.action == "retrieve":
+            return [IsAuthenticated()]
         return super().get_permissions()
 
     def get_serializer_class(self):
+        serializers_by_action = {
+            "list": OfferListSerializer,
+            "retrieve": OfferRetrieveSerializer,
+        }
+        return serializers_by_action.get(
+            self.action,
+            self.serializer_class,
+        )
+
+    def filter_queryset(self, queryset):
         if self.action == "list":
-            return OfferListSerializer
-        return super().get_serializer_class()
+            return super().filter_queryset(queryset)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class OfferDetailView(RetrieveAPIView):
+    queryset = OfferDetail.objects.all()
+    serializer_class = OfferDetailSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get", "head", "options"]

@@ -101,3 +101,32 @@ class OfferListSerializer(serializers.ModelSerializer):
             "user_details",
         ]
         read_only_fields = fields
+
+class OfferRetrieveLinkSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name="offers:offerdetail-detail",
+    )
+
+    class Meta:
+        model = OfferDetail
+        fields = ["id", "url"]
+        read_only_fields = fields
+
+
+class OfferRetrieveSerializer(OfferListSerializer):
+    details = OfferRetrieveLinkSerializer(many=True, read_only=True)
+
+    class Meta(OfferListSerializer.Meta):
+        fields = [
+            "id",
+            "user",
+            "title",
+            "image",
+            "description",
+            "created_at",
+            "updated_at",
+            "details",
+            "min_price",
+            "min_delivery_time",
+        ]
+        read_only_fields = fields
