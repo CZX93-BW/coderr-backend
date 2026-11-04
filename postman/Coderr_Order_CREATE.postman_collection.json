@@ -1,0 +1,1793 @@
+{
+  "info": {
+    "name": "Coderr Order CREATE",
+    "_postman_id": "a9263480-3b5d-4ac4-931b-371645aba6e9",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "C20 / E14. Run all requests in order, one iteration. No files required. Read ORDER_CREATE.md."
+  },
+  "variable": [],
+  "item": [
+    {
+      "name": "PREP | Register business",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"oc_business_{{oc_run}}\",\n  \"email\": \"oc_business_{{oc_run}}@example.com\",\n  \"password\": \"CoderrOrder!83_TestOnly\",\n  \"repeated_password\": \"CoderrOrder!83_TestOnly\",\n  \"type\": \"business\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "for (const key of Object.keys(pm.collectionVariables.toObject())) {",
+              "    if (key.startsWith(\"oc_\")) pm.collectionVariables.unset(key);",
+              "}",
+              "pm.collectionVariables.set(\"oc_run\", pm.variables.replaceIn(\"{{$guid}}\"));",
+              "pm.collectionVariables.set(\"oc_order_ids\", \"[]\");"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "pm.test(\"Registration contains usable credentials\", () => {",
+              "    pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(Number.isInteger(data.user_id) && data.user_id > 0).to.eql(true);",
+              "});",
+              "pm.test(\"Registration returns the requested username\", () => {",
+              "    pm.expect(data.username).to.eql(JSON.parse(pm.variables.replaceIn(pm.request.body.raw)).username);",
+              "});",
+              "",
+              "if (pm.response.code === 201 && data.token && data.user_id) {",
+              "    pm.collectionVariables.set(\"oc_business_token\", data.token);",
+              "    pm.collectionVariables.set(\"oc_business_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register customer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"oc_customer_{{oc_run}}\",\n  \"email\": \"oc_customer_{{oc_run}}@example.com\",\n  \"password\": \"CoderrOrder!83_TestOnly\",\n  \"repeated_password\": \"CoderrOrder!83_TestOnly\",\n  \"type\": \"customer\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "pm.test(\"Registration contains usable credentials\", () => {",
+              "    pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(Number.isInteger(data.user_id) && data.user_id > 0).to.eql(true);",
+              "});",
+              "pm.test(\"Registration returns the requested username\", () => {",
+              "    pm.expect(data.username).to.eql(JSON.parse(pm.variables.replaceIn(pm.request.body.raw)).username);",
+              "});",
+              "",
+              "if (pm.response.code === 201 && data.token && data.user_id) {",
+              "    pm.collectionVariables.set(\"oc_customer_token\", data.token);",
+              "    pm.collectionVariables.set(\"oc_customer_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register other",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"oc_other_{{oc_run}}\",\n  \"email\": \"oc_other_{{oc_run}}@example.com\",\n  \"password\": \"CoderrOrder!83_TestOnly\",\n  \"repeated_password\": \"CoderrOrder!83_TestOnly\",\n  \"type\": \"customer\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "pm.test(\"Registration contains usable credentials\", () => {",
+              "    pm.expect(data.token).to.be.a(\"string\").and.not.empty;",
+              "    pm.expect(Number.isInteger(data.user_id) && data.user_id > 0).to.eql(true);",
+              "});",
+              "pm.test(\"Registration returns the requested username\", () => {",
+              "    pm.expect(data.username).to.eql(JSON.parse(pm.variables.replaceIn(pm.request.body.raw)).username);",
+              "});",
+              "",
+              "if (pm.response.code === 201 && data.token && data.user_id) {",
+              "    pm.collectionVariables.set(\"oc_other_token\", data.token);",
+              "    pm.collectionVariables.set(\"oc_other_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Business creates three distinct packages",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_business_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Order fixture {{oc_run}}\",\n  \"description\": \"Disposable offer for order creation checks.\",\n  \"details\": [\n    {\n      \"title\": \"Basic zero\",\n      \"price\": 0,\n      \"revisions\": 0,\n      \"delivery_time_in_days\": 0,\n      \"features\": [\n        \"Basic feature\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"Standard website\",\n      \"price\": 149.9,\n      \"revisions\": -1,\n      \"delivery_time_in_days\": 3,\n      \"features\": [\n        \"Responsive layout\",\n        \"Contact form\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"Premium website\",\n      \"price\": 299.95,\n      \"revisions\": 5,\n      \"delivery_time_in_days\": 7,\n      \"features\": [\n        \"Premium feature\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "const requested = JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "pm.test(\"Offer has a usable ID and three packages\", () => {",
+              "    pm.expect(Number.isInteger(data.id) && data.id > 0).to.eql(true);",
+              "    pm.expect(data.details).to.be.an(\"array\").with.lengthOf(3);",
+              "});",
+              "pm.test(\"All package values match the submitted fixtures\", () => {",
+              "    for (const expected of requested.details) {",
+              "        const actual = data.details.find(p => p.offer_type === expected.offer_type);",
+              "        pm.expect(Number.isInteger(actual.id) && actual.id > 0).to.eql(true);",
+              "        for (const key of Object.keys(expected)) pm.expect(actual[key]).to.eql(expected[key]);",
+              "    }",
+              "});",
+              "if (pm.response.code === 201 && Array.isArray(data.details)) {",
+              "    pm.collectionVariables.set(\"oc_offer_id\", data.id);",
+              "    for (const expected of requested.details) {",
+              "        const actual = data.details.find(p => p.offer_type === expected.offer_type);",
+              "        pm.collectionVariables.set(\"oc_\" + expected.offer_type + \"_id\", actual.id);",
+              "        pm.collectionVariables.set(\"oc_\" + expected.offer_type + \"_expected\", JSON.stringify(expected));",
+              "    }",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CREATE | Customer buys basic",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_basic_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "const expected = JSON.parse(pm.collectionVariables.get(\"oc_basic_expected\"));",
+              "const previousIds = JSON.parse(pm.collectionVariables.get(\"oc_order_ids\"));",
+              "pm.test(\"Exact documented response fields and a new integer ID\", () => {",
+              "    const fields = [\"id\", \"customer_user\", \"business_user\", \"title\", \"revisions\",",
+              "        \"delivery_time_in_days\", \"price\", \"features\", \"offer_type\", \"status\", \"created_at\", \"updated_at\"];",
+              "    pm.expect(Object.keys(data).sort()).to.eql(fields.sort());",
+              "    pm.expect(Number.isInteger(data.id) && data.id > 0).to.eql(true);",
+              "    pm.expect(previousIds.includes(data.id)).to.eql(false);",
+              "});",
+              "pm.test(\"Participants come from token and package owner\", () => {",
+              "    pm.expect(data.customer_user).to.eql(Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    pm.expect(data.business_user).to.eql(Number(pm.collectionVariables.get(\"oc_business_user\")));",
+              "});",
+              "pm.test(\"Commercial data exactly matches the selected package\", () => {",
+              "    for (const key of Object.keys(expected)) pm.expect(data[key]).to.eql(expected[key]);",
+              "    pm.expect(data.price).to.be.a(\"number\");",
+              "    pm.expect(Number.isInteger(data.revisions)).to.eql(true);",
+              "    pm.expect(Number.isInteger(data.delivery_time_in_days)).to.eql(true);",
+              "});",
+              "pm.test(\"Initial status is in_progress\", () => pm.expect(data.status).to.eql(\"in_progress\"));",
+              "pm.test(\"Server timestamps are valid and ordered\", () => {",
+              "    pm.expect(data.created_at).to.be.a(\"string\");",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");",
+              "    const created = Date.parse(data.created_at), updated = Date.parse(data.updated_at);",
+              "    pm.expect(Number.isFinite(created) && Number.isFinite(updated)).to.eql(true);",
+              "    pm.expect(updated >= created).to.eql(true);",
+              "});",
+              "if (pm.response.code === 201 && Number.isInteger(data.id)) {",
+              "    previousIds.push(data.id);",
+              "    pm.collectionVariables.set(\"oc_order_ids\", JSON.stringify(previousIds));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CREATE | Customer buys standard",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_standard_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "const expected = JSON.parse(pm.collectionVariables.get(\"oc_standard_expected\"));",
+              "const previousIds = JSON.parse(pm.collectionVariables.get(\"oc_order_ids\"));",
+              "pm.test(\"Exact documented response fields and a new integer ID\", () => {",
+              "    const fields = [\"id\", \"customer_user\", \"business_user\", \"title\", \"revisions\",",
+              "        \"delivery_time_in_days\", \"price\", \"features\", \"offer_type\", \"status\", \"created_at\", \"updated_at\"];",
+              "    pm.expect(Object.keys(data).sort()).to.eql(fields.sort());",
+              "    pm.expect(Number.isInteger(data.id) && data.id > 0).to.eql(true);",
+              "    pm.expect(previousIds.includes(data.id)).to.eql(false);",
+              "});",
+              "pm.test(\"Participants come from token and package owner\", () => {",
+              "    pm.expect(data.customer_user).to.eql(Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    pm.expect(data.business_user).to.eql(Number(pm.collectionVariables.get(\"oc_business_user\")));",
+              "});",
+              "pm.test(\"Commercial data exactly matches the selected package\", () => {",
+              "    for (const key of Object.keys(expected)) pm.expect(data[key]).to.eql(expected[key]);",
+              "    pm.expect(data.price).to.be.a(\"number\");",
+              "    pm.expect(Number.isInteger(data.revisions)).to.eql(true);",
+              "    pm.expect(Number.isInteger(data.delivery_time_in_days)).to.eql(true);",
+              "});",
+              "pm.test(\"Initial status is in_progress\", () => pm.expect(data.status).to.eql(\"in_progress\"));",
+              "pm.test(\"Server timestamps are valid and ordered\", () => {",
+              "    pm.expect(data.created_at).to.be.a(\"string\");",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");",
+              "    const created = Date.parse(data.created_at), updated = Date.parse(data.updated_at);",
+              "    pm.expect(Number.isFinite(created) && Number.isFinite(updated)).to.eql(true);",
+              "    pm.expect(updated >= created).to.eql(true);",
+              "});",
+              "if (pm.response.code === 201 && Number.isInteger(data.id)) {",
+              "    previousIds.push(data.id);",
+              "    pm.collectionVariables.set(\"oc_order_ids\", JSON.stringify(previousIds));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CREATE | Customer buys premium",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_premium_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "const expected = JSON.parse(pm.collectionVariables.get(\"oc_premium_expected\"));",
+              "const previousIds = JSON.parse(pm.collectionVariables.get(\"oc_order_ids\"));",
+              "pm.test(\"Exact documented response fields and a new integer ID\", () => {",
+              "    const fields = [\"id\", \"customer_user\", \"business_user\", \"title\", \"revisions\",",
+              "        \"delivery_time_in_days\", \"price\", \"features\", \"offer_type\", \"status\", \"created_at\", \"updated_at\"];",
+              "    pm.expect(Object.keys(data).sort()).to.eql(fields.sort());",
+              "    pm.expect(Number.isInteger(data.id) && data.id > 0).to.eql(true);",
+              "    pm.expect(previousIds.includes(data.id)).to.eql(false);",
+              "});",
+              "pm.test(\"Participants come from token and package owner\", () => {",
+              "    pm.expect(data.customer_user).to.eql(Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    pm.expect(data.business_user).to.eql(Number(pm.collectionVariables.get(\"oc_business_user\")));",
+              "});",
+              "pm.test(\"Commercial data exactly matches the selected package\", () => {",
+              "    for (const key of Object.keys(expected)) pm.expect(data[key]).to.eql(expected[key]);",
+              "    pm.expect(data.price).to.be.a(\"number\");",
+              "    pm.expect(Number.isInteger(data.revisions)).to.eql(true);",
+              "    pm.expect(Number.isInteger(data.delivery_time_in_days)).to.eql(true);",
+              "});",
+              "pm.test(\"Initial status is in_progress\", () => pm.expect(data.status).to.eql(\"in_progress\"));",
+              "pm.test(\"Server timestamps are valid and ordered\", () => {",
+              "    pm.expect(data.created_at).to.be.a(\"string\");",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");",
+              "    const created = Date.parse(data.created_at), updated = Date.parse(data.updated_at);",
+              "    pm.expect(Number.isFinite(created) && Number.isFinite(updated)).to.eql(true);",
+              "    pm.expect(updated >= created).to.eql(true);",
+              "});",
+              "if (pm.response.code === 201 && Number.isInteger(data.id)) {",
+              "    previousIds.push(data.id);",
+              "    pm.collectionVariables.set(\"oc_order_ids\", JSON.stringify(previousIds));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CREATE | Another customer buys the same package",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_other_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_standard_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "const expected = JSON.parse(pm.collectionVariables.get(\"oc_standard_expected\"));",
+              "const previousIds = JSON.parse(pm.collectionVariables.get(\"oc_order_ids\"));",
+              "pm.test(\"Exact documented response fields and a new integer ID\", () => {",
+              "    const fields = [\"id\", \"customer_user\", \"business_user\", \"title\", \"revisions\",",
+              "        \"delivery_time_in_days\", \"price\", \"features\", \"offer_type\", \"status\", \"created_at\", \"updated_at\"];",
+              "    pm.expect(Object.keys(data).sort()).to.eql(fields.sort());",
+              "    pm.expect(Number.isInteger(data.id) && data.id > 0).to.eql(true);",
+              "    pm.expect(previousIds.includes(data.id)).to.eql(false);",
+              "});",
+              "pm.test(\"Participants come from token and package owner\", () => {",
+              "    pm.expect(data.customer_user).to.eql(Number(pm.collectionVariables.get(\"oc_other_user\")));",
+              "    pm.expect(data.business_user).to.eql(Number(pm.collectionVariables.get(\"oc_business_user\")));",
+              "});",
+              "pm.test(\"Commercial data exactly matches the selected package\", () => {",
+              "    for (const key of Object.keys(expected)) pm.expect(data[key]).to.eql(expected[key]);",
+              "    pm.expect(data.price).to.be.a(\"number\");",
+              "    pm.expect(Number.isInteger(data.revisions)).to.eql(true);",
+              "    pm.expect(Number.isInteger(data.delivery_time_in_days)).to.eql(true);",
+              "});",
+              "pm.test(\"Initial status is in_progress\", () => pm.expect(data.status).to.eql(\"in_progress\"));",
+              "pm.test(\"Server timestamps are valid and ordered\", () => {",
+              "    pm.expect(data.created_at).to.be.a(\"string\");",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");",
+              "    const created = Date.parse(data.created_at), updated = Date.parse(data.updated_at);",
+              "    pm.expect(Number.isFinite(created) && Number.isFinite(updated)).to.eql(true);",
+              "    pm.expect(updated >= created).to.eql(true);",
+              "});",
+              "if (pm.response.code === 201 && Number.isInteger(data.id)) {",
+              "    previousIds.push(data.id);",
+              "    pm.collectionVariables.set(\"oc_order_ids\", JSON.stringify(previousIds));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "SECURITY | Client cannot override participants or commercial data",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_standard_id}},\n  \"id\": 2147483647,\n  \"customer_user\": \"{{oc_business_user}}\",\n  \"business_user\": \"{{oc_other_user}}\",\n  \"title\": \"Injected title\",\n  \"price\": 999,\n  \"features\": [\n    \"Injected\"\n  ],\n  \"revisions\": 999,\n  \"delivery_time_in_days\": 999,\n  \"offer_type\": \"premium\",\n  \"status\": \"completed\",\n  \"created_at\": \"2000-01-01T00:00:00Z\",\n  \"updated_at\": \"2000-01-01T00:00:00Z\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "const expected = JSON.parse(pm.collectionVariables.get(\"oc_standard_expected\"));",
+              "const previousIds = JSON.parse(pm.collectionVariables.get(\"oc_order_ids\"));",
+              "pm.test(\"Exact documented response fields and a new integer ID\", () => {",
+              "    const fields = [\"id\", \"customer_user\", \"business_user\", \"title\", \"revisions\",",
+              "        \"delivery_time_in_days\", \"price\", \"features\", \"offer_type\", \"status\", \"created_at\", \"updated_at\"];",
+              "    pm.expect(Object.keys(data).sort()).to.eql(fields.sort());",
+              "    pm.expect(Number.isInteger(data.id) && data.id > 0).to.eql(true);",
+              "    pm.expect(previousIds.includes(data.id)).to.eql(false);",
+              "});",
+              "pm.test(\"Participants come from token and package owner\", () => {",
+              "    pm.expect(data.customer_user).to.eql(Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    pm.expect(data.business_user).to.eql(Number(pm.collectionVariables.get(\"oc_business_user\")));",
+              "});",
+              "pm.test(\"Commercial data exactly matches the selected package\", () => {",
+              "    for (const key of Object.keys(expected)) pm.expect(data[key]).to.eql(expected[key]);",
+              "    pm.expect(data.price).to.be.a(\"number\");",
+              "    pm.expect(Number.isInteger(data.revisions)).to.eql(true);",
+              "    pm.expect(Number.isInteger(data.delivery_time_in_days)).to.eql(true);",
+              "});",
+              "pm.test(\"Initial status is in_progress\", () => pm.expect(data.status).to.eql(\"in_progress\"));",
+              "pm.test(\"Server timestamps are valid and ordered\", () => {",
+              "    pm.expect(data.created_at).to.be.a(\"string\");",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");",
+              "    const created = Date.parse(data.created_at), updated = Date.parse(data.updated_at);",
+              "    pm.expect(Number.isFinite(created) && Number.isFinite(updated)).to.eql(true);",
+              "    pm.expect(updated >= created).to.eql(true);",
+              "});",
+              "if (pm.response.code === 201 && Number.isInteger(data.id)) {",
+              "    previousIds.push(data.id);",
+              "    pm.collectionVariables.set(\"oc_order_ids\", JSON.stringify(previousIds));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CREATE | Repeat purchase creates a distinct order",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_standard_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "const expected = JSON.parse(pm.collectionVariables.get(\"oc_standard_expected\"));",
+              "const previousIds = JSON.parse(pm.collectionVariables.get(\"oc_order_ids\"));",
+              "pm.test(\"Exact documented response fields and a new integer ID\", () => {",
+              "    const fields = [\"id\", \"customer_user\", \"business_user\", \"title\", \"revisions\",",
+              "        \"delivery_time_in_days\", \"price\", \"features\", \"offer_type\", \"status\", \"created_at\", \"updated_at\"];",
+              "    pm.expect(Object.keys(data).sort()).to.eql(fields.sort());",
+              "    pm.expect(Number.isInteger(data.id) && data.id > 0).to.eql(true);",
+              "    pm.expect(previousIds.includes(data.id)).to.eql(false);",
+              "});",
+              "pm.test(\"Participants come from token and package owner\", () => {",
+              "    pm.expect(data.customer_user).to.eql(Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    pm.expect(data.business_user).to.eql(Number(pm.collectionVariables.get(\"oc_business_user\")));",
+              "});",
+              "pm.test(\"Commercial data exactly matches the selected package\", () => {",
+              "    for (const key of Object.keys(expected)) pm.expect(data[key]).to.eql(expected[key]);",
+              "    pm.expect(data.price).to.be.a(\"number\");",
+              "    pm.expect(Number.isInteger(data.revisions)).to.eql(true);",
+              "    pm.expect(Number.isInteger(data.delivery_time_in_days)).to.eql(true);",
+              "});",
+              "pm.test(\"Initial status is in_progress\", () => pm.expect(data.status).to.eql(\"in_progress\"));",
+              "pm.test(\"Server timestamps are valid and ordered\", () => {",
+              "    pm.expect(data.created_at).to.be.a(\"string\");",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");",
+              "    const created = Date.parse(data.created_at), updated = Date.parse(data.updated_at);",
+              "    pm.expect(Number.isFinite(created) && Number.isFinite(updated)).to.eql(true);",
+              "    pm.expect(updated >= created).to.eql(true);",
+              "});",
+              "if (pm.response.code === 201 && Number.isInteger(data.id)) {",
+              "    previousIds.push(data.id);",
+              "    pm.collectionVariables.set(\"oc_order_ids\", JSON.stringify(previousIds));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CREATE | Numeric string package ID is accepted",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"offer_detail_id\": \"{{oc_standard_id}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "const expected = JSON.parse(pm.collectionVariables.get(\"oc_standard_expected\"));",
+              "const previousIds = JSON.parse(pm.collectionVariables.get(\"oc_order_ids\"));",
+              "pm.test(\"Exact documented response fields and a new integer ID\", () => {",
+              "    const fields = [\"id\", \"customer_user\", \"business_user\", \"title\", \"revisions\",",
+              "        \"delivery_time_in_days\", \"price\", \"features\", \"offer_type\", \"status\", \"created_at\", \"updated_at\"];",
+              "    pm.expect(Object.keys(data).sort()).to.eql(fields.sort());",
+              "    pm.expect(Number.isInteger(data.id) && data.id > 0).to.eql(true);",
+              "    pm.expect(previousIds.includes(data.id)).to.eql(false);",
+              "});",
+              "pm.test(\"Participants come from token and package owner\", () => {",
+              "    pm.expect(data.customer_user).to.eql(Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    pm.expect(data.business_user).to.eql(Number(pm.collectionVariables.get(\"oc_business_user\")));",
+              "});",
+              "pm.test(\"Commercial data exactly matches the selected package\", () => {",
+              "    for (const key of Object.keys(expected)) pm.expect(data[key]).to.eql(expected[key]);",
+              "    pm.expect(data.price).to.be.a(\"number\");",
+              "    pm.expect(Number.isInteger(data.revisions)).to.eql(true);",
+              "    pm.expect(Number.isInteger(data.delivery_time_in_days)).to.eql(true);",
+              "});",
+              "pm.test(\"Initial status is in_progress\", () => pm.expect(data.status).to.eql(\"in_progress\"));",
+              "pm.test(\"Server timestamps are valid and ordered\", () => {",
+              "    pm.expect(data.created_at).to.be.a(\"string\");",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");",
+              "    const created = Date.parse(data.created_at), updated = Date.parse(data.updated_at);",
+              "    pm.expect(Number.isFinite(created) && Number.isFinite(updated)).to.eql(true);",
+              "    pm.expect(updated >= created).to.eql(true);",
+              "});",
+              "if (pm.response.code === 201 && Number.isInteger(data.id)) {",
+              "    previousIds.push(data.id);",
+              "    pm.collectionVariables.set(\"oc_order_ids\", JSON.stringify(previousIds));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Package ID missing",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Package ID null",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Package ID empty",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": \"\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Package ID text",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": \"abc\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Package ID zero",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": 0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Package ID negative",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": -1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Package ID fractional",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": 1.5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Package ID boolean",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Package ID array",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Package ID object",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MISSING | Unknown package",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": 2147483647\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | business",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_business_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_standard_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | missing token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_standard_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | invalid",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token 0000000000000000000000000000000000000000"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_standard_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Valid purchase still succeeds after rejected requests",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_standard_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "const expected = JSON.parse(pm.collectionVariables.get(\"oc_standard_expected\"));",
+              "const previousIds = JSON.parse(pm.collectionVariables.get(\"oc_order_ids\"));",
+              "pm.test(\"Exact documented response fields and a new integer ID\", () => {",
+              "    const fields = [\"id\", \"customer_user\", \"business_user\", \"title\", \"revisions\",",
+              "        \"delivery_time_in_days\", \"price\", \"features\", \"offer_type\", \"status\", \"created_at\", \"updated_at\"];",
+              "    pm.expect(Object.keys(data).sort()).to.eql(fields.sort());",
+              "    pm.expect(Number.isInteger(data.id) && data.id > 0).to.eql(true);",
+              "    pm.expect(previousIds.includes(data.id)).to.eql(false);",
+              "});",
+              "pm.test(\"Participants come from token and package owner\", () => {",
+              "    pm.expect(data.customer_user).to.eql(Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    pm.expect(data.business_user).to.eql(Number(pm.collectionVariables.get(\"oc_business_user\")));",
+              "});",
+              "pm.test(\"Commercial data exactly matches the selected package\", () => {",
+              "    for (const key of Object.keys(expected)) pm.expect(data[key]).to.eql(expected[key]);",
+              "    pm.expect(data.price).to.be.a(\"number\");",
+              "    pm.expect(Number.isInteger(data.revisions)).to.eql(true);",
+              "    pm.expect(Number.isInteger(data.delivery_time_in_days)).to.eql(true);",
+              "});",
+              "pm.test(\"Initial status is in_progress\", () => pm.expect(data.status).to.eql(\"in_progress\"));",
+              "pm.test(\"Server timestamps are valid and ordered\", () => {",
+              "    pm.expect(data.created_at).to.be.a(\"string\");",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");",
+              "    const created = Date.parse(data.created_at), updated = Date.parse(data.updated_at);",
+              "    pm.expect(Number.isFinite(created) && Number.isFinite(updated)).to.eql(true);",
+              "    pm.expect(updated >= created).to.eql(true);",
+              "});",
+              "if (pm.response.code === 201 && Number.isInteger(data.id)) {",
+              "    previousIds.push(data.id);",
+              "    pm.collectionVariables.set(\"oc_order_ids\", JSON.stringify(previousIds));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Owner changes package for subsequent purchases",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_business_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{oc_offer_id}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"details\": [\n    {\n      \"title\": \"Changed standard\",\n      \"price\": 199.5,\n      \"revisions\": 2,\n      \"delivery_time_in_days\": 5,\n      \"features\": [\n        \"Updated feature\"\n      ],\n      \"offer_type\": \"standard\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const data = pm.response.json();",
+              "const expected = JSON.parse(pm.variables.replaceIn(pm.request.body.raw)).details[0];",
+              "pm.test(\"Changed package keeps its ID and receives new values\", () => {",
+              "    const actual = data.details.find(p => p.offer_type === \"standard\");",
+              "    pm.expect(actual.id).to.eql(Number(pm.collectionVariables.get(\"oc_standard_id\")));",
+              "    for (const key of Object.keys(expected)) pm.expect(actual[key]).to.eql(expected[key]);",
+              "});",
+              "if (pm.response.code === 200) {",
+              "    pm.collectionVariables.set(\"oc_standard_expected\", JSON.stringify(expected));",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CREATE | New purchase uses changed package values",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_standard_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const data = pm.response.json();",
+              "const expected = JSON.parse(pm.collectionVariables.get(\"oc_standard_expected\"));",
+              "const previousIds = JSON.parse(pm.collectionVariables.get(\"oc_order_ids\"));",
+              "pm.test(\"Exact documented response fields and a new integer ID\", () => {",
+              "    const fields = [\"id\", \"customer_user\", \"business_user\", \"title\", \"revisions\",",
+              "        \"delivery_time_in_days\", \"price\", \"features\", \"offer_type\", \"status\", \"created_at\", \"updated_at\"];",
+              "    pm.expect(Object.keys(data).sort()).to.eql(fields.sort());",
+              "    pm.expect(Number.isInteger(data.id) && data.id > 0).to.eql(true);",
+              "    pm.expect(previousIds.includes(data.id)).to.eql(false);",
+              "});",
+              "pm.test(\"Participants come from token and package owner\", () => {",
+              "    pm.expect(data.customer_user).to.eql(Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    pm.expect(data.business_user).to.eql(Number(pm.collectionVariables.get(\"oc_business_user\")));",
+              "});",
+              "pm.test(\"Commercial data exactly matches the selected package\", () => {",
+              "    for (const key of Object.keys(expected)) pm.expect(data[key]).to.eql(expected[key]);",
+              "    pm.expect(data.price).to.be.a(\"number\");",
+              "    pm.expect(Number.isInteger(data.revisions)).to.eql(true);",
+              "    pm.expect(Number.isInteger(data.delivery_time_in_days)).to.eql(true);",
+              "});",
+              "pm.test(\"Initial status is in_progress\", () => pm.expect(data.status).to.eql(\"in_progress\"));",
+              "pm.test(\"Server timestamps are valid and ordered\", () => {",
+              "    pm.expect(data.created_at).to.be.a(\"string\");",
+              "    pm.expect(data.updated_at).to.be.a(\"string\");",
+              "    const created = Date.parse(data.created_at), updated = Date.parse(data.updated_at);",
+              "    pm.expect(Number.isFinite(created) && Number.isFinite(updated)).to.eql(true);",
+              "    pm.expect(updated >= created).to.eql(true);",
+              "});",
+              "if (pm.response.code === 201 && Number.isInteger(data.id)) {",
+              "    previousIds.push(data.id);",
+              "    pm.collectionVariables.set(\"oc_order_ids\", JSON.stringify(previousIds));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CLEANUP | Owner deletes only this run offer",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_business_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{oc_offer_id}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"DELETE body is empty\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MISSING | Deleted package cannot be purchased",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": {{oc_standard_id}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    pm.expect(data).to.be.an(\"object\");",
+              "    pm.expect(Array.isArray(data)).to.eql(false);",
+              "    pm.expect(Object.keys(data).length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
