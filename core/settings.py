@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "accounts_app.apps.AccountsAppConfig",
     "offers_app",
+    "orders_app",
 ]
 
 MIDDLEWARE = [
