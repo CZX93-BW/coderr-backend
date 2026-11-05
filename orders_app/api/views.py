@@ -1,9 +1,13 @@
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.mixins import DestroyModelMixin, UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from accounts_app.models import UserProfile
 from orders_app.models import Order
 
 from .permissions import CanModifyOrder, IsCustomerUser
@@ -58,3 +62,28 @@ class OrderDetailView(
 
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+
+class OrderCountView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get", "head", "options"]
+    order_status = Order.Status.IN_PROGRESS
+    response_key = "order_count"
+
+    def get(self, request, business_user_id):
+        get_object_or_404(
+            UserProfile,
+            user_id=business_user_id,
+            type="business",
+        )
+        count = Order.objects.filter(
+            business_user_id=business_user_id,
+            status=self.order_status,
+        ).count()
+        return Response({self.response_key: count})
+
+
+class CompletedOrderCountView(OrderCountView):
+    order_status = Order.Status.COMPLETED
+    response_key = "completed_order_count"
