@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "accounts_app.apps.AccountsAppConfig",
     "offers_app",
     "orders_app",
+    "reviews_app",
 ]
 
 MIDDLEWARE = [
