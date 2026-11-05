@@ -1,0 +1,3426 @@
+{
+  "info": {
+    "_postman_id": "e085d120-76ce-4033-93ac-de6184107aaa",
+    "name": "Coderr Order COUNT",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run the complete collection in order, one iteration. Creates unique local fixtures. No staff credentials required. Five users and six orders remain; the two fixture offers are deleted."
+  },
+  "item": [
+    {
+      "name": "PREP | Register customer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"oc_customer_{{oc_run}}\",\n  \"email\": \"oc_customer_{{oc_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrCount!83_Local\",\n  \"repeated_password\": \"CoderrCount!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "for (const key of Object.keys(pm.collectionVariables.toObject())) {",
+              "    if (key.startsWith(\"oc_\")) pm.collectionVariables.unset(key);",
+              "}",
+              "pm.collectionVariables.set(\"oc_run\", pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data.token && data.user_id) {",
+              "    pm.collectionVariables.set(\"oc_customer_token\", data.token);",
+              "    pm.collectionVariables.set(\"oc_customer_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register customer2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"oc_customer2_{{oc_run}}\",\n  \"email\": \"oc_customer2_{{oc_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrCount!83_Local\",\n  \"repeated_password\": \"CoderrCount!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data.token && data.user_id) {",
+              "    pm.collectionVariables.set(\"oc_customer2_token\", data.token);",
+              "    pm.collectionVariables.set(\"oc_customer2_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register a",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"oc_a_{{oc_run}}\",\n  \"email\": \"oc_a_{{oc_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrCount!83_Local\",\n  \"repeated_password\": \"CoderrCount!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data.token && data.user_id) {",
+              "    pm.collectionVariables.set(\"oc_a_token\", data.token);",
+              "    pm.collectionVariables.set(\"oc_a_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register b",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"oc_b_{{oc_run}}\",\n  \"email\": \"oc_b_{{oc_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrCount!83_Local\",\n  \"repeated_password\": \"CoderrCount!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data.token && data.user_id) {",
+              "    pm.collectionVariables.set(\"oc_b_token\", data.token);",
+              "    pm.collectionVariables.set(\"oc_b_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register empty",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"oc_empty_{{oc_run}}\",\n  \"email\": \"oc_empty_{{oc_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrCount!83_Local\",\n  \"repeated_password\": \"CoderrCount!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data.token && data.user_id) {",
+              "    pm.collectionVariables.set(\"oc_empty_token\", data.token);",
+              "    pm.collectionVariables.set(\"oc_empty_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EMPTY | a: order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EMPTY | a: completed_order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EMPTY | b: order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EMPTY | b: completed_order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EMPTY | empty: order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_empty_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "EMPTY | empty: completed_order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_empty_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create offer a",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Counter offer a {{oc_run}}\",\n  \"description\": \"Local counter test fixture.\",\n  \"details\": [\n    {\n      \"title\": \"basic counter package\",\n      \"revisions\": 0,\n      \"price\": 10,\n      \"delivery_time_in_days\": 1,\n      \"features\": [\n        \"Counter fixture\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"standard counter package\",\n      \"revisions\": 0,\n      \"price\": 10,\n      \"delivery_time_in_days\": 1,\n      \"features\": [\n        \"Counter fixture\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"premium counter package\",\n      \"revisions\": 0,\n      \"price\": 10,\n      \"delivery_time_in_days\": 1,\n      \"features\": [\n        \"Counter fixture\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const basic = Array.isArray(data.details) ? data.details.find(p => p.offer_type === \"basic\") : null;",
+              "pm.test(\"Offer and basic package IDs are usable\", () => {",
+              "    assert(Number.isInteger(data.id) && data.id > 0);",
+              "    assert(basic && Number.isInteger(basic.id) && basic.id > 0);",
+              "});",
+              "if (pm.response.code === 201 && basic && basic.id && data.id) {",
+              "    pm.collectionVariables.set(\"oc_offer_a\", data.id);",
+              "    pm.collectionVariables.set(\"oc_package_a\", basic.id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create offer b",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_b_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/offers/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Counter offer b {{oc_run}}\",\n  \"description\": \"Local counter test fixture.\",\n  \"details\": [\n    {\n      \"title\": \"basic counter package\",\n      \"revisions\": 0,\n      \"price\": 10,\n      \"delivery_time_in_days\": 1,\n      \"features\": [\n        \"Counter fixture\"\n      ],\n      \"offer_type\": \"basic\"\n    },\n    {\n      \"title\": \"standard counter package\",\n      \"revisions\": 0,\n      \"price\": 10,\n      \"delivery_time_in_days\": 1,\n      \"features\": [\n        \"Counter fixture\"\n      ],\n      \"offer_type\": \"standard\"\n    },\n    {\n      \"title\": \"premium counter package\",\n      \"revisions\": 0,\n      \"price\": 10,\n      \"delivery_time_in_days\": 1,\n      \"features\": [\n        \"Counter fixture\"\n      ],\n      \"offer_type\": \"premium\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "const basic = Array.isArray(data.details) ? data.details.find(p => p.offer_type === \"basic\") : null;",
+              "pm.test(\"Offer and basic package IDs are usable\", () => {",
+              "    assert(Number.isInteger(data.id) && data.id > 0);",
+              "    assert(basic && Number.isInteger(basic.id) && basic.id > 0);",
+              "});",
+              "if (pm.response.code === 201 && basic && basic.id && data.id) {",
+              "    pm.collectionVariables.set(\"oc_offer_b\", data.id);",
+              "    pm.collectionVariables.set(\"oc_package_b\", basic.id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create order a1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": \"{{oc_package_a}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Order has expected participants and initial status\", () => {",
+              "    assert(Number.isInteger(data.id) && data.id > 0);",
+              "    eq(data.customer_user, Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    eq(data.business_user, Number(pm.collectionVariables.get(\"oc_a_user\")));",
+              "    eq(data.status, \"in_progress\");",
+              "});",
+              "if (pm.response.code === 201 && data.id) pm.collectionVariables.set(\"oc_order_a1\", data.id);",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create order a2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer2_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": \"{{oc_package_a}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Order has expected participants and initial status\", () => {",
+              "    assert(Number.isInteger(data.id) && data.id > 0);",
+              "    eq(data.customer_user, Number(pm.collectionVariables.get(\"oc_customer2_user\")));",
+              "    eq(data.business_user, Number(pm.collectionVariables.get(\"oc_a_user\")));",
+              "    eq(data.status, \"in_progress\");",
+              "});",
+              "if (pm.response.code === 201 && data.id) pm.collectionVariables.set(\"oc_order_a2\", data.id);",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create order a3",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": \"{{oc_package_a}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Order has expected participants and initial status\", () => {",
+              "    assert(Number.isInteger(data.id) && data.id > 0);",
+              "    eq(data.customer_user, Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    eq(data.business_user, Number(pm.collectionVariables.get(\"oc_a_user\")));",
+              "    eq(data.status, \"in_progress\");",
+              "});",
+              "if (pm.response.code === 201 && data.id) pm.collectionVariables.set(\"oc_order_a3\", data.id);",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create order a4",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer2_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": \"{{oc_package_a}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Order has expected participants and initial status\", () => {",
+              "    assert(Number.isInteger(data.id) && data.id > 0);",
+              "    eq(data.customer_user, Number(pm.collectionVariables.get(\"oc_customer2_user\")));",
+              "    eq(data.business_user, Number(pm.collectionVariables.get(\"oc_a_user\")));",
+              "    eq(data.status, \"in_progress\");",
+              "});",
+              "if (pm.response.code === 201 && data.id) pm.collectionVariables.set(\"oc_order_a4\", data.id);",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create order b1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": \"{{oc_package_b}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Order has expected participants and initial status\", () => {",
+              "    assert(Number.isInteger(data.id) && data.id > 0);",
+              "    eq(data.customer_user, Number(pm.collectionVariables.get(\"oc_customer_user\")));",
+              "    eq(data.business_user, Number(pm.collectionVariables.get(\"oc_b_user\")));",
+              "    eq(data.status, \"in_progress\");",
+              "});",
+              "if (pm.response.code === 201 && data.id) pm.collectionVariables.set(\"oc_order_b1\", data.id);",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create order b2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer2_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"offer_detail_id\": \"{{oc_package_b}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.test(\"Order has expected participants and initial status\", () => {",
+              "    assert(Number.isInteger(data.id) && data.id > 0);",
+              "    eq(data.customer_user, Number(pm.collectionVariables.get(\"oc_customer2_user\")));",
+              "    eq(data.business_user, Number(pm.collectionVariables.get(\"oc_b_user\")));",
+              "    eq(data.status, \"in_progress\");",
+              "});",
+              "if (pm.response.code === 201 && data.id) pm.collectionVariables.set(\"oc_order_b2\", data.id);",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "COUNT | a: order_count = 4 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 4}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "COUNT | a: completed_order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "COUNT | b: order_count = 2 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 2}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "COUNT | b: completed_order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | a3 to completed (a)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/{{oc_order_a3}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"completed\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Correct order has requested status\", () => {",
+              "    eq(data.id, Number(pm.collectionVariables.get(\"oc_order_a3\")));",
+              "    eq(data.status, \"completed\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | a4 to cancelled (a)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/{{oc_order_a4}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"cancelled\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Correct order has requested status\", () => {",
+              "    eq(data.id, Number(pm.collectionVariables.get(\"oc_order_a4\")));",
+              "    eq(data.status, \"cancelled\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | b2 to completed (b)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_b_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/{{oc_order_b2}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"completed\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Correct order has requested status\", () => {",
+              "    eq(data.id, Number(pm.collectionVariables.get(\"oc_order_b2\")));",
+              "    eq(data.status, \"completed\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | a: order_count = 2 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 2}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | a: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | b: order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | b: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | a: order_count = 2 (a)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 2}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | a: completed_order_count = 1 (a)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | b: order_count = 1 (a)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | b: completed_order_count = 1 (a)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | a: order_count = 2 (b)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_b_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 2}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | a: completed_order_count = 1 (b)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_b_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | b: order_count = 1 (b)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_b_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ISOLATION | b: completed_order_count = 1 (b)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_b_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "COUNT | empty: order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_empty_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "COUNT | empty: completed_order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_empty_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | a1 to completed (a)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/{{oc_order_a1}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"completed\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Correct order has requested status\", () => {",
+              "    eq(data.id, Number(pm.collectionVariables.get(\"oc_order_a1\")));",
+              "    eq(data.status, \"completed\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATUS CHANGE | a: order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATUS CHANGE | a: completed_order_count = 2 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 2}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OTHER PROVIDER UNCHANGED | b: order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OTHER PROVIDER UNCHANGED | b: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | a1 to cancelled (a)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/{{oc_order_a1}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"cancelled\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Correct order has requested status\", () => {",
+              "    eq(data.id, Number(pm.collectionVariables.get(\"oc_order_a1\")));",
+              "    eq(data.status, \"cancelled\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATUS CHANGE | a: order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATUS CHANGE | a: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OTHER PROVIDER UNCHANGED | b: order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OTHER PROVIDER UNCHANGED | b: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | a1 to in_progress (a)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/{{oc_order_a1}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"in_progress\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Correct order has requested status\", () => {",
+              "    eq(data.id, Number(pm.collectionVariables.get(\"oc_order_a1\")));",
+              "    eq(data.status, \"in_progress\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATUS CHANGE | a: order_count = 2 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 2}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATUS CHANGE | a: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OTHER PROVIDER UNCHANGED | b: order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OTHER PROVIDER UNCHANGED | b: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | a1 to unknown (a)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/{{oc_order_a1}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"unknown\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Error contains JSON details\", () => { const data = pm.response.json(); assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | a1 to completed (b)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_b_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/{{oc_order_a1}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"completed\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Error contains JSON details\", () => { const data = pm.response.json(); assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | a1 to completed (customer)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/orders/{{oc_order_a1}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"completed\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Error contains JSON details\", () => { const data = pm.response.json(); assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "REJECTED PATCH PRESERVES COUNTS | a: order_count = 2 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 2}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "REJECTED PATCH PRESERVES COUNTS | a: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | order-count: Missing token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | order-count: Invalid token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token 0000000000000000000000000000000000000000"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | order-count: Customer is not a provider",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_customer_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | order-count: Unknown provider",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/2147483647/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | completed-order-count: Missing token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | completed-order-count: Invalid token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token 0000000000000000000000000000000000000000"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | completed-order-count: Customer is not a provider",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_customer_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | completed-order-count: Unknown provider",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/2147483647/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Error is a nonempty JSON object\", () => {",
+              "    const data = pm.response.json();",
+              "    assert(data && typeof data === \"object\" && !Array.isArray(data) && Object.keys(data).length > 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Capture orders before repeated counter reads",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Customer sees exactly the three fixture orders\", () => {",
+              "    const expected = [\"a1\", \"a3\", \"b1\"].map(k => Number(pm.collectionVariables.get(\"oc_order_\" + k))).sort((a,b) => a-b);",
+              "    assert(Array.isArray(data));",
+              "    eq(data.map(o => o.id).sort((a,b) => a-b), expected);",
+              "});",
+              "if (pm.response.code === 200 && Array.isArray(data)) {",
+              "    pm.collectionVariables.set(\"oc_baseline\", JSON.stringify(data.sort((a,b) => a.id-b.id)));",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "REPEATED READ | a: order_count = 2 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 2}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "REPEATED READ | a: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "REPEATED READ | b: order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "REPEATED READ | b: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Counter reads preserve all order fields and timestamps",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/orders/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Orders and timestamps are unchanged\", () => {",
+              "    const data = pm.response.json();",
+              "    assert(Array.isArray(data));",
+              "    eq(data.sort((a,b) => a.id-b.id), JSON.parse(pm.collectionVariables.get(\"oc_baseline\")));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CLEANUP | Delete fixture offer a",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_a_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{oc_offer_a}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Delete response is empty\", () => eq(pm.response.text(), \"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CLEANUP | Delete fixture offer b",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_b_token}}"
+          }
+        ],
+        "url": "{{base_url}}/offers/{{oc_offer_b}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Delete response is empty\", () => eq(pm.response.text(), \"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OFFER DELETION PRESERVES COUNTS | a: order_count = 2 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 2}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OFFER DELETION PRESERVES COUNTS | a: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_a_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OFFER DELETION PRESERVES COUNTS | b: order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OFFER DELETION PRESERVES COUNTS | b: completed_order_count = 1 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_b_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 1}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FINAL EMPTY PROVIDER | empty: order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/order-count/{{oc_empty_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.order_count === \"number\" && Number.isInteger(data.order_count) && data.order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FINAL EMPTY PROVIDER | empty: completed_order_count = 0 (customer)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{oc_customer_token}}"
+          }
+        ],
+        "url": "{{base_url}}/completed-order-count/{{oc_empty_user}}/",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.test(\"Exactly the documented key and expected count\", () => eq(data, {completed_order_count: 0}));",
+              "pm.test(\"Count is a nonnegative integer\", () => {",
+              "    assert(typeof data.completed_order_count === \"number\" && Number.isInteger(data.completed_order_count) && data.completed_order_count >= 0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
