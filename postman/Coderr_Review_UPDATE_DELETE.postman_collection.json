@@ -1,0 +1,2896 @@
+{
+  "info": {
+    "_postman_id": "72593e11-9d78-4e7e-a02c-87d01db67326",
+    "name": "Coderr Review UPDATE DELETE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "PREP | Register c1 (customer)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"rm_c1_{{rm_run}}\",\n  \"email\": \"rm_c1_{{rm_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "for (const key of Object.keys(pm.collectionVariables.toObject())) {",
+              "    if (key.startsWith(\"rm_\")) pm.collectionVariables.unset(key);",
+              "}",
+              "pm.collectionVariables.set(\"rm_run\", pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"rm_c1_token\", data.token);",
+              "    pm.collectionVariables.set(\"rm_c1_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register c2 (customer)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"rm_c2_{{rm_run}}\",\n  \"email\": \"rm_c2_{{rm_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"rm_c2_token\", data.token);",
+              "    pm.collectionVariables.set(\"rm_c2_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register a (business)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"rm_a_{{rm_run}}\",\n  \"email\": \"rm_a_{{rm_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"rm_a_token\", data.token);",
+              "    pm.collectionVariables.set(\"rm_a_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register b (business)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"rm_b_{{rm_run}}\",\n  \"email\": \"rm_b_{{rm_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"rm_b_token\", data.token);",
+              "    pm.collectionVariables.set(\"rm_b_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create target",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{rm_a_user}}\",\n  \"rating\": 3,\n  \"description\": \"Review target {{rm_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const sent=JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "let verified=false;",
+              "pm.test(\"Created review belongs to the expected users and has a usable ID\",()=>{",
+              "  eq(Object.keys(data).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  eq(Number.isInteger(data.id) && data.id>0,true);",
+              "  eq(data.reviewer,Number(cv.get(\"rm_c1_user\")));",
+              "  eq(data.business_user,Number(sent.business_user));",
+              "  eq(data.description,sent.description);",
+              "  eq(data.rating,sent.rating);",
+              "  for (const field of [\"created_at\",\"updated_at\"]) eq(Number.isFinite(Date.parse(data[field])),true);",
+              "  verified=true;",
+              "});",
+              "if (verified && pm.response.code===201) {",
+              "  cv.set(\"rm_target\",JSON.stringify(data));",
+              "  cv.set(\"rm_target_id\",data.id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create peer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{rm_a_user}}\",\n  \"rating\": 4,\n  \"description\": \"Review peer {{rm_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const sent=JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "let verified=false;",
+              "pm.test(\"Created review belongs to the expected users and has a usable ID\",()=>{",
+              "  eq(Object.keys(data).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  eq(Number.isInteger(data.id) && data.id>0,true);",
+              "  eq(data.reviewer,Number(cv.get(\"rm_c2_user\")));",
+              "  eq(data.business_user,Number(sent.business_user));",
+              "  eq(data.description,sent.description);",
+              "  eq(data.rating,sent.rating);",
+              "  for (const field of [\"created_at\",\"updated_at\"]) eq(Number.isFinite(Date.parse(data[field])),true);",
+              "  verified=true;",
+              "});",
+              "if (verified && pm.response.code===201) {",
+              "  cv.set(\"rm_peer\",JSON.stringify(data));",
+              "  cv.set(\"rm_peer_id\",data.id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create second",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{rm_b_user}}\",\n  \"rating\": 2,\n  \"description\": \"Review second {{rm_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "",
+              "const sent=JSON.parse(pm.variables.replaceIn(pm.request.body.raw));",
+              "let verified=false;",
+              "pm.test(\"Created review belongs to the expected users and has a usable ID\",()=>{",
+              "  eq(Object.keys(data).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  eq(Number.isInteger(data.id) && data.id>0,true);",
+              "  eq(data.reviewer,Number(cv.get(\"rm_c1_user\")));",
+              "  eq(data.business_user,Number(sent.business_user));",
+              "  eq(data.description,sent.description);",
+              "  eq(data.rating,sent.rating);",
+              "  for (const field of [\"created_at\",\"updated_at\"]) eq(Number.isFinite(Date.parse(data[field])),true);",
+              "  verified=true;",
+              "});",
+              "if (verified && pm.response.code===201) {",
+              "  cv.set(\"rm_second\",JSON.stringify(data));",
+              "  cv.set(\"rm_second_id\",data.id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Initial provider A",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Initial provider B",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_b_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"second\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | Rating only, lower bound",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const before=JSON.parse(cv.get(\"rm_target\"));",
+              "pm.test(\"Full write response contains only the expected changes\",()=>{",
+              "  eq(Object.keys(data).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  eq(data,{...before,...{\"rating\":1},updated_at:data.updated_at});",
+              "});",
+              "pm.test(\"Update returns a valid modification timestamp\",()=>{",
+              "  eq(typeof data.updated_at,\"string\");",
+              "  eq(Date.parse(data.updated_at)>=Date.parse(before.updated_at),true);",
+              "});",
+              "if(pm.response.code===200 && data && typeof data.updated_at===\"string\"){",
+              "  cv.set(\"rm_target\",JSON.stringify({...before,...{\"rating\":1},updated_at:data.updated_at}));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Rating only, lower bound persisted",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | Description only",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Überarbeitete Bewertung.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const before=JSON.parse(cv.get(\"rm_target\"));",
+              "pm.test(\"Full write response contains only the expected changes\",()=>{",
+              "  eq(Object.keys(data).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  eq(data,{...before,...{\"description\":\"Überarbeitete Bewertung.\"},updated_at:data.updated_at});",
+              "});",
+              "pm.test(\"Update returns a valid modification timestamp\",()=>{",
+              "  eq(typeof data.updated_at,\"string\");",
+              "  eq(Date.parse(data.updated_at)>=Date.parse(before.updated_at),true);",
+              "});",
+              "if(pm.response.code===200 && data && typeof data.updated_at===\"string\"){",
+              "  cv.set(\"rm_target\",JSON.stringify({...before,...{\"description\":\"Überarbeitete Bewertung.\"},updated_at:data.updated_at}));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Description only persisted",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | Both writable fields, upper bound",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Final review text.\",\n  \"rating\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const before=JSON.parse(cv.get(\"rm_target\"));",
+              "pm.test(\"Full write response contains only the expected changes\",()=>{",
+              "  eq(Object.keys(data).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  eq(data,{...before,...{\"description\":\"Final review text.\",\"rating\":5},updated_at:data.updated_at});",
+              "});",
+              "pm.test(\"Update returns a valid modification timestamp\",()=>{",
+              "  eq(typeof data.updated_at,\"string\");",
+              "  eq(Date.parse(data.updated_at)>=Date.parse(before.updated_at),true);",
+              "});",
+              "if(pm.response.code===200 && data && typeof data.updated_at===\"string\"){",
+              "  cv.set(\"rm_target\",JSON.stringify({...before,...{\"description\":\"Final review text.\",\"rating\":5},updated_at:data.updated_at}));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Both writable fields, upper bound persisted",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | Forged participants, ID and timestamps",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 4,\n  \"reviewer\": \"{{rm_c2_user}}\",\n  \"business_user\": \"{{rm_b_user}}\",\n  \"id\": 2147483647,\n  \"created_at\": \"2000-01-01T00:00:00Z\",\n  \"updated_at\": \"2000-01-01T00:00:00Z\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const before=JSON.parse(cv.get(\"rm_target\"));",
+              "pm.test(\"Full write response contains only the expected changes\",()=>{",
+              "  eq(Object.keys(data).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  eq(data,{...before,...{\"rating\":4},updated_at:data.updated_at});",
+              "});",
+              "pm.test(\"Update returns a valid modification timestamp\",()=>{",
+              "  eq(typeof data.updated_at,\"string\");",
+              "  eq(Date.parse(data.updated_at)>=Date.parse(before.updated_at),true);",
+              "});",
+              "if(pm.response.code===200 && data && typeof data.updated_at===\"string\"){",
+              "  cv.set(\"rm_target\",JSON.stringify({...before,...{\"rating\":4},updated_at:data.updated_at}));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Forged participants, ID and timestamps persisted",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | rating = 0",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 0,\n  \"description\": \"Rejected change\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"rating\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | rating = -1",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": -1,\n  \"description\": \"Rejected change\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"rating\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | rating = 6",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 6,\n  \"description\": \"Rejected change\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"rating\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | rating = 1.5",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 1.5,\n  \"description\": \"Rejected change\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"rating\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | rating = true",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": true,\n  \"description\": \"Rejected change\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"rating\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | rating = null",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": null,\n  \"description\": \"Rejected change\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"rating\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | rating = \"\"",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": \"\",\n  \"description\": \"Rejected change\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"rating\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | rating = \"abc\"",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": \"abc\",\n  \"description\": \"Rejected change\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"rating\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | description = null",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 1,\n  \"description\": null\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"description\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | description = \"\"",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 1,\n  \"description\": \"\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"description\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | description = \"   \"",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 1,\n  \"description\": \"   \"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"description\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | description = []",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 1,\n  \"description\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"description\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | description = {}",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 1,\n  \"description\": {}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  eq(Object.prototype.hasOwnProperty.call(data,\"description\"),true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Empty object",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Only protected participants",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"reviewer\": \"{{rm_c2_user}}\",\n  \"business_user\": \"{{rm_b_user}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Rejected payloads preserve values and timestamps",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Different reviewer PATCH",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Different reviewer DELETE",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Different reviewer preserves both reviews",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Reviewed provider PATCH",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_a_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Reviewed provider DELETE",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_a_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Reviewed provider preserves both reviews",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Unrelated provider PATCH",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_b_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Unrelated provider DELETE",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_b_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Unrelated provider preserves both reviews",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Missing token PATCH",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Missing token DELETE",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Missing token preserves both reviews",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Invalid token PATCH",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token 0000000000000000000000000000000000000000"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 2\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Invalid token DELETE",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token 0000000000000000000000000000000000000000"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Invalid token preserves both reviews",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | Valid edit after rejections",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"Ready for deletion.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const before=JSON.parse(cv.get(\"rm_target\"));",
+              "pm.test(\"Full write response contains only the expected changes\",()=>{",
+              "  eq(Object.keys(data).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  eq(data,{...before,...{\"description\":\"Ready for deletion.\"},updated_at:data.updated_at});",
+              "});",
+              "pm.test(\"Update returns a valid modification timestamp\",()=>{",
+              "  eq(typeof data.updated_at,\"string\");",
+              "  eq(Date.parse(data.updated_at)>=Date.parse(before.updated_at),true);",
+              "});",
+              "if(pm.response.code===200 && data && typeof data.updated_at===\"string\"){",
+              "  cv.set(\"rm_target\",JSON.stringify({...before,...{\"description\":\"Ready for deletion.\"},updated_at:data.updated_at}));",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Valid edit after rejections persisted",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"target\",\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE | Author deletes target",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Response body is empty\",()=>eq(pm.response.text(),\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Only target was deleted",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Review at other provider preserved",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_b_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"second\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MISSING | PATCH deleted target",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 3\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "MISSING | DELETE deleted target",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_target_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "",
+              "pm.test(\"Response contains a JSON error\",()=>{",
+              "  eq(!!data && typeof data===\"object\" && !Array.isArray(data) && Object.keys(data).length>0,true);",
+              "  ",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Missing-ID requests preserve remaining review",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[\"peer\"].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE | Author deletes peer",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_peer_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Response body is empty\",()=>eq(pm.response.text(),\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE | Author deletes second",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/{{rm_second_id}}/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Response body is empty\",()=>eq(pm.response.text(),\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | All run reviews removed from provider A",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | All run reviews removed from provider B",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rm_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rm_b_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv = pm.collectionVariables;",
+              "const eq = (actual,expected) => pm.expect(actual).to.eql(expected);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const expected=[].map(key=>JSON.parse(cv.get(\"rm_\"+key)));",
+              "const sortById=rows=>rows.slice().sort((a,b)=>a.id-b.id);",
+              "pm.test(\"Exactly the expected review IDs for this provider\",()=>{",
+              "  eq(Array.isArray(data),true);",
+              "  eq(sortById(data).map(r=>r.id),sortById(expected).map(r=>r.id));",
+              "});",
+              "pm.test(\"Stored review fields and timestamps match\",()=>eq(sortById(data),sortById(expected)));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
