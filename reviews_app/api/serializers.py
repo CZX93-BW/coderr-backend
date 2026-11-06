@@ -49,3 +49,38 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
                 ],
             })
         return review
+
+class ReviewUpdateSerializer(serializers.ModelSerializer):
+    rating = serializers.IntegerField(min_value=1, max_value=5)
+
+    class Meta:
+        model = Review
+        fields = (
+            "id",
+            "business_user",
+            "reviewer",
+            "rating",
+            "description",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = (
+            "id",
+            "business_user",
+            "reviewer",
+            "created_at",
+            "updated_at",
+        )
+
+    def validate(self, attrs):
+        if not attrs:
+            raise serializers.ValidationError(
+                "Provide a rating or description to update."
+            )
+        return attrs
+
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        instance.save(update_fields=[*validated_data, "updated_at"])
+        return instance

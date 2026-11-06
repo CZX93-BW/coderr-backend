@@ -14,3 +14,9 @@ class IsCustomerUser(BasePermission):
                 type="customer",
             ).exists()
         )
+
+class IsReviewAuthor(BasePermission):
+    message = "Only the author may modify this review."
+
+    def has_object_permission(self, request, view, obj):
+        return obj.reviewer_id == request.user.pk

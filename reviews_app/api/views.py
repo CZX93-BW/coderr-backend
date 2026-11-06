@@ -1,12 +1,12 @@
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from reviews_app.models import Review
 
 from .filters import ReviewFilterBackend
-from .permissions import IsCustomerUser
-from .serializers import ReviewCreateSerializer
+from .permissions import IsCustomerUser, IsReviewAuthor
+from .serializers import ReviewCreateSerializer, ReviewUpdateSerializer
 
 
 class ReviewListCreateView(ListCreateAPIView):
@@ -26,3 +26,10 @@ class ReviewListCreateView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(reviewer=self.request.user)
+
+class ReviewDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Review.objects.all()
+    serializer_class = ReviewUpdateSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, IsReviewAuthor]
+    http_method_names = ["patch", "delete", "options"]
