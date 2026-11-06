@@ -1,0 +1,2672 @@
+{
+  "info": {
+    "_postman_id": "a3ba074a-4e52-4dbb-ad53-b748979bfe0d",
+    "name": "Coderr Review LIST",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "PREP | Register c1 (customer)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"rl_c1_{{rl_run}}\",\n  \"email\": \"rl_c1_{{rl_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "for (const key of Object.keys(pm.collectionVariables.toObject())) {",
+              "    if (key.startsWith(\"rl_\")) pm.collectionVariables.unset(key);",
+              "}",
+              "pm.collectionVariables.set(\"rl_run\", pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"rl_c1_token\", data.token);",
+              "    pm.collectionVariables.set(\"rl_c1_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register c2 (customer)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"rl_c2_{{rl_run}}\",\n  \"email\": \"rl_c2_{{rl_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"rl_c2_token\", data.token);",
+              "    pm.collectionVariables.set(\"rl_c2_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register c3 (customer)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"rl_c3_{{rl_run}}\",\n  \"email\": \"rl_c3_{{rl_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"rl_c3_token\", data.token);",
+              "    pm.collectionVariables.set(\"rl_c3_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register a (business)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"rl_a_{{rl_run}}\",\n  \"email\": \"rl_a_{{rl_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"rl_a_token\", data.token);",
+              "    pm.collectionVariables.set(\"rl_a_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register b (business)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"rl_b_{{rl_run}}\",\n  \"email\": \"rl_b_{{rl_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"rl_b_token\", data.token);",
+              "    pm.collectionVariables.set(\"rl_b_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Remember existing review IDs",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "const ok = Array.isArray(data) && data.every(row => Number.isInteger(row.id) && row.id > 0);",
+              "check(\"Existing review IDs form a unique list\", () => {",
+              "  eq(ok,true);",
+              "  eq(new Set(data.map(row=>row.id)).size,data.length);",
+              "});",
+              "if (ok && pm.response.code===200) cv.set(\"rl_before\",JSON.stringify(data.map(row=>row.id)));",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create r1 (c1 to a)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{rl_a_user}}\",\n  \"rating\": 4,\n  \"description\": \"Review LIST r1 {{rl_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "check(\"Created fixture matches the requested review\", () => {",
+              "  verifyRow(data);",
+              "  eq(data.reviewer,Number(cv.get(\"rl_c1_user\")));",
+              "  eq(data.business_user,Number(cv.get(\"rl_a_user\")));",
+              "  eq(data.rating,4);",
+              "  eq(data.description,pm.variables.replaceIn(\"Review LIST r1 {{rl_run}}\"));",
+              "});",
+              "if(pm.response.code===201 && data && Number.isInteger(data.id)) cv.set(\"rl_r1\",JSON.stringify(data));",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create r2 (c2 to b)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c2_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{rl_b_user}}\",\n  \"rating\": 2,\n  \"description\": \"Review LIST r2 {{rl_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "check(\"Created fixture matches the requested review\", () => {",
+              "  verifyRow(data);",
+              "  eq(data.reviewer,Number(cv.get(\"rl_c2_user\")));",
+              "  eq(data.business_user,Number(cv.get(\"rl_b_user\")));",
+              "  eq(data.rating,2);",
+              "  eq(data.description,pm.variables.replaceIn(\"Review LIST r2 {{rl_run}}\"));",
+              "});",
+              "if(pm.response.code===201 && data && Number.isInteger(data.id)) cv.set(\"rl_r2\",JSON.stringify(data));",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create r3 (c2 to a)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c2_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{rl_a_user}}\",\n  \"rating\": 4,\n  \"description\": \"Review LIST r3 {{rl_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "check(\"Created fixture matches the requested review\", () => {",
+              "  verifyRow(data);",
+              "  eq(data.reviewer,Number(cv.get(\"rl_c2_user\")));",
+              "  eq(data.business_user,Number(cv.get(\"rl_a_user\")));",
+              "  eq(data.rating,4);",
+              "  eq(data.description,pm.variables.replaceIn(\"Review LIST r3 {{rl_run}}\"));",
+              "});",
+              "if(pm.response.code===201 && data && Number.isInteger(data.id)) cv.set(\"rl_r3\",JSON.stringify(data));",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create r4 (c1 to b)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{rl_b_user}}\",\n  \"rating\": 5,\n  \"description\": \"Review LIST r4 {{rl_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "check(\"Created fixture matches the requested review\", () => {",
+              "  verifyRow(data);",
+              "  eq(data.reviewer,Number(cv.get(\"rl_c1_user\")));",
+              "  eq(data.business_user,Number(cv.get(\"rl_b_user\")));",
+              "  eq(data.rating,5);",
+              "  eq(data.description,pm.variables.replaceIn(\"Review LIST r4 {{rl_run}}\"));",
+              "});",
+              "if(pm.response.code===201 && data && Number.isInteger(data.id)) cv.set(\"rl_r4\",JSON.stringify(data));",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Create r5 (c3 to b)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c3_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{rl_b_user}}\",\n  \"rating\": 1,\n  \"description\": \"Review LIST r5 {{rl_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "check(\"Created fixture matches the requested review\", () => {",
+              "  verifyRow(data);",
+              "  eq(data.reviewer,Number(cv.get(\"rl_c3_user\")));",
+              "  eq(data.business_user,Number(cv.get(\"rl_b_user\")));",
+              "  eq(data.rating,1);",
+              "  eq(data.description,pm.variables.replaceIn(\"Review LIST r5 {{rl_run}}\"));",
+              "});",
+              "if(pm.response.code===201 && data && Number.isInteger(data.id)) cv.set(\"rl_r5\",JSON.stringify(data));",
+              "else pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST | All reviews as c1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r2\",\"r3\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat(JSON.parse(cv.get(\"rl_before\")));",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST | All reviews as a",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_a_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r2\",\"r3\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat(JSON.parse(cv.get(\"rl_before\")));",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "LIST | All reviews as b",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_b_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r2\",\"r3\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat(JSON.parse(cv.get(\"rl_before\")));",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Provider A",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rl_a_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r3\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Provider B",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rl_b_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r2\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Reviewer c1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_b_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?reviewer_id={{rl_c1_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r4\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Reviewer c2",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?reviewer_id={{rl_c2_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r2\",\"r3\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Both filters intersect",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rl_b_user}}&reviewer_id={{rl_c1_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r4\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Valid pair without match",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rl_a_user}}&reviewer_id={{rl_c3_user}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Unknown provider",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id=2147483647"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Unknown reviewer",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?reviewer_id=2147483647"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDER | rating",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?ordering=rating"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r2\",\"r3\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat(JSON.parse(cv.get(\"rl_before\")));",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"rating\";",
+              "  const direction=1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDER | -rating",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?ordering=-rating"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r2\",\"r3\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat(JSON.parse(cv.get(\"rl_before\")));",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"rating\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDER | updated_at",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?ordering=updated_at"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r2\",\"r3\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat(JSON.parse(cv.get(\"rl_before\")));",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDER | -updated_at",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c2_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?ordering=-updated_at"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r2\",\"r3\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat(JSON.parse(cv.get(\"rl_before\")));",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDER | Provider subset by rating",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rl_b_user}}&ordering=rating"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r2\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"rating\";",
+              "  const direction=1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "ORDER | Equal ratings use descending ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rl_a_user}}&ordering=-rating"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r3\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"rating\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Empty frontend parameters",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_a_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id=&reviewer_id=&ordering="
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r2\",\"r3\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat(JSON.parse(cv.get(\"rl_before\")));",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | Whitespace frontend parameters",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id=%20&reviewer_id=%20&ordering=%20"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r2\",\"r3\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat(JSON.parse(cv.get(\"rl_before\")));",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "FILTER | One real filter plus an empty one",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id={{rl_b_user}}&reviewer_id=&ordering="
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r2\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | business_user_id = abc",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id=abc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"business_user_id\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | business_user_id = 0",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"business_user_id\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | business_user_id = -1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id=-1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"business_user_id\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | business_user_id = 1.5",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id=1.5"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"business_user_id\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | business_user_id = true",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?business_user_id=true"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"business_user_id\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | reviewer_id = abc",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?reviewer_id=abc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"reviewer_id\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | reviewer_id = 0",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?reviewer_id=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"reviewer_id\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | reviewer_id = -1",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?reviewer_id=-1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"reviewer_id\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | reviewer_id = 1.5",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?reviewer_id=1.5"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"reviewer_id\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | reviewer_id = true",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?reviewer_id=true"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"reviewer_id\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | ordering = unknown",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?ordering=unknown"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"ordering\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | ordering = created_at",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?ordering=created_at"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"ordering\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | ordering = reviewer__password",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?ordering=reviewer__password"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "",
+              "check(\"Response identifies the invalid field\",()=>eq(!!data && Object.prototype.hasOwnProperty.call(data,\"ordering\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Missing token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "",
+              "check(\"Authentication error includes detail\",()=>eq(!!data && typeof data.detail===\"string\" && data.detail.length>0,true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "AUTH | Invalid token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token 0000000000000000000000000000000000000000"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "",
+              "check(\"Authentication error includes detail\",()=>eq(!!data && typeof data.detail===\"string\" && data.detail.length>0,true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | Valid request after rejected queries",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_c1_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/?reviewer_id={{rl_c1_user}}&ordering=rating"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r4\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat([]);",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"rating\";",
+              "  const direction=1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "VERIFY | All review IDs and fixture values after reads",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{rl_b_token}}"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "url": "{{base_url}}/reviews/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a,b) => pm.expect(a).to.eql(b);",
+              "const cv = pm.collectionVariables;",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "const check = (label,fn) => pm.test(label,fn);",
+              "check(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "",
+              "function verifyRow(row) {",
+              "  eq(Object.keys(row).sort(),[\"business_user\",\"created_at\",\"description\",\"id\",\"rating\",\"reviewer\",\"updated_at\"]);",
+              "  for (const id of [row.id,row.business_user,row.reviewer]) eq(Number.isInteger(id) && id>0,true);",
+              "  eq(Number.isInteger(row.rating) && row.rating>=1 && row.rating<=5,true);",
+              "  eq(typeof row.description,\"string\");",
+              "  for(const date of [row.created_at,row.updated_at]) eq(typeof date===\"string\" && Number.isFinite(Date.parse(date)),true);",
+              "}",
+              "function micros(date) {",
+              "  const part=(date.match(/\\.(\\d+)/)||[\"\",\"\"])[1].padEnd(6,\"0\");",
+              "  return Date.parse(date)*1000+Number(part.slice(3,6));",
+              "}",
+              "",
+              "const fixtures=[\"r1\",\"r2\",\"r3\",\"r4\",\"r5\"].map(k=>JSON.parse(cv.get(\"rl_\"+k)));",
+              "const expected=fixtures.map(r=>r.id).concat(JSON.parse(cv.get(\"rl_before\")));",
+              "check(\"Response is an unpaginated JSON array\",()=>eq(Array.isArray(data),true));",
+              "check(\"Exactly the expected review IDs\",()=>{",
+              "  eq(data.map(r=>r.id).sort((a,b)=>a-b),expected.sort((a,b)=>a-b));",
+              "});",
+              "check(\"Review schema and fixture data match, including timestamps\",()=>{",
+              "  data.forEach(verifyRow);",
+              "  const byId=new Map(data.map(row=>[row.id,row]));",
+              "  fixtures.forEach(row=>eq(byId.get(row.id),row));",
+              "});",
+              "check(\"Requested order including ID tie-break\",()=>{",
+              "  const field=\"updated_at\";",
+              "  const direction=-1;",
+              "  const value=row=>field===\"rating\"?row.rating:micros(row.updated_at);",
+              "  const sorted=data.slice().sort((a,b)=>direction*(value(a)-value(b)) || b.id-a.id);",
+              "  eq(data.map(row=>row.id),sorted.map(row=>row.id));",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
