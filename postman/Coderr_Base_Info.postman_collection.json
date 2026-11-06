@@ -1,0 +1,1774 @@
+{
+  "info": {
+    "_postman_id": "ba61d2c4-f878-4dec-b090-d3e3388239b7",
+    "name": "Coderr Base Info",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "PUBLIC | Anonymous opening snapshot",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "pm.test(\"Empty start when explicitly selected\",()=>{",
+              " if(String(pm.environment.get(\"expect_empty_start\")).toLowerCase()===\"true\")",
+              "  eq(data,{review_count:0,average_rating:0,business_profile_count:0,offer_count:0});",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register c1 (customer)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"bs_c1_{{bs_run}}\",\n  \"email\": \"bs_c1_{{bs_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "for (const key of Object.keys(pm.collectionVariables.toObject())) {",
+              "    if (key.startsWith(\"bs_\")) pm.collectionVariables.unset(key);",
+              "}",
+              "pm.collectionVariables.set(\"bs_run\", pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"bs_c1_token\", data.token);",
+              "    pm.collectionVariables.set(\"bs_c1_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BASELINE | All individual ratings",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/reviews/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c1_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "",
+              "let verified=false;",
+              "pm.test(\"Independent reference data is usable\",()=>{",
+              " eq(Array.isArray(data),true);",
+              "eq(new Set(data.map(r=>r.id)).size,data.length);",
+              "for(const r of data)eq(Number.isInteger(r.rating)&&r.rating>=1&&r.rating<=5,true);",
+              "cv.set(\"bs_count\",data.length);cv.set(\"bs_sum\",data.reduce((sum,r)=>sum+r.rating,0));",
+              " verified=true;",
+              "});",
+              "if(!verified || pm.response.code!==200)pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BASELINE | All business profiles",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/profiles/business/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c1_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "",
+              "let verified=false;",
+              "pm.test(\"Independent reference data is usable\",()=>{",
+              " eq(Array.isArray(data),true);",
+              "eq(new Set(data.map(p=>p.user)).size,data.length);",
+              "cv.set(\"bs_providers\",data.length);",
+              " verified=true;",
+              "});",
+              "if(!verified || pm.response.code!==200)pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "BASELINE | All offers from pagination count",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/offers/?page_size=1",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c1_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "",
+              "let verified=false;",
+              "pm.test(\"Independent reference data is usable\",()=>{",
+              " eq(Number.isInteger(data.count)&&data.count>=0,true);",
+              "eq(Array.isArray(data.results),true);cv.set(\"bs_offers\",data.count);",
+              " verified=true;",
+              "});",
+              "if(!verified || pm.response.code!==200)pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Independent baseline",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+0;",
+              "const sum=get(\"sum\")+0;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+0);",
+              " eq(data.offer_count,get(\"offers\")+0);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register c2 (customer)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"bs_c2_{{bs_run}}\",\n  \"email\": \"bs_c2_{{bs_run}}@example.com\",\n  \"type\": \"customer\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"bs_c2_token\", data.token);",
+              "    pm.collectionVariables.set(\"bs_c2_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Second customer registered",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+0;",
+              "const sum=get(\"sum\")+0;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+0);",
+              " eq(data.offer_count,get(\"offers\")+0);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register a (business)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"bs_a_{{bs_run}}\",\n  \"email\": \"bs_a_{{bs_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"bs_a_token\", data.token);",
+              "    pm.collectionVariables.set(\"bs_a_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | First provider without offers",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+0;",
+              "const sum=get(\"sum\")+0;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+1);",
+              " eq(data.offer_count,get(\"offers\")+0);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Register b (business)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/registration/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"bs_b_{{bs_run}}\",\n  \"email\": \"bs_b_{{bs_run}}@example.com\",\n  \"type\": \"business\",\n  \"password\": \"CoderrReview!83_Local\",\n  \"repeated_password\": \"CoderrReview!83_Local\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const eq = (a, b) => pm.expect(a).to.eql(b);",
+              "const assert = value => eq(Boolean(value), true);",
+              "const data = (() => { try { return pm.response.json(); } catch (_) { return null; } })();",
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Registration returns usable credentials\", () => {",
+              "    assert(data && typeof data.token === \"string\" && data.token.length > 0);",
+              "    assert(Number.isInteger(data.user_id) && data.user_id > 0);",
+              "});",
+              "if (pm.response.code === 201 && data && typeof data.token === \"string\" && data.token.length > 0 && Number.isInteger(data.user_id) && data.user_id > 0) {",
+              "    pm.collectionVariables.set(\"bs_b_token\", data.token);",
+              "    pm.collectionVariables.set(\"bs_b_user\", data.user_id);",
+              "} else { pm.execution.setNextRequest(null); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Second provider without offers",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+0;",
+              "const sum=get(\"sum\")+0;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+0);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Offer o1",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/offers/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_a_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Stats o1 {{bs_run}}\",\n  \"description\": \"Local statistics fixture.\",\n  \"details\": [\n    {\n      \"title\": \"basic package\",\n      \"offer_type\": \"basic\",\n      \"price\": 20,\n      \"revisions\": 1,\n      \"features\": [\n        \"Delivery\"\n      ],\n      \"delivery_time_in_days\": 2\n    },\n    {\n      \"title\": \"standard package\",\n      \"offer_type\": \"standard\",\n      \"price\": 21,\n      \"revisions\": 1,\n      \"features\": [\n        \"Delivery\"\n      ],\n      \"delivery_time_in_days\": 2\n    },\n    {\n      \"title\": \"premium package\",\n      \"offer_type\": \"premium\",\n      \"price\": 22,\n      \"revisions\": 1,\n      \"features\": [\n        \"Delivery\"\n      ],\n      \"delivery_time_in_days\": 2\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "let valid=false;",
+              "pm.test(\"New offer matches this run\",()=>{",
+              " eq(Number.isInteger(data.id)&&data.id>0,true);eq(data.title,pm.variables.replaceIn(\"Stats o1 {{bs_run}}\"));valid=true;",
+              "});",
+              "if(valid && pm.response.code===201){cv.set(\"bs_o1_id\",data.id);}",
+              "else{pm.execution.setNextRequest(null);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Offer o2",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/offers/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_a_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Stats o2 {{bs_run}}\",\n  \"description\": \"Local statistics fixture.\",\n  \"details\": [\n    {\n      \"title\": \"basic package\",\n      \"offer_type\": \"basic\",\n      \"price\": 20,\n      \"revisions\": 1,\n      \"features\": [\n        \"Delivery\"\n      ],\n      \"delivery_time_in_days\": 2\n    },\n    {\n      \"title\": \"standard package\",\n      \"offer_type\": \"standard\",\n      \"price\": 21,\n      \"revisions\": 1,\n      \"features\": [\n        \"Delivery\"\n      ],\n      \"delivery_time_in_days\": 2\n    },\n    {\n      \"title\": \"premium package\",\n      \"offer_type\": \"premium\",\n      \"price\": 22,\n      \"revisions\": 1,\n      \"features\": [\n        \"Delivery\"\n      ],\n      \"delivery_time_in_days\": 2\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "let valid=false;",
+              "pm.test(\"New offer matches this run\",()=>{",
+              " eq(Number.isInteger(data.id)&&data.id>0,true);eq(data.title,pm.variables.replaceIn(\"Stats o2 {{bs_run}}\"));valid=true;",
+              "});",
+              "if(valid && pm.response.code===201){cv.set(\"bs_o2_id\",data.id);}",
+              "else{pm.execution.setNextRequest(null);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Offer o3",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/offers/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_b_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Stats o3 {{bs_run}}\",\n  \"description\": \"Local statistics fixture.\",\n  \"details\": [\n    {\n      \"title\": \"basic package\",\n      \"offer_type\": \"basic\",\n      \"price\": 20,\n      \"revisions\": 1,\n      \"features\": [\n        \"Delivery\"\n      ],\n      \"delivery_time_in_days\": 2\n    },\n    {\n      \"title\": \"standard package\",\n      \"offer_type\": \"standard\",\n      \"price\": 21,\n      \"revisions\": 1,\n      \"features\": [\n        \"Delivery\"\n      ],\n      \"delivery_time_in_days\": 2\n    },\n    {\n      \"title\": \"premium package\",\n      \"offer_type\": \"premium\",\n      \"price\": 22,\n      \"revisions\": 1,\n      \"features\": [\n        \"Delivery\"\n      ],\n      \"delivery_time_in_days\": 2\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "let valid=false;",
+              "pm.test(\"New offer matches this run\",()=>{",
+              " eq(Number.isInteger(data.id)&&data.id>0,true);eq(data.title,pm.variables.replaceIn(\"Stats o3 {{bs_run}}\"));valid=true;",
+              "});",
+              "if(valid && pm.response.code===201){cv.set(\"bs_o3_id\",data.id);}",
+              "else{pm.execution.setNextRequest(null);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Three offers across two providers",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+0;",
+              "const sum=get(\"sum\")+0;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+3);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Review r1",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/reviews/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{bs_a_user}}\",\n  \"rating\": 5,\n  \"description\": \"Stats r1 {{bs_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "let valid=false;",
+              "pm.test(\"New review matches this run\",()=>{",
+              " eq(Number.isInteger(data.id)&&data.id>0,true);eq(data.rating,5);",
+              " eq(data.business_user,Number(cv.get(\"bs_a_user\")));eq(data.reviewer,Number(cv.get(\"bs_c1_user\")));",
+              " eq(data.description,pm.variables.replaceIn(\"Stats r1 {{bs_run}}\"));valid=true;",
+              "});",
+              "if(valid && pm.response.code===201){cv.set(\"bs_r1_id\",data.id);}",
+              "else{pm.execution.setNextRequest(null);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Review r2",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/reviews/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c2_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{bs_a_user}}\",\n  \"rating\": 4,\n  \"description\": \"Stats r2 {{bs_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "let valid=false;",
+              "pm.test(\"New review matches this run\",()=>{",
+              " eq(Number.isInteger(data.id)&&data.id>0,true);eq(data.rating,4);",
+              " eq(data.business_user,Number(cv.get(\"bs_a_user\")));eq(data.reviewer,Number(cv.get(\"bs_c2_user\")));",
+              " eq(data.description,pm.variables.replaceIn(\"Stats r2 {{bs_run}}\"));valid=true;",
+              "});",
+              "if(valid && pm.response.code===201){cv.set(\"bs_r2_id\",data.id);}",
+              "else{pm.execution.setNextRequest(null);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PREP | Review r3",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/reviews/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"business_user\": \"{{bs_b_user}}\",\n  \"rating\": 1,\n  \"description\": \"Stats r3 {{bs_run}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "let valid=false;",
+              "pm.test(\"New review matches this run\",()=>{",
+              " eq(Number.isInteger(data.id)&&data.id>0,true);eq(data.rating,1);",
+              " eq(data.business_user,Number(cv.get(\"bs_b_user\")));eq(data.reviewer,Number(cv.get(\"bs_c1_user\")));",
+              " eq(data.description,pm.variables.replaceIn(\"Stats r3 {{bs_run}}\"));valid=true;",
+              "});",
+              "if(valid && pm.response.code===201){cv.set(\"bs_r3_id\",data.id);}",
+              "else{pm.execution.setNextRequest(null);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Three new reviews rated 5, 4 and 1",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+3;",
+              "const sum=get(\"sum\")+10;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+3);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Same totals with customer token",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c1_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+3;",
+              "const sum=get(\"sum\")+10;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+3);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Same totals with business token",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_b_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+3;",
+              "const sum=get(\"sum\")+10;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+3);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH | Change rating 1 to 5",
+      "request": {
+        "method": "PATCH",
+        "url": "{{base_url}}/reviews/{{bs_r3_id}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Target now has rating 5\",()=>{eq(data.id,Number(cv.get(\"bs_r3_id\")));eq(data.rating,5);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Changed rating updates average",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+3;",
+              "const sum=get(\"sum\")+14;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+3);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "INVALID | Rating 6",
+      "request": {
+        "method": "PATCH",
+        "url": "{{base_url}}/reviews/{{bs_r3_id}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c1_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 6\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 400\",()=>pm.response.to.have.status(400));",
+              "pm.test(\"Validation identifies rating\",()=>eq(Object.prototype.hasOwnProperty.call(data,\"rating\"),true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Rejected update preserves totals",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+3;",
+              "const sum=get(\"sum\")+14;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+3);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE | r3",
+      "request": {
+        "method": "DELETE",
+        "url": "{{base_url}}/reviews/{{bs_r3_id}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c1_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "pm.test(\"Empty delete response\",()=>eq(pm.response.text(),\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Two fixture ratings left",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+2;",
+              "const sum=get(\"sum\")+9;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+3);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE | o1",
+      "request": {
+        "method": "DELETE",
+        "url": "{{base_url}}/offers/{{bs_o1_id}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_a_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "pm.test(\"Empty delete response\",()=>eq(pm.response.text(),\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Only the offer count changes",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+2;",
+              "const sum=get(\"sum\")+9;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+2);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE | r2",
+      "request": {
+        "method": "DELETE",
+        "url": "{{base_url}}/reviews/{{bs_r2_id}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c2_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "pm.test(\"Empty delete response\",()=>eq(pm.response.text(),\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE | r1",
+      "request": {
+        "method": "DELETE",
+        "url": "{{base_url}}/reviews/{{bs_r1_id}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_c1_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "pm.test(\"Empty delete response\",()=>eq(pm.response.text(),\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Ratings back at baseline",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+0;",
+              "const sum=get(\"sum\")+0;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+2);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE | o2",
+      "request": {
+        "method": "DELETE",
+        "url": "{{base_url}}/offers/{{bs_o2_id}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_a_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "pm.test(\"Empty delete response\",()=>eq(pm.response.text(),\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "DELETE | o3",
+      "request": {
+        "method": "DELETE",
+        "url": "{{base_url}}/offers/{{bs_o3_id}}/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Token {{bs_b_token}}"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "pm.test(\"Empty delete response\",()=>eq(pm.response.text(),\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "STATS | Final public summary",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/base-info/",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cv=pm.collectionVariables;",
+              "const eq=(a,b)=>pm.expect(a).to.eql(b);",
+              "const data=(()=>{try{return pm.response.json();}catch(_){return null;}})();",
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "pm.test(\"Four documented numeric fields\",()=>{",
+              " eq(Object.keys(data).sort(),[\"average_rating\",\"business_profile_count\",\"offer_count\",\"review_count\"]);",
+              " for(const key of [\"business_profile_count\",\"offer_count\",\"review_count\"])eq(Number.isInteger(data[key]) && data[key]>=0,true);",
+              " eq(typeof data.average_rating===\"number\" && Number.isFinite(data.average_rating),true);",
+              " eq(data.review_count===0 ? data.average_rating===0 : data.average_rating>=1 && data.average_rating<=5,true);",
+              "});",
+              "const get=k=>Number(cv.get(\"bs_\"+k));",
+              "const count=get(\"count\")+0;",
+              "const sum=get(\"sum\")+0;",
+              "const average=count===0?0:sum/count;",
+              "// Python round(x, 1) uses half-even for exactly representable decimal ties.",
+              "const scaled=average*4;",
+              "let rounded=Number(average.toFixed(1));",
+              "if(Number.isInteger(scaled) && scaled%2===1){",
+              " const lower=Math.floor(average*10);",
+              " rounded=(lower+(lower%2))/10;",
+              "}",
+              "pm.test(\"Counts match independent baseline and fixture changes\",()=>{",
+              " eq(data.review_count,count);",
+              " eq(data.business_profile_count,get(\"providers\")+2);",
+              " eq(data.offer_count,get(\"offers\")+0);",
+              "});",
+              "pm.test(\"Average matches the individual ratings rounded to one decimal\",()=>eq(data.average_rating,rounded));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
