@@ -1,26 +1,56 @@
-# Coderr Backend
+<h1 align="center">Coderr</h1>
 
-Coderr is a service marketplace built with Django REST Framework. Providers publish offers with three package tiers. Customers book a package at its current price and can review the provider. The [Coderr frontend](https://github.com/Developer-Akademie-Backendkurs/project.Coderr) uses this API for both customer and provider accounts.
+<h3 align="center">Django REST API for a Service Marketplace</h3>
 
-**[Quickstart – run the backend locally](#quickstart)**
+<p align="center">
+  Providers publish services in three package tiers. Customers book a package,
+  track their orders and review the provider.
+</p>
 
-## Contents
+<br>
 
-- [Coderr Backend](#coderr-backend)
-  - [Contents](#contents)
-  - [Features and stack](#features-and-stack)
-  - [Requirements](#requirements)
-  - [Quickstart](#quickstart)
-    - [Windows CMD](#windows-cmd)
-    - [macOS](#macos)
-    - [Linux](#linux)
-    - [Start the API](#start-the-api)
-  - [Frontend and demo](#frontend-and-demo)
-  - [API endpoints](#api-endpoints)
-  - [Quality assurance](#quality-assurance)
-  - [Project documentation](#project-documentation)
-  - [Troubleshooting](#troubleshooting)
-  - [Scope](#scope)
+<p align="center">
+  <img alt="Python 3.14" src="https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&amp;logo=python&amp;logoColor=white">
+  <img alt="Django 6.1" src="https://img.shields.io/badge/Django-6.1-092E20?style=for-the-badge&amp;logo=django&amp;logoColor=white">
+  <img alt="Django REST Framework" src="https://img.shields.io/badge/Django_REST_Framework-A30000?style=for-the-badge">
+  <img alt="SQLite" src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&amp;logo=sqlite&amp;logoColor=white">
+</p>
+
+<p align="center">
+  <img alt="Recorded Django test run: 181 passed" src="https://img.shields.io/badge/Django_tests-181_passed-22863A?style=flat-square">
+  <img alt="Authentication: Token" src="https://img.shields.io/badge/Authentication-Token-334155?style=flat-square">
+  <img alt="Project: Solo backend" src="https://img.shields.io/badge/Project-Solo_backend-334155?style=flat-square">
+</p>
+
+<br>
+
+<p align="center">
+  <strong><a href="#quickstart">Quickstart</a></strong> ·
+  <a href="#windows-cmd">Windows</a> ·
+  <a href="#linux">Linux</a> ·
+  <a href="#macos">macOS</a> ·
+  <a href="#api-endpoints">API</a> ·
+  <a href="#project-documentation">Documentation</a>
+</p>
+
+---
+
+## Table of Contents
+
+- [Table of Contents](#table-of-contents)
+- [Features and stack](#features-and-stack)
+- [Requirements](#requirements)
+- [Quickstart](#quickstart)
+  - [Windows CMD](#windows-cmd)
+  - [macOS](#macos)
+  - [Linux](#linux)
+  - [Start the API](#start-the-api)
+- [Frontend and demo](#frontend-and-demo)
+- [API endpoints](#api-endpoints)
+- [Quality assurance](#quality-assurance)
+- [Project documentation](#project-documentation)
+- [Troubleshooting](#troubleshooting)
+- [Scope](#scope)
 
 ## Features and stack
 
