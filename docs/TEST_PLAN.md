@@ -9,8 +9,8 @@ This document describes planned coverage, not completed verification.
 
 Current verified baseline:
 - Five profile model tests pass.
-- Registration and the remaining business API endpoints are not implemented.
-- Postman collection and environment files are not yet available.
+- The API test plan covers registration, profiles, offers, orders, reviews, and base information.
+- Postman collections are available in `postman/collections/`, and local environments are available in `postman/environments/`.
 
 Passing our own tests does not guarantee that all private assessment tests
 will pass.
