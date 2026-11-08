@@ -1,3 +1,5 @@
+# Register users, issue login tokens and serve role-specific profile data.
+
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication

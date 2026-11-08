@@ -1,3 +1,5 @@
+# Create the user, role profile and access token in one transaction.
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework.authtoken.models import Token

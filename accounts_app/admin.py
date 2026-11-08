@@ -1,3 +1,5 @@
+# Find profiles by account identity and inspect their role and upload date.
+
 from django.contrib import admin
 
 from .models import UserProfile

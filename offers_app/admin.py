@@ -1,3 +1,5 @@
+# Manage provider offers and edit their package tiers inline.
+
 from django.contrib import admin
 
 from .models import Offer, OfferDetail

@@ -1,3 +1,5 @@
+# Restrict review creation to customers and edits or deletion to the author.
+
 from rest_framework.permissions import BasePermission
 
 from accounts_app.models import UserProfile

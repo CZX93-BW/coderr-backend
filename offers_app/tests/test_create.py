@@ -1,3 +1,5 @@
+# Verify tier validation, business-only creation and rollback on failure.
+
 from copy import deepcopy
 from decimal import Decimal
 from unittest.mock import patch

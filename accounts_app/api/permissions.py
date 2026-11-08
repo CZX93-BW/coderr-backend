@@ -1,3 +1,5 @@
+# Allow authenticated profile reads and reserve edits for the profile owner.
+
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 

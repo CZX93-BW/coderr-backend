@@ -1,3 +1,6 @@
+# Validate review targets, handle duplicate reviews and limit editable
+# fields.
+
 from rest_framework import serializers
 
 from accounts_app.models import UserProfile

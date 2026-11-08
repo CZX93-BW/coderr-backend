@@ -1,3 +1,5 @@
+# Store the parties, booked package terms and current status for each order.
+
 from decimal import Decimal
 
 from django.conf import settings

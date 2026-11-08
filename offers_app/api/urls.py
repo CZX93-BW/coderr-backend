@@ -1,3 +1,5 @@
+# Map API paths for offers and package tiers to their DRF views.
+
 from django.urls import path
 
 from .views import OfferDetailView, OfferViewSet

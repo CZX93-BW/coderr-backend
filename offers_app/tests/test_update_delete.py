@@ -1,3 +1,5 @@
+# Verify owner permissions, stable package IDs and atomic offer updates.
+
 from decimal import Decimal
 from io import BytesIO
 from tempfile import TemporaryDirectory

@@ -1,3 +1,6 @@
+# Check tier constraints and the effect of deleting an offer on related
+# rows.
+
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model

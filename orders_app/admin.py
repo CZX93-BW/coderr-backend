@@ -1,3 +1,5 @@
+# Inspect bookings by participant, package tier and order status.
+
 from django.contrib import admin
 
 from .models import Order

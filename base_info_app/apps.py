@@ -1,3 +1,5 @@
+# Register the Django application for platform statistics.
+
 from django.apps import AppConfig
 
 

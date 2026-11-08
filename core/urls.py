@@ -1,3 +1,5 @@
+# Mount the marketplace APIs and admin site, and serve local debug media.
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin

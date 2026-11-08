@@ -1,3 +1,5 @@
+# Prepare the frontend guest accounts and their sample offer for local use.
+
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -26,6 +28,7 @@ def get_demo_user(username, password, role):
             {"username": username, "email": email, "password": password},
             role,
         )
+    # A repeat run may reuse a demo account only after verifying its identity.
     validate_demo_user(user, email, password, role)
     return user
 

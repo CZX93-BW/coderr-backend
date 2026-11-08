@@ -1,3 +1,5 @@
+# Check stored terms, status defaults and protection of linked accounts.
+
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model

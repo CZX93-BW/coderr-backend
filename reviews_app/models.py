@@ -1,3 +1,5 @@
+# Store customer ratings with a unique reviewer and provider pair.
+
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models

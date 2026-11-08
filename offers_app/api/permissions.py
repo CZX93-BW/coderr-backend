@@ -1,3 +1,5 @@
+# Restrict creation to business accounts and changes to the offer owner.
+
 from rest_framework.permissions import BasePermission
 
 from accounts_app.models import UserProfile

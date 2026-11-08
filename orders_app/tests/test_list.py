@@ -1,3 +1,5 @@
+# Verify each user sees orders where they are the customer or provider.
+
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model

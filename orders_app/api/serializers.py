@@ -1,3 +1,6 @@
+# Read booked terms, resolve the package for creation and limit status
+# edits.
+
 from collections.abc import Mapping
 
 from django.shortcuts import get_object_or_404
@@ -67,6 +70,7 @@ class OrderStatusSerializer(OrderSerializer):
 
     def to_internal_value(self, data):
         if isinstance(data, Mapping):
+            # Report attempts to overwrite booked terms as validation errors.
             extra_fields = set(data) - {"status"}
             if extra_fields:
                 raise serializers.ValidationError({

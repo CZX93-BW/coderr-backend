@@ -1,3 +1,5 @@
+# Scope orders to participants and count provider orders by status.
+
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework.authentication import TokenAuthentication

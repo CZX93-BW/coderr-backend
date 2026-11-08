@@ -1,3 +1,5 @@
+# List public offers and enforce action-specific access to offers and tiers.
+
 from django.db.models import Min
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import RetrieveAPIView

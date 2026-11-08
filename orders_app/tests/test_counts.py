@@ -1,3 +1,5 @@
+# Check provider-specific counts for in-progress and completed orders.
+
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model

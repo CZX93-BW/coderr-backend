@@ -1,3 +1,6 @@
+# Verify profile details are looked up by user ID and require
+# authentication.
+
 from datetime import datetime
 
 from django.contrib.auth import get_user_model

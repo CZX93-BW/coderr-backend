@@ -1,3 +1,5 @@
+# Check authenticated offer retrieval, package links and detail responses.
+
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model

@@ -1,3 +1,5 @@
+# Extend each Django user with one marketplace profile and account role.
+
 from django.conf import settings
 from django.db import models
 

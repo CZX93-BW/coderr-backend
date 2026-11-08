@@ -1,3 +1,5 @@
+# Register the Django application for customer bookings.
+
 from django.apps import AppConfig
 
 

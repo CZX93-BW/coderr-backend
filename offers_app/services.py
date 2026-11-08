@@ -1,3 +1,5 @@
+# Create and update an offer and its tiers within one transaction.
+
 from django.db import transaction
 
 from .models import Offer, OfferDetail
@@ -17,6 +19,7 @@ def create_offer_with_details(validated_data):
 def update_offer_package(offer, package_data):
     changes = package_data.copy()
     package_type = changes.pop("offer_type")
+    # Updating the existing tier preserves the package ID used by clients.
     package = offer.details.get(offer_type=package_type)
     for field, value in changes.items():
         setattr(package, field, value)
@@ -24,6 +27,7 @@ def update_offer_package(offer, package_data):
         package.save(update_fields=list(changes))
 
 
+# An invalid package update must roll back changes to the whole offer.
 @transaction.atomic
 def update_offer(offer, validated_data):
     changes = validated_data.copy()

@@ -1,3 +1,6 @@
+# Map account and profile records to registration, detail and list
+# responses.
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
@@ -140,6 +143,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
+        # One PATCH may change both the auth user and its profile.
         user_data = validated_data.pop("user", {})
         if "file" in validated_data:
             validated_data["uploaded_at"] = timezone.now()

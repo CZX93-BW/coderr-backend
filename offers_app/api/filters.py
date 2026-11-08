@@ -1,3 +1,5 @@
+# Validate search parameters before filtering and ordering the offer list.
+
 from decimal import Decimal
 
 from django.db.models import Q
@@ -37,6 +39,7 @@ class OfferFilterBackend(BaseFilterBackend):
         queryset = self.apply_search(queryset, params.get("search"))
         ordering = params.get("ordering")
         if ordering:
+            # Break ties by ID so adjacent pages have a stable order.
             return queryset.order_by(ordering, "id")
         return queryset
 

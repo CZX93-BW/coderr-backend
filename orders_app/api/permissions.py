@@ -1,3 +1,5 @@
+# Allow customer bookings, provider status updates and staff deletions.
+
 from rest_framework.permissions import BasePermission
 
 from accounts_app.models import UserProfile

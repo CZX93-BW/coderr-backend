@@ -1,3 +1,5 @@
+# Map API paths for platform statistics to their DRF views.
+
 from django.urls import path
 
 from .views import BaseInfoView

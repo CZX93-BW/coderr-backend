@@ -1,3 +1,6 @@
+# Configure SQLite, token authentication, media storage and frontend
+# origins.
+
 import os
 from pathlib import Path
 
@@ -135,4 +138,5 @@ CORS_ALLOWED_ORIGINS = [
     if origin.strip()
 ]
 
+# Cross-origin access is limited to API paths used by the frontend.
 CORS_URLS_REGEX = r"^/api/.*$"

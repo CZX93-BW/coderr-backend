@@ -1,3 +1,5 @@
+# Filter reviews by participant and validate rating or date ordering.
+
 from rest_framework import serializers
 from rest_framework.filters import BaseFilterBackend
 
@@ -33,4 +35,5 @@ class ReviewFilterBackend(BaseFilterBackend):
         serializer.is_valid(raise_exception=True)
         filters = dict(serializer.validated_data)
         ordering = filters.pop("ordering")
+        # Equal ratings or timestamps are ordered by descending review ID.
         return queryset.filter(**filters).order_by(ordering, "-id")

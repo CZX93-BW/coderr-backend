@@ -1,3 +1,5 @@
+# Store provider offers and the price, delivery time and terms of each tier.
+
 from decimal import Decimal
 
 from django.conf import settings

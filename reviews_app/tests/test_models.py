@@ -1,3 +1,5 @@
+# Verify rating bounds, relationships and uniqueness of each review pair.
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction

@@ -1,3 +1,5 @@
+# Exercise participant and staff permissions for order changes and deletion.
+
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model

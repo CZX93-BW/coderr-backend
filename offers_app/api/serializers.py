@@ -1,3 +1,6 @@
+# Represent offers and validate nested package data for creation and
+# updates.
+
 from decimal import Decimal
 
 from rest_framework import serializers
@@ -59,6 +62,8 @@ class OfferUserSerializer(serializers.Serializer):
     username = serializers.CharField(read_only=True)
 
 
+# The API contract uses relative package links in lists and absolute links
+# when retrieving a single offer.
 class OfferDetailLinkSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 

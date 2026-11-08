@@ -1,3 +1,5 @@
+# Check owner-only updates, linked user fields and profile image uploads.
+
 from datetime import timedelta
 from io import BytesIO
 from tempfile import TemporaryDirectory

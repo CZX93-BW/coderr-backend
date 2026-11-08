@@ -1,3 +1,5 @@
+# Inspect reviews by author, business account, rating and creation date.
+
 from django.contrib import admin
 
 from .models import Review

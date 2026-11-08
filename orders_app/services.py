@@ -1,9 +1,12 @@
+# Record package terms at booking time for the customer and provider.
+
 from copy import deepcopy
 
 from .models import Order
 
 
 def create_order(customer_user, package):
+    # Capture the booked terms so later package edits cannot change an order.
     return Order.objects.create(
         customer_user=customer_user,
         business_user=package.offer.user,

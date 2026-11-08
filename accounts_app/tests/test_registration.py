@@ -1,3 +1,5 @@
+# Check registration responses, role restrictions and transaction rollback.
+
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model

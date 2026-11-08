@@ -1,3 +1,6 @@
+# Check author-only writes and preservation of reviews after invalid
+# changes.
+
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.authtoken.models import Token

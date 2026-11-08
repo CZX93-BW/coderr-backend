@@ -1,3 +1,5 @@
+# Paginate offers and let callers choose the page size.
+
 from rest_framework.pagination import PageNumberPagination
 
 

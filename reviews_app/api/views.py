@@ -1,3 +1,5 @@
+# List and create reviews and enforce authorship for detail writes.
+
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import (
     ListCreateAPIView,
