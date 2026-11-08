@@ -3,7 +3,7 @@
     "name": "Coderr Order CREATE",
     "_postman_id": "a9263480-3b5d-4ac4-931b-371645aba6e9",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "C20 / E14. Run all requests in order, one iteration. No files required. Read ORDER_CREATE.md."
+    "description": "Buy a package as a customer. Verify the stored package values and rejected attempts to override order data."
   },
   "variable": [],
   "item": [

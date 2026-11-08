@@ -3,7 +3,7 @@
     "_postman_id": "e719312c-fdce-4ef6-908d-dd00cae21bfc",
     "name": "Coderr Review CREATE",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Run all requests in order, one iteration. Creates five unique local users and five reviews; no existing account, offer or order is needed. Fixtures remain in the database."
+    "description": "Submit customer ratings from 1 to 5. Check duplicate reviews, invalid providers and token-derived authorship."
   },
   "item": [
     {

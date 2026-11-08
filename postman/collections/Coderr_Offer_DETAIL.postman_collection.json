@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Coderr Offer DETAIL",
-    "description": "C18 / E09 + E12. Run all requests sequentially once. Creates three accounts and two offers; no deletion. Checks authenticated retrieval, exact values, links and error responses.",
+    "description": "Read offers and follow their package links. Check package values, authentication and missing IDs.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {

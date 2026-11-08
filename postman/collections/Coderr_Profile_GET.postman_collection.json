@@ -2,7 +2,7 @@
   "info": {
     "name": "Coderr Profile GET",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Run the main backend collection first to prepare fresh accounts. Then run this read-only collection using the same Coderr Local environment."
+    "description": "Read own and other profiles, verify registration defaults, check missing profiles and invalid tokens. Run directly after Coderr Backend."
   },
   "auth": {
     "type": "noauth"

@@ -3,7 +3,7 @@
     "name": "Coderr Order LIST UPDATE DELETE",
     "_postman_id": "17229ae0-354f-4e8e-a1e8-9fc19c73b2ce",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "C21 / E13 E15 E16. Requires local staff credentials. Run all requests in order, one iteration. See ORDER_LIST_UPDATE_DELETE.md."
+    "description": "List participant orders, change status as the provider and delete as staff. Set both staff credentials before starting."
   },
   "variable": [],
   "item": [

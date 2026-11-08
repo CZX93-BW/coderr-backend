@@ -1,193 +1,49 @@
 # Coderr Backend
 
-Django REST Framework backend for the Coderr training project at
-Developer Akademie.
-
-This repository contains the backend only. Development is in progress.
-
-## Current implementation
-
-- Django project configuration in `core`
-- SQLite database
-- Environment-based settings
-- DRF token authentication configured
-- CORS configured for the local frontend
-- Django administration
-- Basic user profile model
-- Five automated profile model tests
-
-Registration, login and the remaining business API endpoints are not
-implemented yet.
-
-## Requirements
-
-- Python 3.14
-- Git
-- Windows CMD for the commands below
-
-Development currently uses Python 3.14.3.
-Exact package versions are listed in `requirements.txt`.
+Coderr is a service marketplace. Providers publish offers with three package tiers. Customers book packages and review providers. This repository contains the Django REST API for the [Coderr frontend](https://github.com/Developer-Akademie-Backendkurs/project.Coderr).
 
 ## Local setup
 
-Download or clone this backend repository and open CMD in its root
-directory, which contains `manage.py`.
+Use Python 3.14 and Windows CMD. From the directory containing `manage.py`, create the virtual environment and install the pinned dependencies.
 
-Create and activate a virtual environment:
-
-```bat
+```cmd
 python -m venv .venv
 .venv\Scripts\activate.bat
-```
-
-Install the dependencies:
-
-```bat
 python -m pip install -r requirements.txt
-python -m pip check
-```
-
-Create your local environment file:
-
-```bat
-copy .env.example .env
-```
-
-Run this copy command only when setting up a new environment.
-Do not overwrite an existing `.env` containing your local settings.
-
-Generate a secret key:
-
-```bat
+if not exist .env copy .env.example .env
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-Copy the generated value into `DJANGO_SECRET_KEY` in `.env`.
-Keep the surrounding single quotes and never commit the real key.
+For a new installation, put the generated value in `DJANGO_SECRET_KEY` in `.env`. Set `DJANGO_DEBUG=True` for local development, `DJANGO_ALLOWED_HOSTS` to the local backend hostnames, and `DJANGO_CORS_ALLOWED_ORIGINS` to the frontend origins including scheme and port. The example allows Live Server on ports 5500 and 5501 on `127.0.0.1`.
 
-The environment variables are:
-
-| Variable | Purpose |
-| --- | --- |
-| `DJANGO_SECRET_KEY` | Secret key used by Django |
-| `DJANGO_DEBUG` | Local debugging; use `True` for development |
-| `DJANGO_ALLOWED_HOSTS` | Comma-separated backend hostnames |
-| `DJANGO_CORS_ALLOWED_ORIGINS` | Comma-separated frontend origins |
-
-Check the configuration and apply migrations:
-
-```bat
-python manage.py check
+```cmd
 python manage.py migrate
-```
-
-Create a local administrator:
-
-```bat
-python manage.py createsuperuser
-```
-
-Start the development server:
-
-```bat
+python manage.py check
 python manage.py runserver
 ```
 
-Open the administration interface:
+The local API base URL is `http://127.0.0.1:8000/api`. Django uses SQLite for application data and the `media/` directory for uploaded files. To use [Django admin](http://127.0.0.1:8000/admin/), create a local administrator with `python manage.py createsuperuser`.
 
-http://127.0.0.1:8000/admin/
+## API
 
-The development server is intended for local development only.
+| Area | Operations |
+| --- | --- |
+| Accounts and profiles | Register and log in, retrieve and edit profiles, list customers and providers. |
+| Offers | Search, filter and order offers, read package details, create and manage provider-owned offers. |
+| Orders | Book a package, list purchases or sales, change status as the associated provider, delete as staff and read provider order counts. |
+| Reviews | Create one review per customer and provider pair, filter and sort reviews, edit or delete a review as its author. |
+| Platform statistics | Read offer, provider and review counts and the average rating at `GET /api/base-info/`. |
 
-## Frontend
+Protected requests use `Authorization: Token <token>`. Registration and login return the token for the account.
 
-The provided frontend is maintained separately:
+## Tests and demo
 
-https://github.com/Developer-Akademie-Backendkurs/project.Coderr
+Run the Django suite from the repository root. Django creates a separate test database.
 
-The current local frontend origin is:
-
-```text
-http://127.0.0.1:5500
-```
-
-CORS applies to paths beginning with `/api/`.
-The origin must match the browser address, including protocol, hostname
-and port. Do not include a page path such as `/index.html`.
-
-CORS configuration alone does not implement API endpoints.
-Full frontend integration is still pending.
-
-## Tests
-
-Run all tests:
-
-```bat
+```cmd
 python manage.py test
 ```
 
-Run the accounts tests with detailed output:
+For HTTP tests, follow the [Postman guide](postman/docs/README.md). It lists the matching environment, test scope and local inputs for each collection.
 
-```bat
-python manage.py test accounts_app --verbosity 2
-```
-
-Django creates a separate test database. These tests do not modify the
-local development database or its administrator account.
-
-The current model tests cover:
-
-- Linking a customer profile to its user
-- An initially empty profile upload timestamp
-- Empty strings for optional profile text fields
-- At most one profile per user
-- Deleting a user's profile with that user while preserving other accounts
-
-Postman collection and environment files are available in `postman/`.
-Import both JSON files and select the `Coderr Local` environment.
-
-The initial collection contains two CORS preflight requests with ten
-automated checks. Both requests passed in a local collection run.
-Business API tests will be added as the endpoints are implemented.
-
-See `postman/README.md` for setup and execution instructions.
-
-## Project structure
-
-```text
-accounts_app/
-    api/
-    migrations/
-    admin.py
-    apps.py
-    models.py
-    tests.py
-    views.py
-core/
-    settings.py
-    urls.py
-    asgi.py
-    wsgi.py
-manage.py
-requirements.txt
-.env.example
-.gitignore
-```
-
-API implementations will be placed inside each app's `api` directory.
-The generated `accounts_app/views.py` is currently unused.
-
-## Local files and version control
-
-The following remain local and must not be committed:
-
-- `.env`
-- `.venv/`
-- `db.sqlite3` and its temporary files
-- Uploaded files in `media/`
-- Collected static files in `staticfiles/`
-
-Migration files and `requirements.txt` belong in version control.
-
-Media paths are configured, but profile image uploads and development
-media serving are not implemented yet.
+To try the customer and provider flows in the frontend, run `python manage.py seed_demo` against the migrated local database. It prepares both guest accounts and a bookable offer. See the [demo walkthrough](docs/DEMO_FLOW.md).

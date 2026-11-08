@@ -1,5 +1,6 @@
 {
   "info": {
+    "description": "Edit and delete a review as its author. Read back rejected changes and verify that other reviews survive deletion.",
     "_postman_id": "72593e11-9d78-4e7e-a02c-87d01db67326",
     "name": "Coderr Review UPDATE DELETE",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"

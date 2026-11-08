@@ -2,7 +2,7 @@
   "info": {
     "name": "Coderr Offer UPDATE DELETE",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Run folders in order once. Set the Postman working directory to the backend project root before the upload folder. Creates three disposable accounts and three offers; deletes only this run's A and C offers."
+    "description": "Update individual packages, replace images and delete an offer with its packages. Check ownership and stable package IDs. Select the four offer uploads below."
   },
   "variable": [
     {

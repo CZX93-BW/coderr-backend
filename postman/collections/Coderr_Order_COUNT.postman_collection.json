@@ -3,7 +3,7 @@
     "_postman_id": "e085d120-76ce-4033-93ac-de6184107aaa",
     "name": "Coderr Order COUNT",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Run the complete collection in order, one iteration. Creates unique local fixtures. No staff credentials required. Five users and six orders remain; the two fixture offers are deleted."
+    "description": "Count in-progress and completed orders per provider. Check zero counts, status changes and excluded cancelled orders."
   },
   "item": [
     {

@@ -2,7 +2,7 @@
   "info": {
     "name": "Coderr Profile PATCH",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Run the complete collection in order. Creates two fresh test accounts and uploads local fixture images. Select the four upload files before running. See PROFILE_PATCH.md."
+    "description": "Edit text and images, enforce ownership and read back accepted and rejected changes. Select the four profile uploads below."
   },
   "auth": {
     "type": "noauth"

@@ -2,7 +2,7 @@
   "info": {
     "name": "Coderr Profile Lists",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "C14: isolated local test accounts, role lists and token protection. Run all requests in order."
+    "description": "Read both role lists as a customer and provider. Check membership, response fields and authentication."
   },
   "variable": [
     {

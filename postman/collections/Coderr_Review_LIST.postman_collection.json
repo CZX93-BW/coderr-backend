@@ -1,5 +1,6 @@
 {
   "info": {
+    "description": "Filter by provider and reviewer, combine filters and order by rating or update time. Check empty results and invalid queries.",
     "_postman_id": "a3ba074a-4e52-4dbb-ad53-b748979bfe0d",
     "name": "Coderr Review LIST",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"

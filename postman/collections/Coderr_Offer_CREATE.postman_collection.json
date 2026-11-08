@@ -2,7 +2,7 @@
   "info": {
     "name": "Coderr Offer CREATE",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "C16 / E08. Run in order against your local development database. Creates fresh test accounts and four offers. No GET offer route required. Database rollback and ownership are verified in Django tests."
+    "description": "Create the three package tiers as a provider. Check numeric boundaries, invalid package sets and permissions."
   },
   "variable": [
     {

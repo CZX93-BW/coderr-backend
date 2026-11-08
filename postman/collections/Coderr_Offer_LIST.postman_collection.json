@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Coderr Offer LIST",
-    "description": "E07: public offer listing with fresh isolated fixtures, filters, search, ordering and pagination. Run the entire collection once in sequence. Creates two business accounts and seven offers per run. No deletion.",
+    "description": "Check public listings, search, combined filters, pagination, sorting and price and delivery minima.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {

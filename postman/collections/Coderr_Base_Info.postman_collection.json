@@ -1,5 +1,6 @@
 {
   "info": {
+    "description": "Compare public statistics with offer, profile and review data. Check the rounded average after review creation, update and deletion.",
     "_postman_id": "ba61d2c4-f878-4dec-b090-d3e3388239b7",
     "name": "Coderr Base Info",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"

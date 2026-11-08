@@ -3,7 +3,7 @@
     "_postman_id": "2397013c-914e-4210-8336-02f1764583a9",
     "name": "Coderr Login - Manual Preconditions",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Do not run this collection as a batch. Run each request separately after its documented admin precondition. Use only the generated local customer account."
+    "description": "Check an inactive account and token reissuance. Prepare and send each request separately as described below."
   },
   "auth": {
     "type": "noauth"
