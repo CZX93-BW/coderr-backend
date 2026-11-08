@@ -53,6 +53,7 @@ class OfferCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return create_offer_with_details(validated_data)
 
+
 class OfferUserSerializer(serializers.Serializer):
     first_name = serializers.CharField(read_only=True)
     last_name = serializers.CharField(read_only=True)
@@ -103,6 +104,7 @@ class OfferListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+
 class OfferRetrieveLinkSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name="offers:offerdetail-detail",
@@ -131,6 +133,7 @@ class OfferRetrieveSerializer(OfferListSerializer):
             "min_delivery_time",
         ]
         read_only_fields = fields
+
 
 class OfferUpdateSerializer(OfferCreateSerializer):
     def validate_details(self, value):

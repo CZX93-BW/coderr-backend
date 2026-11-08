@@ -13,6 +13,7 @@ def create_offer_with_details(validated_data):
         OfferDetail.objects.create(offer=offer, **detail)
     return offer
 
+
 def update_offer_package(offer, package_data):
     changes = package_data.copy()
     package_type = changes.pop("offer_type")

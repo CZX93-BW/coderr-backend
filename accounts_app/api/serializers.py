@@ -181,6 +181,7 @@ class CustomerProfileListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+
 class BusinessProfileListSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         source="user.username",

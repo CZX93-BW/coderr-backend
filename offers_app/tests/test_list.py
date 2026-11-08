@@ -171,8 +171,12 @@ class OfferListAPITests(APITestCase):
     def test_offers_can_be_ordered_by_update_time(self):
         cheap, expensive = self.prepare_filter_offers()
         now = timezone.now()
-        Offer.objects.filter(pk=cheap.pk).update(updated_at=now - timedelta(days=2))
-        Offer.objects.filter(pk=expensive.pk).update(updated_at=now - timedelta(days=1))
+        Offer.objects.filter(pk=cheap.pk).update(
+            updated_at=now - timedelta(days=2),
+        )
+        Offer.objects.filter(pk=expensive.pk).update(
+            updated_at=now - timedelta(days=1),
+        )
         Offer.objects.filter(pk=self.offer.pk).update(updated_at=now)
         self.assert_list_ids(
             {"ordering": "updated_at"},
@@ -186,7 +190,11 @@ class OfferListAPITests(APITestCase):
     def test_default_pagination_returns_six_offers_then_remaining_offer(self):
         for index in range(6):
             self.create_filter_offer(
-                self.business, f"Extra {index}", "Pagination test.", "10.00", 1,
+                self.business,
+                f"Extra {index}",
+                "Pagination test.",
+                "10.00",
+                1,
             )
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

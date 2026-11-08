@@ -79,7 +79,9 @@ class ReviewUpdateDeleteAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(response.content, b"")
         self.assertFalse(Review.objects.filter(pk=self.review.pk).exists())
-        self.assertTrue(Review.objects.filter(pk=self.other_review.pk).exists())
+        self.assertTrue(
+            Review.objects.filter(pk=self.other_review.pk).exists(),
+        )
 
     def test_other_reviewer_and_provider_cannot_modify_review(self):
         for user in (self.other, self.business):
@@ -131,7 +133,10 @@ class ReviewUpdateDeleteAPITests(APITestCase):
                     "rating": value,
                     "description": "Attempted change.",
                 })
-                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertEqual(
+                    response.status_code,
+                    status.HTTP_400_BAD_REQUEST,
+                )
                 self.assertIn("rating", response.json())
                 self.assertEqual(self.stored_review(), before)
 
@@ -141,7 +146,10 @@ class ReviewUpdateDeleteAPITests(APITestCase):
         for payload in ({}, {"reviewer": self.other.pk}):
             with self.subTest(payload=payload):
                 response = self.patch_review(payload)
-                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertEqual(
+                    response.status_code,
+                    status.HTTP_400_BAD_REQUEST,
+                )
                 self.assertEqual(self.stored_review(), before)
 
     def test_unknown_review_returns_not_found_for_patch_and_delete(self):

@@ -69,8 +69,12 @@ class OfferModelTests(TestCase):
         other_detail = self.create_detail(offer=other_offer)
         self.offer.delete()
         self.assertFalse(OfferDetail.objects.filter(pk=own_detail.pk).exists())
-        self.assertTrue(OfferDetail.objects.filter(pk=other_detail.pk).exists())
-        self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
+        self.assertTrue(
+            OfferDetail.objects.filter(pk=other_detail.pk).exists(),
+        )
+        self.assertTrue(
+            get_user_model().objects.filter(pk=self.user.pk).exists(),
+        )
 
     def test_zero_price_zero_delivery_and_valid_revisions_are_allowed(self):
         detail = self.create_detail()

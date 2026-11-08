@@ -15,6 +15,7 @@ class IsBusinessUser(BasePermission):
             ).exists()
         )
 
+
 class IsOfferOwner(BasePermission):
     message = "Only the offer owner may change or delete this offer."
 

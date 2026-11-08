@@ -50,6 +50,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
             })
         return review
 
+
 class ReviewUpdateSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(min_value=1, max_value=5)
 

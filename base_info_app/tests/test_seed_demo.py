@@ -21,11 +21,15 @@ class SeedDemoTests(APITestCase):
         user = User.objects.get(username=username)
         self.assertEqual(response.data["user_id"], user.pk)
         self.assertTrue(response.data["token"])
-        self.assertTrue(UserProfile.objects.filter(user=user, type=role).exists())
+        self.assertTrue(
+            UserProfile.objects.filter(user=user, type=role).exists(),
+        )
 
     def seed_ids(self):
         return {
-            model: list(model.objects.order_by("pk").values_list("pk", flat=True))
+            model: list(
+                model.objects.order_by("pk").values_list("pk", flat=True),
+            )
             for model in (User, UserProfile, Offer, OfferDetail)
         }
 

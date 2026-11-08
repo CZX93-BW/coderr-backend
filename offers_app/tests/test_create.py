@@ -85,7 +85,9 @@ class OfferCreateAPITests(APITestCase):
         response = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()
-        self.assertEqual(set(data), {"id", "title", "image", "description", "details"})
+        self.assertEqual(
+            set(data), {"id", "title", "image", "description", "details"},
+        )
         self.assertEqual(data["id"], Offer.objects.get().pk)
         self.assertEqual(data["title"], self.payload["title"])
         self.assertEqual(data["description"], self.payload["description"])
@@ -101,7 +103,10 @@ class OfferCreateAPITests(APITestCase):
         self.assertEqual(saved.offer_id, Offer.objects.get().pk)
         self.assertEqual(saved.offer_type, detail["offer_type"])
         self.assertIsInstance(detail["price"], (int, float))
-        self.assertEqual(Decimal(str(detail["price"])), Decimal(expected["price"]))
+        self.assertEqual(
+            Decimal(str(detail["price"])),
+            Decimal(expected["price"]),
+        )
         for field in expected.keys() - {"price"}:
             self.assertEqual(detail[field], expected[field])
 
@@ -117,19 +122,29 @@ class OfferCreateAPITests(APITestCase):
         for package_types in cases:
             with self.subTest(package_types=package_types):
                 payload = deepcopy(self.payload)
-                payload["details"] = [self.package_data(item) for item in package_types]
+                payload["details"] = [
+                    self.package_data(item) for item in package_types
+                ]
                 self.assert_creation_rejected(payload)
 
     def test_zero_values_and_numeric_strings_are_accepted(self):
         self.authenticate(self.business)
         self.payload["image"] = None
         for detail, revisions in zip(self.payload["details"], (-1, 0, 100)):
-            detail.update(price="0.00", delivery_time_in_days="0", revisions=str(revisions))
+            detail.update(
+                price="0.00",
+                delivery_time_in_days="0",
+                revisions=str(revisions),
+            )
         response = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(OfferDetail.objects.count(), 3)
         self.assertEqual(
-            set(OfferDetail.objects.values_list("price", "delivery_time_in_days", "revisions")),
+            set(OfferDetail.objects.values_list(
+                "price",
+                "delivery_time_in_days",
+                "revisions",
+            )),
             {(Decimal("0.00"), 0, value) for value in (-1, 0, 100)},
         )
 
@@ -168,7 +183,10 @@ class OfferCreateAPITests(APITestCase):
             "offers_app.services.OfferDetail.objects.create",
             side_effect=self.create_first_detail_then_fail,
         ) as create_detail:
-            with self.assertRaisesMessage(RuntimeError, "Simulated package save failure."):
+            with self.assertRaisesMessage(
+                RuntimeError,
+                "Simulated package save failure.",
+            ):
                 self.client.post(self.url, self.payload, format="json")
         self.assertEqual(create_detail.call_count, 2)
         self.assertFalse(Offer.objects.exists())

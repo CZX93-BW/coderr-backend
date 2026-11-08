@@ -93,7 +93,9 @@ class LoginAPITests(APITestCase):
         }
         self.assertEqual(response.json(), expected)
 
-    def assert_login_is_rejected(self, payload, error_field="non_field_errors"):
+    def assert_login_is_rejected(
+        self, payload, error_field="non_field_errors"
+    ):
         original_tokens = list(Token.objects.order_by("pk").values())
 
         response = self.client.post(self.url, payload, format="json")

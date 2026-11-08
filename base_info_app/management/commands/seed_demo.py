@@ -50,7 +50,9 @@ def seed_offer(business):
     offer, _ = Offer.objects.get_or_create(
         user=business,
         title=OFFER_TITLE,
-        defaults={"description": "Eine Website passend zu deinem Unternehmen."},
+        defaults={
+            "description": "Eine Website passend zu deinem Unternehmen.",
+        },
     )
     for offer_type, title, revisions, days, price, features in PACKAGES:
         OfferDetail.objects.get_or_create(
@@ -73,4 +75,6 @@ class Command(BaseCommand):
             "kevin", "asdasd24", UserProfile.AccountType.BUSINESS,
         )
         seed_offer(business)
-        self.stdout.write(self.style.SUCCESS("Demo accounts and offer are ready."))
+        self.stdout.write(
+            self.style.SUCCESS("Demo accounts and offer are ready."),
+        )

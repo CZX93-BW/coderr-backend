@@ -212,7 +212,9 @@ class OfferUpdateDeleteAPITests(APITestCase):
 
     def test_client_cannot_change_offer_owner_or_package_id(self):
         package = self.offer.details.get(offer_type="basic")
-        foreign_before = list(self.foreign_offer.details.order_by("pk").values())
+        foreign_before = list(
+            self.foreign_offer.details.order_by("pk").values(),
+        )
         response = self.client.patch(
             self.url, self.ownership_change_payload(), format="json",
         )
@@ -222,7 +224,10 @@ class OfferUpdateDeleteAPITests(APITestCase):
         self.assertEqual(self.offer.user_id, self.owner.pk)
         self.assertEqual(self.offer.title, "Allowed title")
         self.assertEqual(package.price, Decimal("35.00"))
-        self.assertEqual(self.offer.details.get(offer_type="basic").pk, package.pk)
+        self.assertEqual(
+            self.offer.details.get(offer_type="basic").pk,
+            package.pk,
+        )
         self.assertEqual(
             list(self.foreign_offer.details.order_by("pk").values()),
             foreign_before,

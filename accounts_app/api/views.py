@@ -85,6 +85,7 @@ class CustomerProfileListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = None
 
+
 class BusinessProfileListView(generics.ListAPIView):
     queryset = (
         UserProfile.objects.filter(type=UserProfile.AccountType.BUSINESS)

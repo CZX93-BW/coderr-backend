@@ -15,6 +15,7 @@ class IsCustomerUser(BasePermission):
             ).exists()
         )
 
+
 class IsReviewAuthor(BasePermission):
     message = "Only the author may modify this review."
 
