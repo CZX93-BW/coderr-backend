@@ -8,7 +8,7 @@ clarifications provided by the instructor.
 This document describes planned coverage, not completed verification.
 
 Current verified baseline:
-- Five profile model tests pass.
+- On 2026-11-08, `python manage.py test` ran all 181 tests successfully.
 - The API test plan covers registration, profiles, offers, orders, reviews, and base information.
 - Postman collections are available in `postman/collections/`, and local environments are available in `postman/environments/`.
 
