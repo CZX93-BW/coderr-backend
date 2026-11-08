@@ -35,6 +35,10 @@ class OfferUpdateDeleteAPITests(APITestCase):
         offer = Offer.objects.create(
             user=user, title=title, description="Original description",
         )
+        self.create_default_packages(offer)
+        return offer
+
+    def create_default_packages(self, offer):
         for package_type in ("basic", "standard", "premium"):
             OfferDetail.objects.create(
                 offer=offer,
@@ -45,7 +49,6 @@ class OfferUpdateDeleteAPITests(APITestCase):
                 price=Decimal("100.00"),
                 features=["Responsive layout"],
             )
-        return offer
 
     def authenticate(self, user):
         token, _ = Token.objects.get_or_create(user=user)
@@ -159,13 +162,16 @@ class OfferUpdateDeleteAPITests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.offer.refresh_from_db()
-        self.assertTrue(self.offer.image.name)
-        self.assertTrue(
-            self.offer.image.storage.exists(self.offer.image.name),
-        )
+        self.assert_image_stored()
         self.assertEqual(self.offer.title, "Original offer")
         self.assertEqual(
             list(self.offer.details.order_by("pk").values()), before,
+        )
+
+    def assert_image_stored(self):
+        self.assertTrue(self.offer.image.name)
+        self.assertTrue(
+            self.offer.image.storage.exists(self.offer.image.name),
         )
 
     def test_invalid_image_prevents_text_changes(self):
@@ -219,6 +225,13 @@ class OfferUpdateDeleteAPITests(APITestCase):
             self.url, self.ownership_change_payload(), format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_owned_offer_update(package)
+        self.assertEqual(
+            list(self.foreign_offer.details.order_by("pk").values()),
+            foreign_before,
+        )
+
+    def assert_owned_offer_update(self, package):
         self.offer.refresh_from_db()
         package.refresh_from_db()
         self.assertEqual(self.offer.user_id, self.owner.pk)
@@ -227,10 +240,6 @@ class OfferUpdateDeleteAPITests(APITestCase):
         self.assertEqual(
             self.offer.details.get(offer_type="basic").pk,
             package.pk,
-        )
-        self.assertEqual(
-            list(self.foreign_offer.details.order_by("pk").values()),
-            foreign_before,
         )
 
     def fail_standard_package_save(self, instance, *args, **kwargs):

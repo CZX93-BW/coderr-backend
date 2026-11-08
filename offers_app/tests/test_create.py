@@ -85,6 +85,12 @@ class OfferCreateAPITests(APITestCase):
         response = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()
+        self.assert_created_offer(data)
+        self.assertEqual(len(data["details"]), 3)
+        for detail in data["details"]:
+            self.assert_package_response(detail)
+
+    def assert_created_offer(self, data):
         self.assertEqual(
             set(data), {"id", "title", "image", "description", "details"},
         )
@@ -92,9 +98,6 @@ class OfferCreateAPITests(APITestCase):
         self.assertEqual(data["title"], self.payload["title"])
         self.assertEqual(data["description"], self.payload["description"])
         self.assertIsNone(data["image"])
-        self.assertEqual(len(data["details"]), 3)
-        for detail in data["details"]:
-            self.assert_package_response(detail)
 
     def assert_package_response(self, detail):
         expected = self.package_data(detail["offer_type"])
@@ -129,13 +132,7 @@ class OfferCreateAPITests(APITestCase):
 
     def test_zero_values_and_numeric_strings_are_accepted(self):
         self.authenticate(self.business)
-        self.payload["image"] = None
-        for detail, revisions in zip(self.payload["details"], (-1, 0, 100)):
-            detail.update(
-                price="0.00",
-                delivery_time_in_days="0",
-                revisions=str(revisions),
-            )
+        self.prepare_numeric_string_payload()
         response = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(OfferDetail.objects.count(), 3)
@@ -147,6 +144,15 @@ class OfferCreateAPITests(APITestCase):
             )),
             {(Decimal("0.00"), 0, value) for value in (-1, 0, 100)},
         )
+
+    def prepare_numeric_string_payload(self):
+        self.payload["image"] = None
+        for detail, revisions in zip(self.payload["details"], (-1, 0, 100)):
+            detail.update(
+                price="0.00",
+                delivery_time_in_days="0",
+                revisions=str(revisions),
+            )
 
     def test_invalid_package_numbers_create_no_data(self):
         self.authenticate(self.business)

@@ -36,6 +36,9 @@ class CustomerProfileListAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response.data, list)
         self.assertEqual(len(response.data), 1)
+        self.assert_customer_profile(response)
+
+    def assert_customer_profile(self, response):
         self.assertEqual(
             set(response.data[0]),
             {
@@ -47,6 +50,17 @@ class CustomerProfileListAPITests(APITestCase):
         self.assertEqual(response.data[0]["type"], "customer")
 
     def test_business_can_read_customer_list_without_being_listed(self):
+        self.authenticate_business_reader()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            [profile["user"] for profile in response.data],
+            [self.user.pk],
+        )
+
+    def authenticate_business_reader(self):
         business = get_user_model().objects.create_user(
             username="business_list_reader",
         )
@@ -56,14 +70,6 @@ class CustomerProfileListAPITests(APITestCase):
         )
         token = Token.objects.create(user=business)
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            [profile["user"] for profile in response.data],
-            [self.user.pk],
-        )
 
     def test_customer_list_without_profiles_returns_empty_list(self):
         self.profile.delete()
@@ -107,6 +113,9 @@ class BusinessProfileListAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response.data, list)
         self.assertEqual(len(response.data), 1)
+        self.assert_business_profile(response)
+
+    def assert_business_profile(self, response):
         self.assertEqual(
             set(response.data[0]),
             {
@@ -119,6 +128,17 @@ class BusinessProfileListAPITests(APITestCase):
         self.assertEqual(response.data[0]["type"], "business")
 
     def test_customer_can_read_business_list_without_being_listed(self):
+        self.authenticate_customer_reader()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            [profile["user"] for profile in response.data],
+            [self.user.pk],
+        )
+
+    def authenticate_customer_reader(self):
         customer = get_user_model().objects.create_user(
             username="customer_list_reader",
         )
@@ -128,14 +148,6 @@ class BusinessProfileListAPITests(APITestCase):
         )
         token = Token.objects.create(user=customer)
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
-
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            [profile["user"] for profile in response.data],
-            [self.user.pk],
-        )
 
     def test_business_list_without_profiles_returns_empty_list(self):
         self.profile.delete()

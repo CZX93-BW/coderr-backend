@@ -12,6 +12,13 @@ from orders_app.models import Order
 User = get_user_model()
 
 
+ORDER_FIELDS = {
+    "id", "customer_user", "business_user", "title", "revisions",
+    "delivery_time_in_days", "price", "features", "offer_type",
+    "status", "created_at", "updated_at",
+}
+
+
 class OrderCreateAPITests(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -152,12 +159,7 @@ class OrderCreateAPITests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         data = response.json()
-        expected_fields = {
-            "id", "customer_user", "business_user", "title", "revisions",
-            "delivery_time_in_days", "price", "features", "offer_type",
-            "status", "created_at", "updated_at",
-        }
-        self.assertEqual(set(data), expected_fields)
+        self.assertEqual(set(data), ORDER_FIELDS)
         self.assertIsInstance(data["price"], (int, float))
         self.assertEqual(Decimal(str(data["price"])), Decimal("149.90"))
         self.assertEqual(data["customer_user"], self.customer.pk)
@@ -170,6 +172,11 @@ class OrderCreateAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         order = Order.objects.get()
         before = self.order_snapshot(order)
+        self.update_original_package()
+        order.refresh_from_db()
+        self.assertEqual(self.order_snapshot(order), before)
+
+    def update_original_package(self):
         changes = {
             "title": "Changed package",
             "price": Decimal("299.00"),
@@ -181,8 +188,6 @@ class OrderCreateAPITests(APITestCase):
         for field, value in changes.items():
             setattr(self.package, field, value)
         self.package.save()
-        order.refresh_from_db()
-        self.assertEqual(self.order_snapshot(order), before)
 
     def test_deleting_offer_preserves_existing_order(self):
         response = self.post_as_customer(

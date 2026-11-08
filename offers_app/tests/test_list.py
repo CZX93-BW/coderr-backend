@@ -170,14 +170,7 @@ class OfferListAPITests(APITestCase):
 
     def test_offers_can_be_ordered_by_update_time(self):
         cheap, expensive = self.prepare_filter_offers()
-        now = timezone.now()
-        Offer.objects.filter(pk=cheap.pk).update(
-            updated_at=now - timedelta(days=2),
-        )
-        Offer.objects.filter(pk=expensive.pk).update(
-            updated_at=now - timedelta(days=1),
-        )
-        Offer.objects.filter(pk=self.offer.pk).update(updated_at=now)
+        self.set_update_times(cheap, expensive)
         self.assert_list_ids(
             {"ordering": "updated_at"},
             [cheap.pk, expensive.pk, self.offer.pk],
@@ -187,15 +180,18 @@ class OfferListAPITests(APITestCase):
             [self.offer.pk, expensive.pk, cheap.pk],
         )
 
+    def set_update_times(self, cheap, expensive):
+        now = timezone.now()
+        Offer.objects.filter(pk=cheap.pk).update(
+            updated_at=now - timedelta(days=2),
+        )
+        Offer.objects.filter(pk=expensive.pk).update(
+            updated_at=now - timedelta(days=1),
+        )
+        Offer.objects.filter(pk=self.offer.pk).update(updated_at=now)
+
     def test_default_pagination_returns_six_offers_then_remaining_offer(self):
-        for index in range(6):
-            self.create_filter_offer(
-                self.business,
-                f"Extra {index}",
-                "Pagination test.",
-                "10.00",
-                1,
-            )
+        self.create_six_extra_offers()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], 7)
@@ -204,6 +200,16 @@ class OfferListAPITests(APITestCase):
         self.assertIsNotNone(response.data["next"])
         second_page = self.client.get(response.data["next"])
         self.assert_pagination_partition(response, second_page, 7)
+
+    def create_six_extra_offers(self):
+        for index in range(6):
+            self.create_filter_offer(
+                self.business,
+                f"Extra {index}",
+                "Pagination test.",
+                "10.00",
+                1,
+            )
 
     def test_page_size_controls_number_of_results(self):
         self.prepare_filter_offers()

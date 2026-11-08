@@ -61,12 +61,7 @@ class OfferModelTests(TestCase):
 
     def test_deleting_offer_only_deletes_its_details(self):
         own_detail = self.create_detail()
-        other_offer = Offer.objects.create(
-            user=self.user,
-            title="Another website",
-            description="An independent offer.",
-        )
-        other_detail = self.create_detail(offer=other_offer)
+        other_detail = self.create_unrelated_detail()
         self.offer.delete()
         self.assertFalse(OfferDetail.objects.filter(pk=own_detail.pk).exists())
         self.assertTrue(
@@ -75,6 +70,14 @@ class OfferModelTests(TestCase):
         self.assertTrue(
             get_user_model().objects.filter(pk=self.user.pk).exists(),
         )
+
+    def create_unrelated_detail(self):
+        other_offer = Offer.objects.create(
+            user=self.user,
+            title="Another website",
+            description="An independent offer.",
+        )
+        return self.create_detail(offer=other_offer)
 
     def test_zero_price_zero_delivery_and_valid_revisions_are_allowed(self):
         detail = self.create_detail()

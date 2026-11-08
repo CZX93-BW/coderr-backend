@@ -92,13 +92,7 @@ class RegistrationAPITests(APITestCase):
         self.assert_invalid_registration(payload, "email")
 
     def test_duplicate_username_preserves_existing_registration(self):
-        original_response = self.client.post(
-            self.url, self.payload, format="json"
-        )
-        self.assertEqual(
-            original_response.status_code, status.HTTP_201_CREATED
-        )
-        original_state = self.get_registration_state()
+        original_state = self.register_and_capture_state()
         duplicate_payload = self.build_duplicate_username_payload()
 
         response = self.client.post(
@@ -108,6 +102,15 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("username", response.json())
         self.assertEqual(self.get_registration_state(), original_state)
+
+    def register_and_capture_state(self):
+        original_response = self.client.post(
+            self.url, self.payload, format="json"
+        )
+        self.assertEqual(
+            original_response.status_code, status.HTTP_201_CREATED
+        )
+        return self.get_registration_state()
 
     def build_duplicate_username_payload(self):
         payload = self.payload.copy()

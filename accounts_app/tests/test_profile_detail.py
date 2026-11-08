@@ -8,6 +8,22 @@ from rest_framework.test import APITestCase
 from accounts_app.models import UserProfile
 
 
+PROFILE_FIELDS = {
+    "user",
+    "username",
+    "first_name",
+    "last_name",
+    "file",
+    "location",
+    "tel",
+    "description",
+    "working_hours",
+    "type",
+    "email",
+    "created_at",
+}
+
+
 class ProfileDetailAPITests(APITestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
@@ -73,23 +89,9 @@ class ProfileDetailAPITests(APITestCase):
             HTTP_AUTHORIZATION=f"Token {self.token.key}",
         )
         response = self.client.get(self.url)
-        expected_fields = {
-            "user",
-            "username",
-            "first_name",
-            "last_name",
-            "file",
-            "location",
-            "tel",
-            "description",
-            "working_hours",
-            "type",
-            "email",
-            "created_at",
-        }
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(set(response.data), expected_fields)
+        self.assertEqual(set(response.data), PROFILE_FIELDS)
 
     def test_profile_without_image_returns_null(self):
         self.client.credentials(
@@ -147,13 +149,7 @@ class ProfileDetailAPITests(APITestCase):
         )
 
     def test_customer_can_read_another_users_business_profile(self):
-        provider = get_user_model().objects.create_user(
-            username="profile_provider",
-        )
-        UserProfile.objects.create(
-            user=provider,
-            type=UserProfile.AccountType.BUSINESS,
-        )
+        provider = self.create_business_user()
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {self.token.key}",
         )
@@ -164,6 +160,16 @@ class ProfileDetailAPITests(APITestCase):
         self.assertEqual(response.data["user"], provider.pk)
         self.assertEqual(response.data["username"], provider.username)
         self.assertEqual(response.data["type"], "business")
+
+    def create_business_user(self):
+        provider = get_user_model().objects.create_user(
+            username="profile_provider",
+        )
+        UserProfile.objects.create(
+            user=provider,
+            type=UserProfile.AccountType.BUSINESS,
+        )
+        return provider
 
     def test_profile_lookup_uses_user_id(self):
         self.profile.delete()

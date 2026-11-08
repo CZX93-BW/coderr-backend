@@ -66,14 +66,17 @@ class ReviewListAPITests(APITestCase):
         }
         for user in (self.customer, self.business, self.other_business):
             with self.subTest(user=user.username):
-                self.authenticate(user)
-                response = self.client.get("/api/reviews/")
-                self.assertEqual(response.status_code, status.HTTP_200_OK)
-                data = response.json()
-                self.assertIsInstance(data, list)
-                self.assertCountEqual([item["id"] for item in data], expected)
-                for item in data:
-                    self.assert_review_data(item, expected[item["id"]])
+                self.assert_user_can_read_reviews(user, expected)
+
+    def assert_user_can_read_reviews(self, user, expected):
+        self.authenticate(user)
+        response = self.client.get("/api/reviews/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertIsInstance(data, list)
+        self.assertCountEqual([item["id"] for item in data], expected)
+        for item in data:
+            self.assert_review_data(item, expected[item["id"]])
 
     def test_empty_review_list_returns_empty_array(self):
         Review.objects.all().delete()

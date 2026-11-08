@@ -44,6 +44,15 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.profile.type, "customer")
 
     def test_other_customer_cannot_update_profile(self):
+        self.authenticate_other_customer()
+        response = self.client.patch(
+            self.url, {"location": "Hamburg"}, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.location, "Berlin")
+
+    def authenticate_other_customer(self):
         other_user = get_user_model().objects.create_user(
             username="other_customer",
         )
@@ -55,12 +64,6 @@ class ProfileUpdateAPITests(APITestCase):
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {other_token.key}",
         )
-        response = self.client.patch(
-            self.url, {"location": "Hamburg"}, format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        self.profile.refresh_from_db()
-        self.assertEqual(self.profile.location, "Berlin")
 
     def test_profile_update_without_token_is_rejected(self):
         self.client.credentials()
@@ -256,6 +259,9 @@ class ProfileUpdateAPITests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("file", response.data)
+        self.assert_original_profile_preserved()
+
+    def assert_original_profile_preserved(self):
         self.profile.refresh_from_db()
         self.assertFalse(self.profile.file.name)
         self.assertIsNone(self.profile.uploaded_at)

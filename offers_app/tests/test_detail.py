@@ -10,6 +10,13 @@ from accounts_app.models import UserProfile
 from offers_app.models import Offer, OfferDetail
 
 
+OFFER_DETAIL_FIELDS = {
+    "id", "user", "title", "image", "description",
+    "created_at", "updated_at", "details",
+    "min_price", "min_delivery_time",
+}
+
+
 class OfferRetrieveAPITests(APITestCase):
     def setUp(self):
         self.business = self.create_user("detail_owner", "business")
@@ -58,12 +65,17 @@ class OfferRetrieveAPITests(APITestCase):
     def assert_offer_fields(self, data):
         self.assertEqual(
             set(data),
-            {
-                "id", "user", "title", "image", "description",
-                "created_at", "updated_at", "details",
-                "min_price", "min_delivery_time",
-            },
+            OFFER_DETAIL_FIELDS,
         )
+        self.assert_offer_values(data)
+        self.assertEqual(
+            parse_datetime(data["created_at"]), self.offer.created_at
+        )
+        self.assertEqual(
+            parse_datetime(data["updated_at"]), self.offer.updated_at
+        )
+
+    def assert_offer_values(self, data):
         self.assertEqual(data["id"], self.offer.pk)
         self.assertEqual(data["user"], self.business.pk)
         self.assertEqual(data["title"], self.offer.title)
@@ -71,12 +83,6 @@ class OfferRetrieveAPITests(APITestCase):
         self.assertIsNone(data["image"])
         self.assertEqual(data["min_price"], 0)
         self.assertEqual(data["min_delivery_time"], 0)
-        self.assertEqual(
-            parse_datetime(data["created_at"]), self.offer.created_at
-        )
-        self.assertEqual(
-            parse_datetime(data["updated_at"]), self.offer.updated_at
-        )
 
     def assert_package_links(self, details):
         expected = [
