@@ -14,6 +14,9 @@ User = get_user_model()
 class OrderModelTests(TestCase):
     @classmethod
     def setUpTestData(cls):
+        """Prepare shared orders models fixtures including customer,
+        business, order.
+        """
         cls.customer = User.objects.create_user(username="order_customer")
         cls.business = User.objects.create_user(username="order_business")
         cls.order = Order.objects.create(
@@ -28,6 +31,7 @@ class OrderModelTests(TestCase):
         )
 
     def test_order_stores_participants_and_package_data(self):
+        """Verify that order stores participants and package data."""
         self.order.refresh_from_db()
         self.assertEqual(self.order.customer_user, self.customer)
         self.assertEqual(self.order.business_user, self.business)
@@ -41,18 +45,21 @@ class OrderModelTests(TestCase):
         self.assertEqual(self.order.offer_type, "basic")
 
     def test_new_order_starts_in_progress_with_timestamps(self):
+        """Verify that new order starts in progress with timestamps."""
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, "in_progress")
         self.assertIsNotNone(self.order.created_at)
         self.assertIsNotNone(self.order.updated_at)
 
     def test_customer_with_order_cannot_be_deleted(self):
+        """Verify that customer with order cannot be deleted."""
         with self.assertRaises(ProtectedError):
             self.customer.delete()
         self.assertTrue(User.objects.filter(pk=self.customer.pk).exists())
         self.assertTrue(Order.objects.filter(pk=self.order.pk).exists())
 
     def test_business_with_order_cannot_be_deleted(self):
+        """Verify that business with order cannot be deleted."""
         with self.assertRaises(ProtectedError):
             self.business.delete()
         self.assertTrue(User.objects.filter(pk=self.business.pk).exists())

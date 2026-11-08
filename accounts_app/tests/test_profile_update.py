@@ -18,6 +18,9 @@ from accounts_app.models import UserProfile
 
 class ProfileUpdateAPITests(APITestCase):
     def setUp(self):
+        """Prepare accounts profile update fixtures including user, profile,
+        token.
+        """
         self.user = get_user_model().objects.create_user(
             username="profile_owner",
         )
@@ -33,6 +36,7 @@ class ProfileUpdateAPITests(APITestCase):
         )
 
     def test_owner_can_update_profile_location(self):
+        """Verify that owner can update profile location."""
         response = self.client.patch(
             self.url,
             {"location": "Dortmund"},
@@ -46,6 +50,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.profile.type, "customer")
 
     def test_other_customer_cannot_update_profile(self):
+        """Verify that other customer cannot update profile."""
         self.authenticate_other_customer()
         response = self.client.patch(
             self.url, {"location": "Hamburg"}, format="json",
@@ -55,6 +60,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.profile.location, "Berlin")
 
     def authenticate_other_customer(self):
+        """Authenticate other customer."""
         other_user = get_user_model().objects.create_user(
             username="other_customer",
         )
@@ -68,6 +74,7 @@ class ProfileUpdateAPITests(APITestCase):
         )
 
     def test_profile_update_without_token_is_rejected(self):
+        """Verify that profile update without token is rejected."""
         self.client.credentials()
 
         response = self.client.patch(
@@ -84,6 +91,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.profile.location, "Berlin")
 
     def test_owner_can_update_optional_profile_texts(self):
+        """Verify that owner can update optional profile texts."""
         payload = {
             "tel": "+49 123 456789",
             "description": "Web development services.",
@@ -100,6 +108,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.profile.location, "Berlin")
 
     def test_owner_can_update_linked_user_fields(self):
+        """Verify that owner can update linked user fields."""
         payload = {
             "first_name": "Bastian",
             "last_name": "Example",
@@ -117,6 +126,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.profile.location, "Berlin")
 
     def test_invalid_email_prevents_all_profile_changes(self):
+        """Verify that invalid email prevents all profile changes."""
         original_email = self.user.email
         payload = {
             "email": "invalid-email",
@@ -133,6 +143,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.profile.location, "Berlin")
 
     def test_profile_save_failure_rolls_back_user_changes(self):
+        """Verify that profile save failure rolls back user changes."""
         original_email = self.user.email
         payload = {
             "email": "updated@example.com",
@@ -152,6 +163,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.profile.location, "Berlin")
 
     def test_profile_update_cannot_grant_privileges(self):
+        """Verify that profile update cannot grant privileges."""
         payload = {
             "location": "Dortmund",
             "type": "business",
@@ -170,6 +182,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertFalse(self.user.is_superuser)
 
     def test_owner_can_clear_profile_location(self):
+        """Verify that owner can clear profile location."""
         response = self.client.patch(
             self.url,
             {"location": ""},
@@ -182,6 +195,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.profile.location, "")
 
     def test_null_location_is_rejected_without_changes(self):
+        """Verify that null location is rejected without changes."""
         response = self.client.patch(
             self.url,
             {"location": None, "first_name": "Changed"},
@@ -196,6 +210,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.user.first_name, "")
 
     def test_text_update_preserves_upload_timestamp(self):
+        """Verify that text update preserves upload timestamp."""
         uploaded_at = timezone.now()
         self.profile.uploaded_at = uploaded_at
         self.profile.save(update_fields=["uploaded_at"])
@@ -212,6 +227,7 @@ class ProfileUpdateAPITests(APITestCase):
         self.assertEqual(self.profile.uploaded_at, uploaded_at)
 
     def create_test_image(self):
+        """Build a valid in-memory PNG upload for a multipart request."""
         image_buffer = BytesIO()
         Image.new("RGB", (2, 2), color="blue").save(
             image_buffer,
@@ -224,6 +240,7 @@ class ProfileUpdateAPITests(APITestCase):
         )
 
     def assert_uploaded_image_is_saved(self, response):
+        """Check uploaded image is saved."""
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.profile.refresh_from_db()
         self.assertTrue(self.profile.file.name)
@@ -237,6 +254,7 @@ class ProfileUpdateAPITests(APITestCase):
         )
 
     def test_owner_can_upload_profile_image(self):
+        """Verify that owner can upload profile image."""
         with TemporaryDirectory() as media_directory:
             with self.settings(MEDIA_ROOT=media_directory):
                 response = self.client.patch(
@@ -248,6 +266,7 @@ class ProfileUpdateAPITests(APITestCase):
                 self.assert_uploaded_image_is_saved(response)
 
     def test_invalid_image_prevents_profile_changes(self):
+        """Verify that invalid image prevents profile changes."""
         invalid_image = SimpleUploadedFile(
             "invalid.png",
             b"This is not an image.",
@@ -264,12 +283,14 @@ class ProfileUpdateAPITests(APITestCase):
         self.assert_original_profile_preserved()
 
     def assert_original_profile_preserved(self):
+        """Check original profile preserved."""
         self.profile.refresh_from_db()
         self.assertFalse(self.profile.file.name)
         self.assertIsNone(self.profile.uploaded_at)
         self.assertEqual(self.profile.location, "Berlin")
 
     def upload_image_at(self, uploaded_at):
+        """Upload image at."""
         with patch(
             "accounts_app.api.serializers.timezone.now",
             return_value=uploaded_at,
@@ -284,6 +305,7 @@ class ProfileUpdateAPITests(APITestCase):
         return self.profile.file.name
 
     def test_owner_can_replace_profile_image(self):
+        """Verify that owner can replace profile image."""
         first_upload_at = timezone.now()
         second_upload_at = first_upload_at + timedelta(minutes=1)
         with TemporaryDirectory() as media_directory:

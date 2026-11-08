@@ -26,6 +26,9 @@ class ReviewFilterSerializer(serializers.Serializer):
 
 class ReviewFilterBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
+        """Validate participant filters and apply deterministic rating or
+        date ordering.
+        """
         params = {
             key: value
             for key, value in request.query_params.items()

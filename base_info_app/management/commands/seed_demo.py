@@ -21,6 +21,9 @@ PACKAGES = (
 
 
 def get_demo_user(username, password, role):
+    """Create a missing guest account or verify the existing account before
+    reuse.
+    """
     email = f"{username}@coderr-demo.example"
     user = User.objects.filter(username=username).first()
     if user is None:
@@ -34,6 +37,18 @@ def get_demo_user(username, password, role):
 
 
 def validate_demo_user(user, email, password, role):
+    """Reject an existing username whose credentials or privileges differ
+    from the demo configuration.
+
+    Args:
+        user: Existing account using the configured guest username.
+        email: Expected demo email address.
+        password: Expected guest password.
+        role: Expected marketplace profile type.
+
+    Raises:
+        CommandError: The account cannot safely be reused as this guest.
+    """
     matches = (
         user.email == email
         and user.is_active
@@ -49,6 +64,7 @@ def validate_demo_user(user, email, password, role):
 
 
 def seed_offer(business):
+    """Create the demo offer and fill in any missing package tiers."""
     offer, _ = Offer.objects.get_or_create(
         user=business,
         title=OFFER_TITLE,
@@ -72,6 +88,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        """Provision both guest accounts and the sample offer atomically."""
         get_demo_user("andrey", "asdasd", UserProfile.AccountType.CUSTOMER)
         business = get_demo_user(
             "kevin", "asdasd24", UserProfile.AccountType.BUSINESS,

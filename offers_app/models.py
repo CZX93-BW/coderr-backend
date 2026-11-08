@@ -24,6 +24,7 @@ class Offer(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """Return the offer title for display."""
         return self.title
 
 
@@ -63,4 +64,5 @@ class OfferDetail(models.Model):
         ]
 
     def __str__(self):
+        """Identify the package by its parent offer and tier."""
         return f"{self.offer.title}: {self.offer_type}"

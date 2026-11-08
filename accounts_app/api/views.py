@@ -27,6 +27,9 @@ class RegistrationView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """Register the account and return its token and public identity
+        fields.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -44,6 +47,9 @@ class LoginView(generics.GenericAPIView):
     authentication_classes = []
 
     def post(self, request):
+        """Authenticate the credentials and reuse or create the account
+        token.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
@@ -64,6 +70,9 @@ class ProfileDetailView(generics.RetrieveAPIView):
     lookup_url_kwarg = "pk"
 
     def patch(self, request, *args, **kwargs):
+        """Apply the partial update and return the complete profile
+        representation.
+        """
         profile = self.get_object()
         serializer = ProfileUpdateSerializer(
             profile,

@@ -14,6 +14,7 @@ User = get_user_model()
 
 class SeedDemoTests(APITestCase):
     def assert_guest_login(self, username, password, role):
+        """Check guest login."""
         response = self.client.post(
             "/api/login/",
             {"username": username, "password": password},
@@ -28,6 +29,9 @@ class SeedDemoTests(APITestCase):
         )
 
     def seed_ids(self):
+        """Collect primary keys to detect duplicate demo records across
+        runs.
+        """
         return {
             model: list(
                 model.objects.order_by("pk").values_list("pk", flat=True),
@@ -36,6 +40,7 @@ class SeedDemoTests(APITestCase):
         }
 
     def test_first_run_provides_guest_logins_and_bookable_offer(self):
+        """Verify that first run provides guest logins and bookable offer."""
         call_command("seed_demo")
         self.assert_guest_login("andrey", "asdasd", "customer")
         self.assert_guest_login("kevin", "asdasd24", "business")
@@ -46,6 +51,7 @@ class SeedDemoTests(APITestCase):
         )
 
     def test_second_run_preserves_seed_ids_without_duplicates(self):
+        """Verify that second run preserves seed ids without duplicates."""
         call_command("seed_demo")
         first_run = self.seed_ids()
         call_command("seed_demo")

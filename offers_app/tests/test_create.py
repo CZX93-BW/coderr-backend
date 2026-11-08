@@ -15,6 +15,7 @@ from offers_app.models import Offer, OfferDetail
 
 class OfferCreateAPITests(APITestCase):
     def setUp(self):
+        """Prepare offers create fixtures including url, business, customer."""
         self.url = "/api/offers/"
         self.business = self.create_user("offer_business", "business")
         self.customer = self.create_user("offer_customer", "customer")
@@ -29,17 +30,20 @@ class OfferCreateAPITests(APITestCase):
         }
 
     def create_user(self, username, account_type):
+        """Create a test account with its marketplace role."""
         user = get_user_model().objects.create_user(username=username)
         UserProfile.objects.create(user=user, type=account_type)
         return user
 
     def authenticate(self, user):
+        """Set the API client token for subsequent requests."""
         token, _ = Token.objects.get_or_create(user=user)
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {token.key}",
         )
 
     def package_data(self, offer_type):
+        """Package data for the test request."""
         return {
             "title": f"{offer_type.title()} website",
             "revisions": 2,
@@ -50,6 +54,7 @@ class OfferCreateAPITests(APITestCase):
         }
 
     def test_business_can_create_offer_with_three_packages(self):
+        """Verify that business can create offer with three packages."""
         self.authenticate(self.business)
         response = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -64,6 +69,7 @@ class OfferCreateAPITests(APITestCase):
         )
 
     def test_customer_cannot_create_offer(self):
+        """Verify that customer cannot create offer."""
         self.authenticate(self.customer)
         response = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -71,18 +77,21 @@ class OfferCreateAPITests(APITestCase):
         self.assertFalse(OfferDetail.objects.exists())
 
     def test_anonymous_user_cannot_create_offer(self):
+        """Verify that anonymous user cannot create offer."""
         response = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertFalse(Offer.objects.exists())
         self.assertFalse(OfferDetail.objects.exists())
 
     def assert_creation_rejected(self, payload):
+        """Check creation rejected."""
         response = self.client.post(self.url, payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(Offer.objects.exists())
         self.assertFalse(OfferDetail.objects.exists())
 
     def test_response_contains_documented_offer_and_package_data(self):
+        """Verify that response contains documented offer and package data."""
         self.authenticate(self.business)
         response = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -93,6 +102,7 @@ class OfferCreateAPITests(APITestCase):
             self.assert_package_response(detail)
 
     def assert_created_offer(self, data):
+        """Check created offer."""
         self.assertEqual(
             set(data), {"id", "title", "image", "description", "details"},
         )
@@ -102,6 +112,7 @@ class OfferCreateAPITests(APITestCase):
         self.assertIsNone(data["image"])
 
     def assert_package_response(self, detail):
+        """Check package response."""
         expected = self.package_data(detail["offer_type"])
         self.assertEqual(set(detail), set(expected) | {"id"})
         saved = OfferDetail.objects.get(pk=detail["id"])
@@ -116,6 +127,9 @@ class OfferCreateAPITests(APITestCase):
             self.assertEqual(detail[field], expected[field])
 
     def test_incomplete_duplicate_and_unknown_package_types_are_rejected(self):
+        """Verify that incomplete duplicate and unknown package types are
+        rejected.
+        """
         self.authenticate(self.business)
         cases = [
             [],
@@ -133,6 +147,7 @@ class OfferCreateAPITests(APITestCase):
                 self.assert_creation_rejected(payload)
 
     def test_zero_values_and_numeric_strings_are_accepted(self):
+        """Verify that zero values and numeric strings are accepted."""
         self.authenticate(self.business)
         self.prepare_numeric_string_payload()
         response = self.client.post(self.url, self.payload, format="json")
@@ -148,6 +163,7 @@ class OfferCreateAPITests(APITestCase):
         )
 
     def prepare_numeric_string_payload(self):
+        """Prepare numeric string payload."""
         self.payload["image"] = None
         for detail, revisions in zip(self.payload["details"], (-1, 0, 100)):
             detail.update(
@@ -157,6 +173,7 @@ class OfferCreateAPITests(APITestCase):
             )
 
     def test_invalid_package_numbers_create_no_data(self):
+        """Verify that invalid package numbers create no data."""
         self.authenticate(self.business)
         cases = [
             ("price", "-0.01"),
@@ -172,6 +189,7 @@ class OfferCreateAPITests(APITestCase):
                 self.assert_creation_rejected(payload)
 
     def test_client_cannot_choose_another_offer_owner(self):
+        """Verify that client cannot choose another offer owner."""
         self.authenticate(self.business)
         self.payload["user"] = self.customer.pk
         response = self.client.post(self.url, self.payload, format="json")
@@ -179,6 +197,7 @@ class OfferCreateAPITests(APITestCase):
         self.assertEqual(Offer.objects.get().user_id, self.business.pk)
 
     def create_first_detail_then_fail(self, **kwargs):
+        """Create first detail then fail."""
         if OfferDetail.objects.exists():
             raise RuntimeError("Simulated package save failure.")
         detail = OfferDetail(**kwargs)
@@ -186,6 +205,9 @@ class OfferCreateAPITests(APITestCase):
         return detail
 
     def test_package_save_failure_rolls_back_offer_and_previous_package(self):
+        """Verify that package save failure rolls back offer and previous
+        package.
+        """
         self.authenticate(self.business)
         with patch(
             "offers_app.services.OfferDetail.objects.create",

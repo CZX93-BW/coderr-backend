@@ -24,12 +24,14 @@ class ReviewListCreateView(ListCreateAPIView):
     http_method_names = ["get", "post", "head", "options"]
 
     def get_permissions(self):
+        """Require a customer profile to publish a review."""
         permissions = super().get_permissions()
         if self.request.method == "POST":
             permissions.append(IsCustomerUser())
         return permissions
 
     def perform_create(self, serializer):
+        """Assign authorship to the authenticated reviewer."""
         serializer.save(reviewer=self.request.user)
 
 

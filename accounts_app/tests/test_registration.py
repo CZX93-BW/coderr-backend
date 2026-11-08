@@ -12,6 +12,7 @@ from accounts_app.models import UserProfile
 
 class RegistrationAPITests(APITestCase):
     def setUp(self):
+        """Prepare accounts registration fixtures including url, payload."""
         self.url = "/api/registration/"
         self.payload = {
             "username": "new_customer",
@@ -22,6 +23,9 @@ class RegistrationAPITests(APITestCase):
         }
 
     def test_customer_registration_creates_account_profile_and_token(self):
+        """Verify that customer registration creates account profile and
+        token.
+        """
         response = self.client.post(self.url, self.payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -36,6 +40,9 @@ class RegistrationAPITests(APITestCase):
         self.assert_registered_user(user)
 
     def test_business_registration_creates_account_profile_and_token(self):
+        """Verify that business registration creates account profile and
+        token.
+        """
         self.payload["type"] = "business"
 
         response = self.client.post(self.url, self.payload, format="json")
@@ -52,6 +59,7 @@ class RegistrationAPITests(APITestCase):
         self.assert_registered_user(user)
 
     def test_password_mismatch_creates_no_registration_data(self):
+        """Verify that password mismatch creates no registration data."""
         self.payload["repeated_password"] = "DifferentPassword123!"
 
         response = self.client.post(self.url, self.payload, format="json")
@@ -63,6 +71,7 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(Token.objects.count(), 0)
 
     def test_invalid_account_type_creates_no_registration_data(self):
+        """Verify that invalid account type creates no registration data."""
         for account_type in ("admin", "staff", "invalid"):
             with self.subTest(account_type=account_type):
                 payload = self.payload.copy()
@@ -71,6 +80,7 @@ class RegistrationAPITests(APITestCase):
                 self.assert_invalid_registration(payload, "type")
 
     def test_missing_required_fields_create_no_registration_data(self):
+        """Verify that missing required fields create no registration data."""
         for field in self.payload:
             with self.subTest(field=field):
                 payload = self.payload.copy()
@@ -79,6 +89,7 @@ class RegistrationAPITests(APITestCase):
                 self.assert_invalid_registration(payload, field)
 
     def test_empty_required_fields_create_no_registration_data(self):
+        """Verify that empty required fields create no registration data."""
         for field in self.payload:
             for value in ("", None):
                 with self.subTest(field=field, value=value):
@@ -88,12 +99,14 @@ class RegistrationAPITests(APITestCase):
                     self.assert_invalid_registration(payload, field)
 
     def test_invalid_email_creates_no_registration_data(self):
+        """Verify that invalid email creates no registration data."""
         payload = self.payload.copy()
         payload["email"] = "not-an-email"
 
         self.assert_invalid_registration(payload, "email")
 
     def test_duplicate_username_preserves_existing_registration(self):
+        """Verify that duplicate username preserves existing registration."""
         original_state = self.register_and_capture_state()
         duplicate_payload = self.build_duplicate_username_payload()
 
@@ -106,6 +119,7 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(self.get_registration_state(), original_state)
 
     def register_and_capture_state(self):
+        """Register and capture state."""
         original_response = self.client.post(
             self.url, self.payload, format="json"
         )
@@ -115,6 +129,7 @@ class RegistrationAPITests(APITestCase):
         return self.get_registration_state()
 
     def build_duplicate_username_payload(self):
+        """Build duplicate username payload."""
         payload = self.payload.copy()
         payload.update(
             email="different@example.com",
@@ -125,6 +140,9 @@ class RegistrationAPITests(APITestCase):
         return payload
 
     def get_registration_state(self):
+        """Snapshot account, profile and token records for rollback
+        comparisons.
+        """
         return {
             "users": list(
                 get_user_model().objects.order_by("pk").values()
@@ -138,6 +156,7 @@ class RegistrationAPITests(APITestCase):
         }
 
     def assert_invalid_registration(self, payload, field):
+        """Check invalid registration."""
         response = self.client.post(self.url, payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -147,6 +166,7 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(Token.objects.count(), 0)
 
     def assert_registration_response(self, response, user, token):
+        """Check registration response."""
         expected = {
             "token": token.key,
             "username": self.payload["username"],
@@ -156,6 +176,7 @@ class RegistrationAPITests(APITestCase):
         self.assertEqual(response.json(), expected)
 
     def assert_registered_user(self, user):
+        """Check registered user."""
         self.assertEqual(user.email, self.payload["email"])
         self.assertTrue(user.check_password(self.payload["password"]))
         self.assertNotEqual(user.password, self.payload["password"])
@@ -165,6 +186,9 @@ class RegistrationAPITests(APITestCase):
 
 class RegistrationPermissionTests(APITestCase):
     def test_registration_cannot_grant_staff_or_superuser_privileges(self):
+        """Verify that registration cannot grant staff or superuser
+        privileges.
+        """
         payload = {
             "username": "privilege_attempt",
             "email": "privilege@example.com",
@@ -190,6 +214,7 @@ class RegistrationPermissionTests(APITestCase):
 
 class RegistrationTransactionTests(APITestCase):
     def setUp(self):
+        """Prepare accounts registration fixtures including payload."""
         self.payload = {
             "username": "rollback_customer",
             "email": "rollback@example.com",
@@ -199,16 +224,21 @@ class RegistrationTransactionTests(APITestCase):
         }
 
     def test_profile_creation_failure_rolls_back_registration(self):
+        """Verify that profile creation failure rolls back registration."""
         self.assert_registration_is_rolled_back(
             "accounts_app.services.UserProfile.objects.create"
         )
 
     def test_token_creation_failure_rolls_back_registration(self):
+        """Verify that token creation failure rolls back registration."""
         self.assert_registration_is_rolled_back(
             "accounts_app.services.Token.objects.create"
         )
 
     def assert_registration_is_rolled_back(self, target):
+        """Inject a save failure and check that registration leaves no
+        records.
+        """
         with patch(target, side_effect=RuntimeError("Simulated failure")):
             with self.assertRaises(RuntimeError):
                 self.client.post(

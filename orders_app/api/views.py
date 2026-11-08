@@ -28,23 +28,29 @@ class OrderListCreateView(ListCreateAPIView):
     http_method_names = ["get", "post", "head", "options"]
 
     def get_permissions(self):
+        """Require a customer profile when creating a booking."""
         permissions = super().get_permissions()
         if self.request.method == "POST":
             permissions.append(IsCustomerUser())
         return permissions
 
     def get_serializer_class(self):
+        """Use package selection for creation and the order representation
+        for reads.
+        """
         if self.request.method == "POST":
             return OrderCreateSerializer
         return OrderSerializer
 
     def get_queryset(self):
+        """Return orders in which the requester is the customer or provider."""
         user = self.request.user
         return Order.objects.filter(
             Q(customer_user=user) | Q(business_user=user),
         ).order_by("id")
 
     def perform_create(self, serializer):
+        """Bind the booking to the authenticated customer."""
         serializer.save(customer_user=self.request.user)
 
 
@@ -60,9 +66,11 @@ class OrderDetailView(
     http_method_names = ["patch", "delete", "options"]
 
     def patch(self, request, *args, **kwargs):
+        """Apply a partial status update to the selected order."""
         return self.partial_update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
+        """Delete the selected order after the permission check."""
         return self.destroy(request, *args, **kwargs)
 
 
@@ -74,6 +82,9 @@ class OrderCountView(APIView):
     response_key = "order_count"
 
     def get(self, request, business_user_id):
+        """Count orders with the configured status for the requested
+        provider.
+        """
         get_object_or_404(
             UserProfile,
             user_id=business_user_id,

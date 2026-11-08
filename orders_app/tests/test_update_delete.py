@@ -16,6 +16,9 @@ User = get_user_model()
 class OrderUpdateDeleteAPITests(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        """Prepare shared orders update delete fixtures including customer,
+        business, other business.
+        """
         cls.customer = cls.create_user("change_customer", "customer")
         cls.business = cls.create_user("change_business", "business")
         cls.other_business = cls.create_user("change_other", "business")
@@ -25,6 +28,7 @@ class OrderUpdateDeleteAPITests(APITestCase):
 
     @classmethod
     def create_user(cls, username, account_type, **extra):
+        """Create a test account with its marketplace role."""
         user = User.objects.create_user(username=username, **extra)
         UserProfile.objects.create(user=user, type=account_type)
         Token.objects.create(user=user)
@@ -32,6 +36,7 @@ class OrderUpdateDeleteAPITests(APITestCase):
 
     @classmethod
     def create_order(cls, business):
+        """Create order."""
         return Order.objects.create(
             customer_user=cls.customer,
             business_user=business,
@@ -44,18 +49,22 @@ class OrderUpdateDeleteAPITests(APITestCase):
         )
 
     def authenticate(self, user):
+        """Set the API client token for subsequent requests."""
         token = Token.objects.get(user=user)
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {token.key}",
         )
 
     def order_url(self):
+        """Order url for the test request."""
         return f"/api/orders/{self.order.pk}/"
 
     def stored_order(self):
+        """Read persisted order fields for a before-and-after comparison."""
         return Order.objects.values().get(pk=self.order.pk)
 
     def test_associated_business_can_change_status(self):
+        """Verify that associated business can change status."""
         self.authenticate(self.business)
         before = self.stored_order()
         for value in ("completed", "cancelled", "in_progress"):
@@ -71,6 +80,9 @@ class OrderUpdateDeleteAPITests(APITestCase):
                     self.assertEqual(after[field], before[field])
 
     def test_customer_foreign_business_and_unrelated_staff_cannot_update(self):
+        """Verify that customer foreign business and unrelated staff cannot
+        update.
+        """
         before = self.stored_order()
         for user in (self.customer, self.other_business, self.staff):
             with self.subTest(user=user.username):
@@ -84,6 +96,7 @@ class OrderUpdateDeleteAPITests(APITestCase):
                 self.assertEqual(self.stored_order(), before)
 
     def test_invalid_status_or_extra_fields_preserve_order(self):
+        """Verify that invalid status or extra fields preserve order."""
         self.authenticate(self.business)
         before = self.stored_order()
         payloads = [
@@ -106,6 +119,7 @@ class OrderUpdateDeleteAPITests(APITestCase):
                 self.assertEqual(self.stored_order(), before)
 
     def test_staff_can_delete_unrelated_order_only(self):
+        """Verify that staff can delete unrelated order only."""
         self.authenticate(self.staff)
         other_before = Order.objects.values().get(pk=self.other_order.pk)
         response = self.client.delete(self.order_url())
@@ -119,6 +133,7 @@ class OrderUpdateDeleteAPITests(APITestCase):
         self.assertTrue(User.objects.filter(pk=self.business.pk).exists())
 
     def test_non_staff_users_cannot_delete_order(self):
+        """Verify that non staff users cannot delete order."""
         before = self.stored_order()
         for user in (self.customer, self.business, self.other_business):
             with self.subTest(user=user.username):
@@ -130,6 +145,7 @@ class OrderUpdateDeleteAPITests(APITestCase):
                 self.assertEqual(self.stored_order(), before)
 
     def test_anonymous_user_cannot_update_or_delete_order(self):
+        """Verify that anonymous user cannot update or delete order."""
         before = self.stored_order()
         responses = [
             self.client.patch(
@@ -144,6 +160,7 @@ class OrderUpdateDeleteAPITests(APITestCase):
         self.assertEqual(self.stored_order(), before)
 
     def test_authorized_users_receive_not_found_for_unknown_order(self):
+        """Verify that authorized users receive not found for unknown order."""
         missing_url = f"/api/orders/{self.other_order.pk + 1000}/"
         self.authenticate(self.business)
         response = self.client.patch(

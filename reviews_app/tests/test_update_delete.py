@@ -15,6 +15,9 @@ User = get_user_model()
 class ReviewUpdateDeleteAPITests(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        """Prepare shared reviews update delete fixtures including author,
+        other, business.
+        """
         cls.author = cls.create_user("edit_author", "customer")
         cls.other = cls.create_user("edit_other", "customer")
         cls.business = cls.create_user("edit_provider", "business")
@@ -23,6 +26,7 @@ class ReviewUpdateDeleteAPITests(APITestCase):
 
     @classmethod
     def create_user(cls, username, account_type):
+        """Create a test account with its marketplace role."""
         user = User.objects.create_user(username=username)
         UserProfile.objects.create(user=user, type=account_type)
         Token.objects.create(user=user)
@@ -30,6 +34,7 @@ class ReviewUpdateDeleteAPITests(APITestCase):
 
     @classmethod
     def create_review(cls, reviewer, description):
+        """Create review."""
         return Review.objects.create(
             reviewer=reviewer,
             business_user=cls.business,
@@ -38,13 +43,16 @@ class ReviewUpdateDeleteAPITests(APITestCase):
         )
 
     def authenticate(self, user):
+        """Set the API client token for subsequent requests."""
         token = Token.objects.get(user=user)
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
 
     def review_url(self):
+        """Review url for the test request."""
         return f"/api/reviews/{self.review.pk}/"
 
     def assert_write_denied(self, expected_status):
+        """Check write denied."""
         url = self.review_url()
         before = list(Review.objects.order_by("pk").values())
         patch = self.client.patch(url, {"rating": 1}, format="json")
@@ -54,6 +62,7 @@ class ReviewUpdateDeleteAPITests(APITestCase):
         self.assertEqual(list(Review.objects.order_by("pk").values()), before)
 
     def test_author_can_update_rating_only(self):
+        """Verify that author can update rating only."""
         self.authenticate(self.author)
         response = self.client.patch(
             self.review_url(), {"rating": 1}, format="json",
@@ -66,6 +75,7 @@ class ReviewUpdateDeleteAPITests(APITestCase):
         self.assertEqual(self.review.business_user_id, self.business.pk)
 
     def test_author_can_update_description_only(self):
+        """Verify that author can update description only."""
         self.authenticate(self.author)
         response = self.client.patch(
             self.review_url(), {"description": "Revised text."}, format="json",
@@ -76,6 +86,7 @@ class ReviewUpdateDeleteAPITests(APITestCase):
         self.assertEqual(self.review.rating, 4)
 
     def test_author_can_delete_only_the_target_review(self):
+        """Verify that author can delete only the target review."""
         self.authenticate(self.author)
         response = self.client.delete(self.review_url())
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -86,15 +97,18 @@ class ReviewUpdateDeleteAPITests(APITestCase):
         )
 
     def test_other_reviewer_and_provider_cannot_modify_review(self):
+        """Verify that other reviewer and provider cannot modify review."""
         for user in (self.other, self.business):
             with self.subTest(user=user.username):
                 self.authenticate(user)
                 self.assert_write_denied(status.HTTP_403_FORBIDDEN)
 
     def test_anonymous_user_cannot_modify_review(self):
+        """Verify that anonymous user cannot modify review."""
         self.assert_write_denied(status.HTTP_401_UNAUTHORIZED)
 
     def test_invalid_rating_preserves_description_and_rating(self):
+        """Verify that invalid rating preserves description and rating."""
         self.authenticate(self.author)
         response = self.client.patch(
             self.review_url(),
@@ -107,12 +121,17 @@ class ReviewUpdateDeleteAPITests(APITestCase):
         self.assertEqual(self.review.description, "Original review.")
 
     def patch_review(self, payload):
+        """Patch review."""
         return self.client.patch(self.review_url(), payload, format="json")
 
     def stored_review(self):
+        """Read persisted review fields for a before-and-after comparison."""
         return Review.objects.values().get(pk=self.review.pk)
 
     def test_author_can_set_maximum_rating_but_cannot_reassign_review(self):
+        """Verify that author can set maximum rating but cannot reassign
+        review.
+        """
         self.authenticate(self.author)
         provider = self.create_user("another_provider", "business")
         response = self.patch_review({
@@ -127,6 +146,7 @@ class ReviewUpdateDeleteAPITests(APITestCase):
         self.assertEqual(self.review.business_user_id, self.business.pk)
 
     def test_invalid_ratings_preserve_all_stored_fields(self):
+        """Verify that invalid ratings preserve all stored fields."""
         self.authenticate(self.author)
         before = self.stored_review()
         for value in (0, -1, 6, 1.5, True, None, "", "abc"):
@@ -143,6 +163,7 @@ class ReviewUpdateDeleteAPITests(APITestCase):
                 self.assertEqual(self.stored_review(), before)
 
     def test_patch_without_editable_fields_returns_bad_request(self):
+        """Verify that patch without editable fields returns bad request."""
         self.authenticate(self.author)
         before = self.stored_review()
         for payload in ({}, {"reviewer": self.other.pk}):
@@ -155,6 +176,9 @@ class ReviewUpdateDeleteAPITests(APITestCase):
                 self.assertEqual(self.stored_review(), before)
 
     def test_unknown_review_returns_not_found_for_patch_and_delete(self):
+        """Verify that unknown review returns not found for patch and
+        delete.
+        """
         self.authenticate(self.author)
         unknown_id = max(self.review.pk, self.other_review.pk) + 1
         url = f"/api/reviews/{unknown_id}/"

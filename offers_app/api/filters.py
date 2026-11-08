@@ -34,6 +34,7 @@ class OfferQuerySerializer(serializers.Serializer):
 
 class OfferFilterBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
+        """Apply validated filters and use the ID to break ordering ties."""
         params = self.get_validated_params(request)
         queryset = self.apply_numeric_filters(queryset, params)
         queryset = self.apply_search(queryset, params.get("search"))
@@ -44,6 +45,9 @@ class OfferFilterBackend(BaseFilterBackend):
         return queryset
 
     def get_validated_params(self, request):
+        """Discard blank query values and validate the remaining list
+        parameters.
+        """
         data = {
             key: value
             for key, value in request.query_params.items()
@@ -54,6 +58,9 @@ class OfferFilterBackend(BaseFilterBackend):
         return serializer.validated_data
 
     def apply_numeric_filters(self, queryset, params):
+        """Filter by provider, minimum package price and maximum delivery
+        time.
+        """
         lookups = {
             "creator_id": "user_id",
             "min_price": "min_price__gte",
@@ -67,6 +74,7 @@ class OfferFilterBackend(BaseFilterBackend):
         return queryset.filter(**filters)
 
     def apply_search(self, queryset, search):
+        """Match the search text against the offer title or description."""
         if not search:
             return queryset
         return queryset.filter(

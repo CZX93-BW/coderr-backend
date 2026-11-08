@@ -29,6 +29,9 @@ PROFILE_FIELDS = {
 
 class ProfileDetailAPITests(APITestCase):
     def setUp(self):
+        """Prepare accounts profile detail fixtures including user, profile,
+        token.
+        """
         self.user = get_user_model().objects.create_user(
             username="profile_customer",
             email="profile@example.com",
@@ -41,6 +44,7 @@ class ProfileDetailAPITests(APITestCase):
         self.url = f"/api/profile/{self.user.pk}/"
 
     def test_profile_request_without_token_is_rejected(self):
+        """Verify that profile request without token is rejected."""
         response = self.client.get(self.url)
 
         self.assertEqual(
@@ -49,6 +53,7 @@ class ProfileDetailAPITests(APITestCase):
         )
 
     def test_valid_token_allows_profile_access(self):
+        """Verify that valid token allows profile access."""
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {self.token.key}",
         )
@@ -60,6 +65,7 @@ class ProfileDetailAPITests(APITestCase):
         self.assertEqual(response.data["type"], self.profile.type)
 
     def test_unknown_token_is_rejected(self):
+        """Verify that unknown token is rejected."""
         first_character = "0" if self.token.key[0] != "0" else "1"
         invalid_key = first_character + self.token.key[1:]
         self.client.credentials(
@@ -74,6 +80,7 @@ class ProfileDetailAPITests(APITestCase):
         )
 
     def test_inactive_user_token_is_rejected(self):
+        """Verify that inactive user token is rejected."""
         self.user.is_active = False
         self.user.save(update_fields=["is_active"])
         self.client.credentials(
@@ -88,6 +95,7 @@ class ProfileDetailAPITests(APITestCase):
         )
 
     def test_profile_response_contains_documented_fields(self):
+        """Verify that profile response contains documented fields."""
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {self.token.key}",
         )
@@ -97,6 +105,7 @@ class ProfileDetailAPITests(APITestCase):
         self.assertEqual(set(response.data), PROFILE_FIELDS)
 
     def test_profile_without_image_returns_null(self):
+        """Verify that profile without image returns null."""
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {self.token.key}",
         )
@@ -108,6 +117,7 @@ class ProfileDetailAPITests(APITestCase):
         self.assertIsNone(response.data["file"])
 
     def test_profile_returns_linked_user_data(self):
+        """Verify that profile returns linked user data."""
         self.user.first_name = "Bastian"
         self.user.last_name = "Example"
         self.user.save(update_fields=["first_name", "last_name"])
@@ -128,6 +138,7 @@ class ProfileDetailAPITests(APITestCase):
                 self.assertEqual(response.data[field], expected_value)
 
     def test_profile_created_at_matches_user_date_joined(self):
+        """Verify that profile created at matches user date joined."""
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {self.token.key}",
         )
@@ -139,6 +150,7 @@ class ProfileDetailAPITests(APITestCase):
         self.assertEqual(created_at, self.user.date_joined)
 
     def test_missing_profile_returns_not_found(self):
+        """Verify that missing profile returns not found."""
         self.profile.delete()
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {self.token.key}",
@@ -152,6 +164,7 @@ class ProfileDetailAPITests(APITestCase):
         )
 
     def test_customer_can_read_another_users_business_profile(self):
+        """Verify that customer can read another users business profile."""
         provider = self.create_business_user()
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {self.token.key}",
@@ -165,6 +178,7 @@ class ProfileDetailAPITests(APITestCase):
         self.assertEqual(response.data["type"], "business")
 
     def create_business_user(self):
+        """Create business user."""
         provider = get_user_model().objects.create_user(
             username="profile_provider",
         )
@@ -175,6 +189,7 @@ class ProfileDetailAPITests(APITestCase):
         return provider
 
     def test_profile_lookup_uses_user_id(self):
+        """Verify that profile lookup uses user id."""
         self.profile.delete()
         self.profile = UserProfile.objects.create(
             pk=self.user.pk + 100,
@@ -191,6 +206,7 @@ class ProfileDetailAPITests(APITestCase):
         self.assertEqual(response.data["user"], self.user.pk)
 
     def test_profile_returns_saved_profile_texts(self):
+        """Verify that profile returns saved profile texts."""
         expected_values = {
             "location": "Dortmund",
             "tel": "+49 123 456789",

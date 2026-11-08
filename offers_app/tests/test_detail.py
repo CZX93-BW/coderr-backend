@@ -21,6 +21,9 @@ OFFER_DETAIL_FIELDS = {
 
 class OfferRetrieveAPITests(APITestCase):
     def setUp(self):
+        """Prepare offers detail fixtures including business, customer,
+        other business.
+        """
         self.business = self.create_user("detail_owner", "business")
         self.customer = self.create_user("detail_customer", "customer")
         self.other_business = self.create_user("detail_reader", "business")
@@ -35,17 +38,20 @@ class OfferRetrieveAPITests(APITestCase):
         self.authenticate(self.customer)
 
     def create_user(self, username, account_type):
+        """Create a test account with its marketplace role."""
         user = get_user_model().objects.create_user(username=username)
         UserProfile.objects.create(user=user, type=account_type)
         return user
 
     def authenticate(self, user):
+        """Set the API client token for subsequent requests."""
         token, _ = Token.objects.get_or_create(user=user)
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {token.key}"
         )
 
     def create_packages(self):
+        """Create packages."""
         values = [
             ("basic", "0.00", 7, -1),
             ("standard", "100.50", 0, 2),
@@ -65,6 +71,7 @@ class OfferRetrieveAPITests(APITestCase):
         ]
 
     def assert_offer_fields(self, data):
+        """Check offer fields."""
         self.assertEqual(
             set(data),
             OFFER_DETAIL_FIELDS,
@@ -78,6 +85,7 @@ class OfferRetrieveAPITests(APITestCase):
         )
 
     def assert_offer_values(self, data):
+        """Check offer values."""
         self.assertEqual(data["id"], self.offer.pk)
         self.assertEqual(data["user"], self.business.pk)
         self.assertEqual(data["title"], self.offer.title)
@@ -87,6 +95,9 @@ class OfferRetrieveAPITests(APITestCase):
         self.assertEqual(data["min_delivery_time"], 0)
 
     def assert_package_links(self, details):
+        """Check the package links and follow each URL to its detail
+        endpoint.
+        """
         expected = [
             {
                 "id": package.pk,
@@ -104,6 +115,9 @@ class OfferRetrieveAPITests(APITestCase):
             self.assertEqual(response.json()["id"], detail["id"])
 
     def test_customer_can_read_documented_offer_with_absolute_links(self):
+        """Verify that customer can read documented offer with absolute
+        links.
+        """
         response = self.client.get(self.offer_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -112,6 +126,7 @@ class OfferRetrieveAPITests(APITestCase):
         self.assert_package_links(data["details"])
 
     def test_customer_can_read_documented_package(self):
+        """Verify that customer can read documented package."""
         response = self.client.get(self.package_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -129,6 +144,7 @@ class OfferRetrieveAPITests(APITestCase):
         )
 
     def test_owner_and_other_business_can_read_both_details(self):
+        """Verify that owner and other business can read both details."""
         for user in (self.business, self.other_business):
             self.authenticate(user)
             for url in (self.offer_url, self.package_url):
@@ -139,6 +155,7 @@ class OfferRetrieveAPITests(APITestCase):
                     )
 
     def test_anonymous_user_cannot_read_details(self):
+        """Verify that anonymous user cannot read details."""
         self.client.credentials()
 
         for url in (self.offer_url, self.package_url):
@@ -149,6 +166,7 @@ class OfferRetrieveAPITests(APITestCase):
                 )
 
     def test_invalid_token_cannot_read_details(self):
+        """Verify that invalid token cannot read details."""
         self.client.credentials(
             HTTP_AUTHORIZATION="Token invalid-detail-test-token"
         )
@@ -161,6 +179,7 @@ class OfferRetrieveAPITests(APITestCase):
                 )
 
     def test_unknown_offer_and_package_return_not_found(self):
+        """Verify that unknown offer and package return not found."""
         missing_offer_id = self.offer.pk + 1000
         missing_package_id = max(p.pk for p in self.packages) + 1000
         urls = [

@@ -40,6 +40,9 @@ class OfferViewSet(ModelViewSet):
     ]
 
     def get_permissions(self):
+        """Select public, authenticated or owner access for the current
+        action.
+        """
         if self.action == "list":
             return [AllowAny()]
         if self.action == "retrieve":
@@ -49,6 +52,7 @@ class OfferViewSet(ModelViewSet):
         return super().get_permissions()
 
     def get_serializer_class(self):
+        """Choose the response or input serializer for the offer action."""
         serializers_by_action = {
             "list": OfferListSerializer,
             "retrieve": OfferRetrieveSerializer,
@@ -60,11 +64,13 @@ class OfferViewSet(ModelViewSet):
         )
 
     def filter_queryset(self, queryset):
+        """Apply list filters only when browsing the offer collection."""
         if self.action == "list":
             return super().filter_queryset(queryset)
         return queryset
 
     def perform_create(self, serializer):
+        """Assign the authenticated provider as the new offer owner."""
         serializer.save(user=self.request.user)
 
 

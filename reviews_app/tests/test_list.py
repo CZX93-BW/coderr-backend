@@ -17,6 +17,9 @@ User = get_user_model()
 class ReviewListAPITests(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        """Prepare shared reviews list fixtures including customer, other
+        customer, business.
+        """
         cls.customer = cls.create_user("list_reviewer", "customer")
         cls.other_customer = cls.create_user("list_other", "customer")
         cls.business = cls.create_user("list_provider", "business")
@@ -27,6 +30,7 @@ class ReviewListAPITests(APITestCase):
 
     @classmethod
     def create_user(cls, username, account_type):
+        """Create a test account with its marketplace role."""
         user = User.objects.create_user(username=username)
         UserProfile.objects.create(user=user, type=account_type)
         Token.objects.create(user=user)
@@ -34,6 +38,7 @@ class ReviewListAPITests(APITestCase):
 
     @classmethod
     def create_review(cls, reviewer, business, rating):
+        """Create review."""
         return Review.objects.create(
             reviewer=reviewer,
             business_user=business,
@@ -42,12 +47,14 @@ class ReviewListAPITests(APITestCase):
         )
 
     def authenticate(self, user):
+        """Set the API client token for subsequent requests."""
         token = Token.objects.get(user=user)
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {token.key}",
         )
 
     def assert_review_data(self, data, review):
+        """Check review data."""
         self.assertEqual(set(data), {
             "id", "business_user", "reviewer", "rating",
             "description", "created_at", "updated_at",
@@ -62,6 +69,7 @@ class ReviewListAPITests(APITestCase):
         self.assertTrue(data["updated_at"])
 
     def test_authenticated_users_can_read_all_reviews(self):
+        """Verify that authenticated users can read all reviews."""
         expected = {
             review.pk: review
             for review in (self.first, self.second, self.third)
@@ -71,6 +79,7 @@ class ReviewListAPITests(APITestCase):
                 self.assert_user_can_read_reviews(user, expected)
 
     def assert_user_can_read_reviews(self, user, expected):
+        """Check user can read reviews."""
         self.authenticate(user)
         response = self.client.get("/api/reviews/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -81,6 +90,7 @@ class ReviewListAPITests(APITestCase):
             self.assert_review_data(item, expected[item["id"]])
 
     def test_empty_review_list_returns_empty_array(self):
+        """Verify that empty review list returns empty array."""
         Review.objects.all().delete()
         self.authenticate(self.customer)
         response = self.client.get("/api/reviews/")
@@ -88,15 +98,18 @@ class ReviewListAPITests(APITestCase):
         self.assertEqual(response.json(), [])
 
     def test_anonymous_user_cannot_list_reviews(self):
+        """Verify that anonymous user cannot list reviews."""
         response = self.client.get("/api/reviews/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_invalid_token_cannot_list_reviews(self):
+        """Verify that invalid token cannot list reviews."""
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {'0' * 40}")
         response = self.client.get("/api/reviews/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def assert_list_ids(self, params, expected, ordered=False):
+        """Check list ids."""
         response = self.client.get("/api/reviews/", params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -108,6 +121,7 @@ class ReviewListAPITests(APITestCase):
             self.assertCountEqual(actual, expected)
 
     def test_reviews_can_be_filtered_by_business(self):
+        """Verify that reviews can be filtered by business."""
         self.authenticate(self.customer)
         self.assert_list_ids(
             {"business_user_id": self.business.pk},
@@ -119,6 +133,7 @@ class ReviewListAPITests(APITestCase):
         )
 
     def test_reviews_can_be_filtered_by_reviewer(self):
+        """Verify that reviews can be filtered by reviewer."""
         self.authenticate(self.business)
         self.assert_list_ids(
             {"reviewer_id": self.customer.pk},
@@ -130,6 +145,7 @@ class ReviewListAPITests(APITestCase):
         )
 
     def test_business_and_reviewer_filters_are_combined(self):
+        """Verify that business and reviewer filters are combined."""
         self.authenticate(self.customer)
         self.assert_list_ids(
             {
@@ -140,6 +156,7 @@ class ReviewListAPITests(APITestCase):
         )
 
     def test_filters_without_matches_return_empty_array(self):
+        """Verify that filters without matches return empty array."""
         self.authenticate(self.customer)
         self.assert_list_ids(
             {
@@ -154,6 +171,7 @@ class ReviewListAPITests(APITestCase):
         )
 
     def test_reviews_can_be_ordered_by_rating(self):
+        """Verify that reviews can be ordered by rating."""
         self.authenticate(self.customer)
         self.assert_list_ids(
             {"ordering": "rating"},
@@ -167,6 +185,7 @@ class ReviewListAPITests(APITestCase):
         )
 
     def set_distinct_update_times(self):
+        """Set distinct update times."""
         base = timezone.now() - timedelta(days=1)
         for review, hours in (
             (self.first, 3),
@@ -178,6 +197,7 @@ class ReviewListAPITests(APITestCase):
             )
 
     def test_reviews_can_be_ordered_by_update_time(self):
+        """Verify that reviews can be ordered by update time."""
         self.authenticate(self.customer)
         self.set_distinct_update_times()
         self.assert_list_ids(
@@ -192,6 +212,7 @@ class ReviewListAPITests(APITestCase):
         )
 
     def test_default_ordering_uses_latest_update_first(self):
+        """Verify that default ordering uses latest update first."""
         self.authenticate(self.customer)
         self.set_distinct_update_times()
         self.assert_list_ids(
@@ -201,6 +222,7 @@ class ReviewListAPITests(APITestCase):
         )
 
     def test_empty_optional_filters_are_ignored(self):
+        """Verify that empty optional filters are ignored."""
         self.authenticate(self.customer)
         self.set_distinct_update_times()
         for value in ("", "   "):
@@ -216,6 +238,7 @@ class ReviewListAPITests(APITestCase):
                 )
 
     def test_invalid_id_filters_return_bad_request(self):
+        """Verify that invalid id filters return bad request."""
         self.authenticate(self.customer)
         for field in ("business_user_id", "reviewer_id"):
             for value in ("abc", "0", "-1", "1.5", "true"):
@@ -230,6 +253,7 @@ class ReviewListAPITests(APITestCase):
                     self.assertIn(field, response.json())
 
     def test_unsupported_ordering_returns_bad_request(self):
+        """Verify that unsupported ordering returns bad request."""
         self.authenticate(self.customer)
         for value in ("unknown", "reviewer__password", "created_at"):
             with self.subTest(ordering=value):

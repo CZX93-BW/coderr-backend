@@ -9,6 +9,7 @@ class IsCustomerUser(BasePermission):
     message = "Only customers may create reviews."
 
     def has_permission(self, request, view):
+        """Require an authenticated customer profile."""
         return (
             request.user.is_authenticated
             and UserProfile.objects.filter(
@@ -22,4 +23,5 @@ class IsReviewAuthor(BasePermission):
     message = "Only the author may modify this review."
 
     def has_object_permission(self, request, view, obj):
+        """Allow modification only by the account that wrote the review."""
         return obj.reviewer_id == request.user.pk

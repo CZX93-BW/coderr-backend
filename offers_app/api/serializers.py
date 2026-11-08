@@ -44,6 +44,7 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
     def validate_details(self, details):
+        """Require one package of each supported tier for a new offer."""
         package_types = {detail["offer_type"] for detail in details}
         expected_types = set(OfferDetail.OfferType.values)
         if len(details) != 3 or package_types != expected_types:
@@ -53,6 +54,7 @@ class OfferCreateSerializer(serializers.ModelSerializer):
         return details
 
     def create(self, validated_data):
+        """Persist the offer and its validated package details together."""
         return create_offer_with_details(validated_data)
 
 
@@ -73,6 +75,7 @@ class OfferDetailLinkSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_url(self, obj):
+        """Build the relative package path used in offer list responses."""
         return f"/offerdetails/{obj.pk}/"
 
 
@@ -141,6 +144,7 @@ class OfferRetrieveSerializer(OfferListSerializer):
 
 class OfferUpdateSerializer(OfferCreateSerializer):
     def validate_details(self, value):
+        """Reject missing, duplicate or unknown tiers in a partial update."""
         package_types = [item.get("offer_type") for item in value]
         if None in package_types:
             raise serializers.ValidationError(
@@ -156,4 +160,5 @@ class OfferUpdateSerializer(OfferCreateSerializer):
         return value
 
     def update(self, instance, validated_data):
+        """Apply the supplied offer and tier changes atomically."""
         return update_offer(instance, validated_data)

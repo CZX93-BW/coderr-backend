@@ -35,6 +35,7 @@ class Review(models.Model):
         ]
 
     def __str__(self):
+        """Identify the review and its reviewer and provider IDs."""
         return (
             f"Review {self.pk}: "
             f"{self.reviewer_id} -> {self.business_user_id}"

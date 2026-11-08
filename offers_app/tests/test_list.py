@@ -14,6 +14,7 @@ from offers_app.models import Offer, OfferDetail
 
 class OfferListAPITests(APITestCase):
     def setUp(self):
+        """Prepare offers list fixtures including url, business, offer."""
         self.url = "/api/offers/"
         self.business = get_user_model().objects.create_user(
             username="list_business",
@@ -28,6 +29,7 @@ class OfferListAPITests(APITestCase):
         self.create_packages()
 
     def create_offer(self):
+        """Create offer."""
         return Offer.objects.create(
             user=self.business,
             title="Website development",
@@ -35,6 +37,7 @@ class OfferListAPITests(APITestCase):
         )
 
     def create_packages(self):
+        """Create packages."""
         packages = [
             ("basic", "100.00", 7),
             ("standard", "0.00", 10),
@@ -49,6 +52,7 @@ class OfferListAPITests(APITestCase):
             )
 
     def test_anonymous_user_receives_documented_offer_list(self):
+        """Verify that anonymous user receives documented offer list."""
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -60,6 +64,7 @@ class OfferListAPITests(APITestCase):
         self.assert_offer_data(data["results"][0])
 
     def assert_offer_data(self, item):
+        """Check offer data."""
         expected_fields = {
             "id", "user", "title", "image", "description",
             "created_at", "updated_at", "details",
@@ -77,6 +82,9 @@ class OfferListAPITests(APITestCase):
         })
 
     def test_zero_minimum_values_and_relative_package_links_are_returned(self):
+        """Verify that zero minimum values and relative package links are
+        returned.
+        """
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         item = response.json()["results"][0]
@@ -89,6 +97,7 @@ class OfferListAPITests(APITestCase):
         self.assertCountEqual(item["details"], expected_details)
 
     def test_empty_offer_list_returns_paginated_empty_results(self):
+        """Verify that empty offer list returns paginated empty results."""
         self.offer.delete()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -100,6 +109,7 @@ class OfferListAPITests(APITestCase):
         })
 
     def create_filter_offer(self, user, title, description, price, days):
+        """Create filter offer."""
         offer = Offer.objects.create(
             user=user, title=title, description=description,
         )
@@ -113,6 +123,7 @@ class OfferListAPITests(APITestCase):
         return offer
 
     def prepare_filter_offers(self):
+        """Prepare filter offers."""
         other_user = get_user_model().objects.create_user(
             username="other_list_business",
         )
@@ -126,6 +137,7 @@ class OfferListAPITests(APITestCase):
         return cheap, expensive
 
     def assert_list_ids(self, params, expected_ids):
+        """Check list ids."""
         response = self.client.get(self.url, params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["count"], len(expected_ids))
@@ -133,6 +145,7 @@ class OfferListAPITests(APITestCase):
         self.assertEqual(actual_ids, expected_ids)
 
     def test_filters_select_expected_offers(self):
+        """Verify that filters select expected offers."""
         cheap, expensive = self.prepare_filter_offers()
         cases = [
             ({"creator_id": expensive.user_id}, [expensive.pk]),
@@ -148,6 +161,9 @@ class OfferListAPITests(APITestCase):
                 self.assert_list_ids(params, expected_ids)
 
     def test_search_matches_title_and_description_case_insensitively(self):
+        """Verify that search matches title and description case
+        insensitively.
+        """
         cheap, expensive = self.prepare_filter_offers()
         cases = [
             ({"search": "LOGO"}, [cheap.pk]),
@@ -160,6 +176,7 @@ class OfferListAPITests(APITestCase):
                 self.assert_list_ids(params, expected_ids)
 
     def test_offers_can_be_ordered_by_minimum_price(self):
+        """Verify that offers can be ordered by minimum price."""
         cheap, expensive = self.prepare_filter_offers()
         self.assert_list_ids(
             {"ordering": "min_price"},
@@ -171,6 +188,7 @@ class OfferListAPITests(APITestCase):
         )
 
     def test_offers_can_be_ordered_by_update_time(self):
+        """Verify that offers can be ordered by update time."""
         cheap, expensive = self.prepare_filter_offers()
         self.set_update_times(cheap, expensive)
         self.assert_list_ids(
@@ -183,6 +201,7 @@ class OfferListAPITests(APITestCase):
         )
 
     def set_update_times(self, cheap, expensive):
+        """Set update times."""
         now = timezone.now()
         Offer.objects.filter(pk=cheap.pk).update(
             updated_at=now - timedelta(days=2),
@@ -193,6 +212,9 @@ class OfferListAPITests(APITestCase):
         Offer.objects.filter(pk=self.offer.pk).update(updated_at=now)
 
     def test_default_pagination_returns_six_offers_then_remaining_offer(self):
+        """Verify that default pagination returns six offers then remaining
+        offer.
+        """
         self.create_six_extra_offers()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -204,6 +226,7 @@ class OfferListAPITests(APITestCase):
         self.assert_pagination_partition(response, second_page, 7)
 
     def create_six_extra_offers(self):
+        """Create six extra offers."""
         for index in range(6):
             self.create_filter_offer(
                 self.business,
@@ -214,6 +237,7 @@ class OfferListAPITests(APITestCase):
             )
 
     def test_page_size_controls_number_of_results(self):
+        """Verify that page size controls number of results."""
         self.prepare_filter_offers()
         response = self.client.get(self.url, {"page_size": 2})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -224,6 +248,7 @@ class OfferListAPITests(APITestCase):
         self.assert_pagination_partition(response, second_page, 3)
 
     def assert_pagination_partition(self, first_page, second_page, total):
+        """Check pagination partition."""
         self.assertEqual(second_page.status_code, status.HTTP_200_OK)
         self.assertEqual(second_page.data["count"], total)
         self.assertEqual(len(second_page.data["results"]), 1)
@@ -238,6 +263,7 @@ class OfferListAPITests(APITestCase):
         )
 
     def test_invalid_filter_parameters_return_bad_request(self):
+        """Verify that invalid filter parameters return bad request."""
         cases = {
             "creator_id": ["abc", "-1", "1.5"],
             "min_price": ["abc", "-0.01", "NaN", "Infinity"],
@@ -254,6 +280,7 @@ class OfferListAPITests(APITestCase):
                     self.assertIn(field, response.data)
 
     def test_empty_frontend_filters_are_ignored(self):
+        """Verify that empty frontend filters are ignored."""
         cheap, expensive = self.prepare_filter_offers()
         params = {
             "creator_id": "",
@@ -268,6 +295,7 @@ class OfferListAPITests(APITestCase):
         )
 
     def test_invalid_page_size_returns_bad_request(self):
+        """Verify that invalid page size returns bad request."""
         for value in ("abc", "0", "-1", "1.5"):
             with self.subTest(page_size=value):
                 response = self.client.get(self.url, {"page_size": value})

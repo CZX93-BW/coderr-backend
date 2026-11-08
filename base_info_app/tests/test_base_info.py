@@ -13,11 +13,13 @@ User = get_user_model()
 
 class BaseInfoAPITests(APITestCase):
     def create_user(self, username, account_type):
+        """Create a test account with its marketplace role."""
         user = User.objects.create_user(username=username)
         UserProfile.objects.create(user=user, type=account_type)
         return user
 
     def create_offer(self, business, title):
+        """Create offer."""
         return Offer.objects.create(
             user=business,
             title=title,
@@ -25,6 +27,7 @@ class BaseInfoAPITests(APITestCase):
         )
 
     def create_review(self, customer, business, rating):
+        """Create review."""
         return Review.objects.create(
             reviewer=customer,
             business_user=business,
@@ -33,6 +36,7 @@ class BaseInfoAPITests(APITestCase):
         )
 
     def create_rated_providers(self):
+        """Create rated providers."""
         first = self.create_user("stats_provider_a", "business")
         second = self.create_user("stats_provider_b", "business")
         alice = self.create_user("stats_alice", "customer")
@@ -42,6 +46,7 @@ class BaseInfoAPITests(APITestCase):
         return self.create_review(alice, second, 1)
 
     def assert_statistics(self, *, reviews, average, businesses, offers):
+        """Check statistics."""
         response = self.client.get("/api/base-info/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
@@ -56,9 +61,13 @@ class BaseInfoAPITests(APITestCase):
         self.assertIn(type(data["average_rating"]), (int, float))
 
     def test_anonymous_user_receives_zero_counts_for_empty_database(self):
+        """Verify that anonymous user receives zero counts for empty
+        database.
+        """
         self.assert_statistics(reviews=0, average=0.0, businesses=0, offers=0)
 
     def test_counts_business_profiles_and_individual_offers(self):
+        """Verify that counts business profiles and individual offers."""
         provider = self.create_user("stats_active", "business")
         self.create_user("stats_without_offers", "business")
         self.create_user("stats_customer", "customer")
@@ -71,10 +80,12 @@ class BaseInfoAPITests(APITestCase):
         self.assert_statistics(reviews=0, average=0.0, businesses=2, offers=2)
 
     def test_average_uses_all_reviews_and_rounds_to_one_decimal(self):
+        """Verify that average uses all reviews and rounds to one decimal."""
         self.create_rated_providers()
         self.assert_statistics(reviews=3, average=3.3, businesses=2, offers=0)
 
     def test_statistics_follow_review_updates_and_deletions(self):
+        """Verify that statistics follow review updates and deletions."""
         review = self.create_rated_providers()
         review.rating = 5
         review.save(update_fields=["rating", "updated_at"])

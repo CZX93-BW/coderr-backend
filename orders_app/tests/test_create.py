@@ -24,6 +24,9 @@ ORDER_FIELDS = {
 class OrderCreateAPITests(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        """Prepare shared orders create fixtures including customer,
+        business, customer token.
+        """
         cls.customer = User.objects.create_user(username="buyer")
         cls.business = User.objects.create_user(username="provider")
         UserProfile.objects.create(user=cls.customer, type="customer")
@@ -39,6 +42,7 @@ class OrderCreateAPITests(APITestCase):
 
     @classmethod
     def create_package(cls):
+        """Create package."""
         return OfferDetail.objects.create(
             offer=cls.offer,
             title="Website Basic",
@@ -50,11 +54,13 @@ class OrderCreateAPITests(APITestCase):
         )
 
     def authenticate(self, token):
+        """Set the API client token for subsequent requests."""
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {token.key}",
         )
 
     def create_order(self):
+        """Create order."""
         return self.client.post(
             "/api/orders/",
             {"offer_detail_id": self.package.pk},
@@ -62,6 +68,7 @@ class OrderCreateAPITests(APITestCase):
         )
 
     def test_customer_can_create_order_from_package(self):
+        """Verify that customer can create order from package."""
         self.authenticate(self.customer_token)
         response = self.create_order()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -74,6 +81,7 @@ class OrderCreateAPITests(APITestCase):
         self.assert_package_snapshot(order)
 
     def assert_package_snapshot(self, order):
+        """Check package snapshot."""
         fields = (
             "title", "revisions", "delivery_time_in_days",
             "price", "features", "offer_type",
@@ -86,21 +94,27 @@ class OrderCreateAPITests(APITestCase):
                 )
 
     def test_business_cannot_create_order(self):
+        """Verify that business cannot create order."""
         self.authenticate(self.business_token)
         response = self.create_order()
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertFalse(Order.objects.exists())
 
     def test_anonymous_user_cannot_create_order(self):
+        """Verify that anonymous user cannot create order."""
         response = self.create_order()
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertFalse(Order.objects.exists())
 
     def post_as_customer(self, payload):
+        """Post as customer."""
         self.authenticate(self.customer_token)
         return self.client.post("/api/orders/", payload, format="json")
 
     def order_snapshot(self, order):
+        """Capture the booked fields for comparison after the source tier
+        changes.
+        """
         fields = (
             "id", "customer_user_id", "business_user_id", "title",
             "revisions", "delivery_time_in_days", "price", "features",
@@ -109,6 +123,7 @@ class OrderCreateAPITests(APITestCase):
         return {field: getattr(order, field) for field in fields}
 
     def test_invalid_package_ids_create_no_orders(self):
+        """Verify that invalid package ids create no orders."""
         payloads = [
             {},
             {"offer_detail_id": None},
@@ -128,12 +143,14 @@ class OrderCreateAPITests(APITestCase):
                 self.assertFalse(Order.objects.exists())
 
     def test_unknown_package_returns_not_found(self):
+        """Verify that unknown package returns not found."""
         missing_id = self.package.pk + 1000
         response = self.post_as_customer({"offer_detail_id": missing_id})
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertFalse(Order.objects.exists())
 
     def test_client_cannot_override_order_data(self):
+        """Verify that client cannot override order data."""
         payload = {
             "offer_detail_id": self.package.pk,
             "customer_user": self.business.pk,
@@ -156,6 +173,9 @@ class OrderCreateAPITests(APITestCase):
         self.assert_package_snapshot(order)
 
     def test_response_contains_documented_fields_and_numeric_price(self):
+        """Verify that response contains documented fields and numeric
+        price.
+        """
         response = self.post_as_customer(
             {"offer_detail_id": self.package.pk},
         )
@@ -168,6 +188,7 @@ class OrderCreateAPITests(APITestCase):
         self.assertEqual(data["business_user"], self.business.pk)
 
     def test_package_changes_do_not_change_existing_order(self):
+        """Verify that package changes do not change existing order."""
         response = self.post_as_customer(
             {"offer_detail_id": self.package.pk},
         )
@@ -179,6 +200,7 @@ class OrderCreateAPITests(APITestCase):
         self.assertEqual(self.order_snapshot(order), before)
 
     def update_original_package(self):
+        """Update original package."""
         changes = {
             "title": "Changed package",
             "price": Decimal("299.00"),
@@ -192,6 +214,7 @@ class OrderCreateAPITests(APITestCase):
         self.package.save()
 
     def test_deleting_offer_preserves_existing_order(self):
+        """Verify that deleting offer preserves existing order."""
         response = self.post_as_customer(
             {"offer_detail_id": self.package.pk},
         )

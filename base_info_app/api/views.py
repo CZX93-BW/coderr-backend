@@ -13,4 +13,5 @@ class BaseInfoView(APIView):
     http_method_names = ["get", "head", "options"]
 
     def get(self, request):
+        """Return public counts and the average review rating."""
         return Response(get_base_info())

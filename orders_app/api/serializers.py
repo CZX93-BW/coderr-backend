@@ -48,6 +48,9 @@ class OrderCreateSerializer(OrderSerializer):
         fields = OrderSerializer.Meta.fields + ("offer_detail_id",)
 
     def create(self, validated_data):
+        """Resolve the selected package and book it for the authenticated
+        customer.
+        """
         package = get_object_or_404(
             OfferDetail.objects.select_related("offer__user"),
             pk=validated_data["offer_detail_id"],
@@ -69,6 +72,7 @@ class OrderStatusSerializer(OrderSerializer):
         )
 
     def to_internal_value(self, data):
+        """Reject attempts to write fields other than the order status."""
         if isinstance(data, Mapping):
             # Report attempts to overwrite booked terms as validation errors.
             extra_fields = set(data) - {"status"}
@@ -80,6 +84,7 @@ class OrderStatusSerializer(OrderSerializer):
         return super().to_internal_value(data)
 
     def validate(self, attrs):
+        """Require a status value even for a partial update."""
         if "status" not in attrs:
             raise serializers.ValidationError({
                 "status": ["This field is required."],
@@ -87,6 +92,7 @@ class OrderStatusSerializer(OrderSerializer):
         return attrs
 
     def update(self, instance, validated_data):
+        """Persist the validated status and refresh the update timestamp."""
         instance.status = validated_data["status"]
         instance.save(update_fields=["status", "updated_at"])
         return instance

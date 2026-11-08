@@ -30,6 +30,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         validators = []
 
     def validate_business_user(self, value):
+        """Verify that the target account has a business profile."""
         if not UserProfile.objects.filter(
             user=value,
             type="business",
@@ -40,6 +41,12 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        """Create one review per customer and provider and reject a
+        duplicate.
+
+        Raises:
+            ValidationError: The customer has already reviewed this provider.
+        """
         review, created = Review.objects.get_or_create(
             reviewer=validated_data.pop("reviewer"),
             business_user=validated_data.pop("business_user"),
@@ -77,6 +84,7 @@ class ReviewUpdateSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, attrs):
+        """Require at least one writable review field."""
         if not attrs:
             raise serializers.ValidationError(
                 "Provide a rating or description to update."
@@ -84,6 +92,7 @@ class ReviewUpdateSerializer(serializers.ModelSerializer):
         return attrs
 
     def update(self, instance, validated_data):
+        """Save the supplied review fields and refresh the update timestamp."""
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save(update_fields=[*validated_data, "updated_at"])

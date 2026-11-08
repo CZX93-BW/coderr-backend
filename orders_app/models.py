@@ -52,4 +52,5 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """Display the booked title and current order status."""
         return f"{self.title} ({self.status})"

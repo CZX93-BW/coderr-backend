@@ -19,6 +19,9 @@ from offers_app.models import Offer, OfferDetail
 
 class OfferUpdateDeleteAPITests(APITestCase):
     def setUp(self):
+        """Prepare offers update delete fixtures including owner, other,
+        customer.
+        """
         self.owner = self.create_user("edit_owner", "business")
         self.other = self.create_user("edit_other", "business")
         self.customer = self.create_user("edit_customer", "customer")
@@ -29,11 +32,13 @@ class OfferUpdateDeleteAPITests(APITestCase):
         self.configure_temporary_media()
 
     def create_user(self, username, account_type):
+        """Create a test account with its marketplace role."""
         user = get_user_model().objects.create_user(username=username)
         UserProfile.objects.create(user=user, type=account_type)
         return user
 
     def create_offer(self, user, title):
+        """Create offer."""
         offer = Offer.objects.create(
             user=user, title=title, description="Original description",
         )
@@ -41,6 +46,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         return offer
 
     def create_default_packages(self, offer):
+        """Create default packages."""
         for package_type in ("basic", "standard", "premium"):
             OfferDetail.objects.create(
                 offer=offer,
@@ -53,16 +59,19 @@ class OfferUpdateDeleteAPITests(APITestCase):
             )
 
     def authenticate(self, user):
+        """Set the API client token for subsequent requests."""
         token, _ = Token.objects.get_or_create(user=user)
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
 
     def snapshot(self):
+        """Capture offers and tiers before a request that may modify them."""
         return (
             list(Offer.objects.order_by("pk").values()),
             list(OfferDetail.objects.order_by("pk").values()),
         )
 
     def send_write_request(self, method):
+        """Send write request."""
         if method == "patch":
             return self.client.patch(
                 self.url, {"title": "Unauthorized change"}, format="json",
@@ -70,6 +79,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         return self.client.delete(self.url)
 
     def test_owner_can_update_title_without_changing_packages(self):
+        """Verify that owner can update title without changing packages."""
         before = list(self.offer.details.order_by("pk").values())
         response = self.client.patch(
             self.url, {"title": "Updated offer"}, format="json",
@@ -84,6 +94,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         )
 
     def test_owner_can_update_one_package_and_preserve_ids(self):
+        """Verify that owner can update one package and preserve ids."""
         before = list(self.offer.details.order_by("pk").values())
         payload = {"details": [{"offer_type": "standard", "price": "125.50"}]}
         response = self.client.patch(self.url, payload, format="json")
@@ -97,6 +108,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         self.assertEqual(len(response.data["details"]), 3)
 
     def test_owner_can_delete_offer_and_its_packages(self):
+        """Verify that owner can delete offer and its packages."""
         package_ids = list(self.offer.details.values_list("pk", flat=True))
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -111,6 +123,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         self.assertEqual(self.foreign_offer.details.count(), 3)
 
     def test_foreign_users_cannot_update_or_delete_offer(self):
+        """Verify that foreign users cannot update or delete offer."""
         before = self.snapshot()
         for user in (self.other, self.customer):
             self.authenticate(user)
@@ -123,6 +136,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
                     self.assertEqual(self.snapshot(), before)
 
     def test_anonymous_user_cannot_update_or_delete_offer(self):
+        """Verify that anonymous user cannot update or delete offer."""
         self.client.credentials()
         before = self.snapshot()
         for method in ("patch", "delete"):
@@ -134,6 +148,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
                 self.assertEqual(self.snapshot(), before)
 
     def test_invalid_package_prevents_all_offer_changes(self):
+        """Verify that invalid package prevents all offer changes."""
         before = self.snapshot()
         payload = {
             "title": "Must not be saved",
@@ -144,6 +159,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         self.assertEqual(self.snapshot(), before)
 
     def configure_temporary_media(self):
+        """Configure temporary media."""
         media_directory = TemporaryDirectory()
         self.addCleanup(media_directory.cleanup)
         media_settings = override_settings(MEDIA_ROOT=media_directory.name)
@@ -151,6 +167,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         self.addCleanup(media_settings.disable)
 
     def create_test_image(self):
+        """Build a valid in-memory PNG upload for a multipart request."""
         content = BytesIO()
         Image.new("RGB", (2, 2), "blue").save(content, format="PNG")
         return SimpleUploadedFile(
@@ -158,6 +175,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         )
 
     def test_owner_can_upload_image_without_changing_packages(self):
+        """Verify that owner can upload image without changing packages."""
         before = list(self.offer.details.order_by("pk").values())
         response = self.client.patch(
             self.url, {"image": self.create_test_image()}, format="multipart",
@@ -171,12 +189,14 @@ class OfferUpdateDeleteAPITests(APITestCase):
         )
 
     def assert_image_stored(self):
+        """Check image stored."""
         self.assertTrue(self.offer.image.name)
         self.assertTrue(
             self.offer.image.storage.exists(self.offer.image.name),
         )
 
     def test_invalid_image_prevents_text_changes(self):
+        """Verify that invalid image prevents text changes."""
         before = self.snapshot()
         invalid_image = SimpleUploadedFile(
             "invalid.png", b"not an image", content_type="image/png",
@@ -190,6 +210,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         self.assertEqual(self.snapshot(), before)
 
     def test_invalid_package_identifiers_preserve_all_data(self):
+        """Verify that invalid package identifiers preserve all data."""
         cases = [
             [{"price": "25.00"}],
             [{"offer_type": "unknown", "price": "25.00"}],
@@ -207,6 +228,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
                 self.assertEqual(self.snapshot(), before)
 
     def ownership_change_payload(self):
+        """Ownership change payload for the test request."""
         foreign_package = self.foreign_offer.details.get(offer_type="basic")
         return {
             "user": self.other.pk,
@@ -219,6 +241,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         }
 
     def test_client_cannot_change_offer_owner_or_package_id(self):
+        """Verify that client cannot change offer owner or package id."""
         package = self.offer.details.get(offer_type="basic")
         foreign_before = list(
             self.foreign_offer.details.order_by("pk").values(),
@@ -234,6 +257,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         )
 
     def assert_owned_offer_update(self, package):
+        """Check owned offer update."""
         self.offer.refresh_from_db()
         package.refresh_from_db()
         self.assertEqual(self.offer.user_id, self.owner.pk)
@@ -245,11 +269,15 @@ class OfferUpdateDeleteAPITests(APITestCase):
         )
 
     def fail_standard_package_save(self, instance, *args, **kwargs):
+        """Simulate a write failure for the standard tier to exercise
+        rollback.
+        """
         if instance.offer_type == "standard":
             raise RuntimeError("Simulated package save failure")
         return self.original_package_save(instance, *args, **kwargs)
 
     def test_save_failure_rolls_back_offer_and_previous_package(self):
+        """Verify that save failure rolls back offer and previous package."""
         before = self.snapshot()
         self.original_package_save = OfferDetail.save
         payload = {
@@ -269,6 +297,7 @@ class OfferUpdateDeleteAPITests(APITestCase):
         self.assertEqual(self.snapshot(), before)
 
     def test_unknown_offer_cannot_be_updated_or_deleted(self):
+        """Verify that unknown offer cannot be updated or deleted."""
         missing_id = Offer.objects.order_by("-pk").first().pk + 1000
         self.url = f"/api/offers/{missing_id}/"
         before = self.snapshot()

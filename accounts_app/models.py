@@ -49,4 +49,7 @@ class UserProfile(models.Model):
     )
 
     def __str__(self):
+        """Return the username used to identify this profile in Django
+        admin.
+        """
         return self.user.username

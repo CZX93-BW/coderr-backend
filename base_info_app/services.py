@@ -9,6 +9,13 @@ from reviews_app.models import Review
 
 
 def get_base_info():
+    """Aggregate marketplace counts and round the mean rating to one decimal
+    place.
+
+    Returns:
+        Counts of offers, business profiles and reviews, plus the mean
+        rating. An empty review table produces an average of 0.0.
+    """
     reviews = Review.objects.aggregate(
         review_count=Count("pk"),
         average_rating=Avg("rating"),

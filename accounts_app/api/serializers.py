@@ -38,6 +38,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
+        """Require the repeated password to match the submitted password."""
         if attrs["password"] != attrs["repeated_password"]:
             raise serializers.ValidationError(
                 {"repeated_password": "Passwords do not match."}
@@ -45,6 +46,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        """Create a user and role profile from the validated registration
+        fields.
+        """
         validated_data.pop("repeated_password")
         account_type = validated_data.pop("type")
         return create_registered_user(validated_data, account_type)
@@ -143,6 +147,9 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
+        """Save profile and user changes together and timestamp a new
+        upload.
+        """
         # One PATCH may change both the auth user and its profile.
         user_data = validated_data.pop("user", {})
         if "file" in validated_data:
@@ -151,6 +158,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
     def update_user_fields(self, user, user_data):
+        """Save only the account fields supplied in the profile update."""
         if not user_data:
             return
         for field, value in user_data.items():
