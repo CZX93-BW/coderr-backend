@@ -41,7 +41,7 @@ Do not introduce artificial failures to claim a red phase.
 | Postman | Real HTTP requests and connected workflows against the local server |
 | Frontend checks | Integration with the supplied frontend, including uploads |
 
-Model and API tests initially live in each app's `tests.py`.
+Model and API tests live in each app's `tests/` package.
 Use separate test classes for their responsibilities.
 
 Django tests use an isolated test database.
@@ -193,7 +193,7 @@ Run the accounts tests:
 
 Run the profile model test class:
 
-    python manage.py test accounts_app.tests.UserProfileModelTests
+    python manage.py test accounts_app.tests.test_models.UserProfileModelTests
 
 A run containing zero tests is only a setup check.
 
