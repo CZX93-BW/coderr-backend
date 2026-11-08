@@ -196,30 +196,3 @@ Run the profile model test class:
     python manage.py test accounts_app.tests.test_models.UserProfileModelTests
 
 A run containing zero tests is only a setup check.
-
-## Postman delivery
-
-Provide the full updated collection and environment as importable JSON
-files whenever HTTP test coverage is added.
-
-Document:
-- Required local server and staff account setup
-- Collection execution order
-- Automatically captured tokens and IDs
-- Repeat-run behavior
-- Cleanup limited to dedicated test data
-
-Do not report unimplemented endpoint checks as passed.
-
-## Evidence and completion
-
-For each completed task, record:
-- Date and relevant commit
-- Test command or collection run
-- Number of executed tests and failures
-- Expected red result where applicable
-- Successful green result and refactor verification
-- Remaining limitations or unresolved cases
-
-Report Django test results and Postman results separately.
-Only report coverage percentages when they were actually measured.
