@@ -6,7 +6,6 @@ from accounts_app.models import UserProfile
 from offers_app.models import Offer
 from reviews_app.models import Review
 
-
 User = get_user_model()
 
 

@@ -5,7 +5,6 @@ from django.test import TestCase
 
 from reviews_app.models import Review
 
-
 User = get_user_model()
 
 

@@ -3,10 +3,10 @@ from io import BytesIO
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from PIL import Image
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
+from PIL import Image
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase

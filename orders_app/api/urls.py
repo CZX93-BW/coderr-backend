@@ -7,7 +7,6 @@ from .views import (
     OrderListCreateView,
 )
 
-
 app_name = "orders"
 
 urlpatterns = [

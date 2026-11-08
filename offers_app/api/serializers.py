@@ -3,8 +3,7 @@ from decimal import Decimal
 from rest_framework import serializers
 
 from offers_app.models import Offer, OfferDetail
-from offers_app.services import create_offer_with_details
-from offers_app.services import update_offer
+from offers_app.services import create_offer_with_details, update_offer
 
 
 class OfferDetailSerializer(serializers.ModelSerializer):

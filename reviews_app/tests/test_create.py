@@ -6,7 +6,6 @@ from rest_framework.test import APITestCase
 from accounts_app.models import UserProfile
 from reviews_app.models import Review
 
-
 User = get_user_model()
 
 

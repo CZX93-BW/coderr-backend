@@ -2,7 +2,6 @@ from django.urls import path
 
 from .views import ReviewDetailView, ReviewListCreateView
 
-
 app_name = "reviews"
 
 urlpatterns = [

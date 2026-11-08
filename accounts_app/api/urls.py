@@ -8,7 +8,6 @@ from .views import (
     RegistrationView,
 )
 
-
 app_name = "accounts"
 
 urlpatterns = [

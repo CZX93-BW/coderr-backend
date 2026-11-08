@@ -6,7 +6,6 @@ from django.test import TestCase
 
 from orders_app.models import Order
 
-
 User = get_user_model()
 
 

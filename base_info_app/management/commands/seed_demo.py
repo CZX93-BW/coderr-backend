@@ -6,7 +6,6 @@ from accounts_app.models import UserProfile
 from accounts_app.services import create_registered_user
 from offers_app.models import Offer, OfferDetail
 
-
 User = get_user_model()
 
 OFFER_TITLE = "Demo: Website für dein Unternehmen"

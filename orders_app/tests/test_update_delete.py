@@ -8,7 +8,6 @@ from rest_framework.test import APITestCase
 from accounts_app.models import UserProfile
 from orders_app.models import Order
 
-
 User = get_user_model()
 
 

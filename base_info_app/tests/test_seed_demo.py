@@ -6,7 +6,6 @@ from rest_framework.test import APITestCase
 from accounts_app.models import UserProfile
 from offers_app.models import Offer, OfferDetail
 
-
 User = get_user_model()
 
 

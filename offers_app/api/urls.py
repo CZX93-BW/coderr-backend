@@ -2,7 +2,6 @@ from django.urls import path
 
 from .views import OfferDetailView, OfferViewSet
 
-
 app_name = "offers"
 
 urlpatterns = [

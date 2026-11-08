@@ -9,7 +9,6 @@ from accounts_app.models import UserProfile
 from offers_app.models import Offer, OfferDetail
 from orders_app.models import Order
 
-
 User = get_user_model()
 
 
