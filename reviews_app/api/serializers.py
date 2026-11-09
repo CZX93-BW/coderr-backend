@@ -1,5 +1,6 @@
-# Validate review targets, handle duplicate reviews and limit editable
-# fields.
+"""Validate review targets, handle duplicate reviews and limit editable
+fields.
+"""
 
 from rest_framework import serializers
 
@@ -8,9 +9,13 @@ from reviews_app.models import Review
 
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
+    """Validate a customer rating and associate it with its provider."""
+
     rating = serializers.IntegerField(min_value=1, max_value=5)
 
     class Meta:
+        """Select review fields and delegate duplicate checks to validation."""
+
         model = Review
         fields = (
             "id",
@@ -62,9 +67,13 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
 
 
 class ReviewUpdateSerializer(serializers.ModelSerializer):
+    """Limit review edits to the rating and description."""
+
     rating = serializers.IntegerField(min_value=1, max_value=5)
 
     class Meta:
+        """Protect authorship and provider identity during review edits."""
+
         model = Review
         fields = (
             "id",

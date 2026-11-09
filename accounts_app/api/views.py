@@ -1,4 +1,4 @@
-# Register users, issue login tokens and serve role-specific profile data.
+"""Register users, issue login tokens and serve role-specific profile data."""
 
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status
@@ -22,6 +22,8 @@ from .serializers import (
 
 
 class RegistrationView(generics.GenericAPIView):
+    """Register a marketplace account and return its access token."""
+
     queryset = get_user_model().objects.all()
     serializer_class = RegistrationSerializer
     permission_classes = [AllowAny]
@@ -41,6 +43,8 @@ class RegistrationView(generics.GenericAPIView):
 
 
 class LoginView(generics.GenericAPIView):
+    """Authenticate an active user and return a reusable access token."""
+
     queryset = get_user_model().objects.all()
     serializer_class = AuthTokenSerializer
     permission_classes = [AllowAny]
@@ -62,6 +66,8 @@ class LoginView(generics.GenericAPIView):
 
 
 class ProfileDetailView(generics.RetrieveAPIView):
+    """Retrieve a profile by user ID or update the caller's profile."""
+
     queryset = UserProfile.objects.select_related("user")
     serializer_class = ProfileDetailSerializer
     authentication_classes = [TokenAuthentication]
@@ -86,6 +92,8 @@ class ProfileDetailView(generics.RetrieveAPIView):
 
 
 class CustomerProfileListView(generics.ListAPIView):
+    """List customer profiles for authenticated callers."""
+
     queryset = (
         UserProfile.objects.filter(type=UserProfile.AccountType.CUSTOMER)
         .select_related("user")
@@ -98,6 +106,8 @@ class CustomerProfileListView(generics.ListAPIView):
 
 
 class BusinessProfileListView(generics.ListAPIView):
+    """List provider profiles for authenticated callers."""
+
     queryset = (
         UserProfile.objects.filter(type=UserProfile.AccountType.BUSINESS)
         .select_related("user")

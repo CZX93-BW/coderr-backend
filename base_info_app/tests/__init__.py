@@ -1,1 +1,1 @@
-# Django test discovery package for platform statistics.
+"""Django test discovery package for platform statistics."""

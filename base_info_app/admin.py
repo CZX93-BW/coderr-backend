@@ -1,1 +1,1 @@
-# Statistics are computed from other apps and have no separate admin model.
+"""Statistics are computed from other apps and have no separate admin model."""

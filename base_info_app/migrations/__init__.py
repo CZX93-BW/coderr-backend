@@ -1,1 +1,1 @@
-# Django schema migration package for platform statistics.
+"""Django schema migration package for platform statistics."""

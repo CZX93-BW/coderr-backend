@@ -1,1 +1,1 @@
-# Django management command discovery for local demo setup.
+"""Django management command discovery for local demo setup."""

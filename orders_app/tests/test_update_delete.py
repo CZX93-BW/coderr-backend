@@ -1,4 +1,5 @@
-# Exercise participant and staff permissions for order changes and deletion.
+"""Exercise participant and staff permissions for order changes and deletion.
+"""
 
 from decimal import Decimal
 

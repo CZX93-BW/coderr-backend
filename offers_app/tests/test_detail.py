@@ -1,4 +1,4 @@
-# Check authenticated offer retrieval, package links and detail responses.
+"""Check authenticated offer retrieval, package links and detail responses."""
 
 from datetime import UTC
 from decimal import Decimal

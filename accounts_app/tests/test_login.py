@@ -1,5 +1,6 @@
-# Check token reuse, missing tokens, inactive accounts and invalid
-# credentials.
+"""Check token reuse, missing tokens, inactive accounts and invalid
+credentials.
+"""
 
 from django.contrib.auth import get_user_model
 from rest_framework import status

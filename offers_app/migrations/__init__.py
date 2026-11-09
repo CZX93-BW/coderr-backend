@@ -1,1 +1,1 @@
-# Django schema migration package for offers and package tiers.
+"""Django schema migration package for offers and package tiers."""

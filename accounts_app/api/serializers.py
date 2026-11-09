@@ -1,5 +1,5 @@
-# Map account and profile records to registration, detail and list
-# responses.
+"""Map account and profile records to registration, detail and list responses.
+"""
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -11,6 +11,8 @@ from accounts_app.services import create_registered_user
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
+    """Validate credentials and create a user with a marketplace role."""
+
     password = serializers.CharField(
         write_only=True,
         trim_whitespace=False,
@@ -25,6 +27,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """Map registration input to the user model."""
+
         model = get_user_model()
         fields = [
             "username",
@@ -55,6 +59,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class RegistrationResponseSerializer(serializers.ModelSerializer):
+    """Return account details and the token issued at registration."""
+
     token = serializers.CharField(
         source="auth_token.key",
         read_only=True,
@@ -62,12 +68,16 @@ class RegistrationResponseSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source="pk", read_only=True)
 
     class Meta:
+        """Expose read-only account fields for the registration response."""
+
         model = get_user_model()
         fields = ["token", "username", "email", "user_id"]
         read_only_fields = fields
 
 
 class ProfileDetailSerializer(serializers.ModelSerializer):
+    """Combine user account fields with marketplace profile details."""
+
     username = serializers.CharField(
         source="user.username",
         read_only=True,
@@ -90,6 +100,8 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """Select read-only fields for the combined account and profile."""
+
         model = UserProfile
         fields = [
             "user",
@@ -109,6 +121,8 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
 
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
+    """Update account and profile fields, including the profile image."""
+
     first_name = serializers.CharField(
         source="user.first_name",
         max_length=150,
@@ -133,6 +147,8 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """Select the profile fields accepted for updates."""
+
         model = UserProfile
         fields = [
             "first_name",
@@ -167,6 +183,8 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
 
 class CustomerProfileListSerializer(serializers.ModelSerializer):
+    """Expose the fields returned by the customer directory."""
+
     username = serializers.CharField(
         source="user.username",
         read_only=True,
@@ -181,6 +199,8 @@ class CustomerProfileListSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """Select read-only customer directory fields."""
+
         model = UserProfile
         fields = [
             "user",
@@ -195,6 +215,8 @@ class CustomerProfileListSerializer(serializers.ModelSerializer):
 
 
 class BusinessProfileListSerializer(serializers.ModelSerializer):
+    """Expose the fields returned by the provider directory."""
+
     username = serializers.CharField(
         source="user.username",
         read_only=True,
@@ -209,6 +231,8 @@ class BusinessProfileListSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """Select read-only provider directory fields."""
+
         model = UserProfile
         fields = [
             "user",

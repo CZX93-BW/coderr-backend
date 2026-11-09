@@ -1,1 +1,1 @@
-# HTTP interface for customer bookings.
+"""HTTP interface for customer bookings."""

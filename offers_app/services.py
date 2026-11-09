@@ -1,4 +1,4 @@
-# Create and update an offer and its tiers within one transaction.
+"""Create and update an offer and its tiers within one transaction."""
 
 from django.db import transaction
 

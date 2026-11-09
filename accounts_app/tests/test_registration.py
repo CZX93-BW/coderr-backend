@@ -1,4 +1,4 @@
-# Check registration responses, role restrictions and transaction rollback.
+"""Check registration responses, role restrictions and transaction rollback."""
 
 from unittest.mock import patch
 

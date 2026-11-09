@@ -1,4 +1,5 @@
-# Store the parties, booked package terms and current status for each order.
+"""Store the parties, booked package terms and current status for each order.
+"""
 
 from decimal import Decimal
 
@@ -8,12 +9,18 @@ from django.db import models
 
 
 class Order(models.Model):
+    """Keep the booked package terms and link the customer and provider."""
+
     class Status(models.TextChoices):
+        """Define the permitted order states."""
+
         IN_PROGRESS = "in_progress", "In progress"
         COMPLETED = "completed", "Completed"
         CANCELLED = "cancelled", "Cancelled"
 
     class OfferType(models.TextChoices):
+        """Identify the basic, standard and premium package tiers."""
+
         BASIC = "basic", "Basic"
         STANDARD = "standard", "Standard"
         PREMIUM = "premium", "Premium"

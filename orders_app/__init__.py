@@ -1,1 +1,1 @@
-# Django application for customer bookings.
+"""Django application for customer bookings."""

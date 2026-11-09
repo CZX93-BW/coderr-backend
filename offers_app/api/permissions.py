@@ -1,4 +1,4 @@
-# Restrict creation to business accounts and changes to the offer owner.
+"""Restrict creation to business accounts and changes to the offer owner."""
 
 from rest_framework.permissions import BasePermission
 
@@ -6,6 +6,8 @@ from accounts_app.models import UserProfile
 
 
 class IsBusinessUser(BasePermission):
+    """Require an authenticated provider account."""
+
     message = "Only business users can create offers."
 
     def has_permission(self, request, view):
@@ -20,6 +22,8 @@ class IsBusinessUser(BasePermission):
 
 
 class IsOfferOwner(BasePermission):
+    """Restrict changes to the user who owns the offer."""
+
     message = "Only the offer owner may change or delete this offer."
 
     def has_object_permission(self, request, view, obj):

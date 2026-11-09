@@ -1,4 +1,4 @@
-# Prepare the frontend guest accounts and their sample offer for local use.
+"""Prepare the frontend guest accounts and their sample offer for local use."""
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
@@ -84,6 +84,8 @@ def seed_offer(business):
 
 
 class Command(BaseCommand):
+    """Prepare guest accounts and a bookable three-tier demo offer."""
+
     help = "Create guest accounts and a sample offer for the local frontend."
 
     @transaction.atomic

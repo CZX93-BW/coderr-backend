@@ -1,4 +1,4 @@
-# Check public access, empty statistics and aggregates across providers.
+"""Check public access, empty statistics and aggregates across providers."""
 
 from django.contrib.auth import get_user_model
 from rest_framework import status

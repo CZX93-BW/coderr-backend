@@ -1,5 +1,5 @@
-# Check author-only writes and preservation of reviews after invalid
-# changes.
+"""Check author-only writes and preservation of reviews after invalid changes.
+"""
 
 from django.contrib.auth import get_user_model
 from rest_framework import status

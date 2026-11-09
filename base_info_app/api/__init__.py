@@ -1,1 +1,1 @@
-# HTTP interface for platform statistics.
+"""HTTP interface for platform statistics."""

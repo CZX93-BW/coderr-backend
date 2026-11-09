@@ -1,1 +1,1 @@
-# Local commands exposed through manage.py.
+"""Local commands exposed through manage.py."""

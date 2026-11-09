@@ -1,5 +1,5 @@
-# Verify profile details are looked up by user ID and require
-# authentication.
+"""Verify profile details are looked up by user ID and require authentication.
+"""
 
 from datetime import datetime
 

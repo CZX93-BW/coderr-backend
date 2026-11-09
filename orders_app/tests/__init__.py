@@ -1,1 +1,1 @@
-# Django test discovery package for customer bookings.
+"""Django test discovery package for customer bookings."""

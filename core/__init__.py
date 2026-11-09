@@ -1,1 +1,1 @@
-# Project configuration shared by Django entry points.
+"""Project configuration shared by Django entry points."""

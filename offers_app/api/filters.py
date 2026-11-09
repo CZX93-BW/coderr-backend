@@ -1,4 +1,4 @@
-# Validate search parameters before filtering and ordering the offer list.
+"""Validate search parameters before filtering and ordering the offer list."""
 
 from decimal import Decimal
 
@@ -8,6 +8,8 @@ from rest_framework.filters import BaseFilterBackend
 
 
 class OfferQuerySerializer(serializers.Serializer):
+    """Validate filters, search terms and ordering for the offer list."""
+
     creator_id = serializers.IntegerField(required=False, min_value=1)
     page_size = serializers.IntegerField(required=False, min_value=1)
     min_price = serializers.DecimalField(
@@ -33,6 +35,8 @@ class OfferQuerySerializer(serializers.Serializer):
 
 
 class OfferFilterBackend(BaseFilterBackend):
+    """Apply search, price and delivery filters and order offer results."""
+
     def filter_queryset(self, request, queryset, view):
         """Apply validated filters and use the ID to break ordering ties."""
         params = self.get_validated_params(request)

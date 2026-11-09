@@ -1,1 +1,1 @@
-# Django application for provider reviews.
+"""Django application for provider reviews."""

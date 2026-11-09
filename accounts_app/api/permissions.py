@@ -1,9 +1,12 @@
-# Allow authenticated profile reads and reserve edits for the profile owner.
+"""Allow authenticated profile reads and reserve edits for the profile owner.
+"""
 
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsProfileOwnerOrReadOnly(BasePermission):
+    """Allow profile reads and restrict changes to the linked user."""
+
     def has_object_permission(self, request, view, obj):
         """Allow reads and restrict writes to the user linked to the
         profile.

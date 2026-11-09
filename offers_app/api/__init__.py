@@ -1,1 +1,1 @@
-# HTTP interface for offers and package tiers.
+"""HTTP interface for offers and package tiers."""

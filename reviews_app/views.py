@@ -1,1 +1,1 @@
-# HTTP views for provider reviews live in api.views.
+"""HTTP views for provider reviews live in api.views."""

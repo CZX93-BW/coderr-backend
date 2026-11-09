@@ -1,1 +1,1 @@
-# Django test discovery package for offers and package tiers.
+"""Django test discovery package for offers and package tiers."""

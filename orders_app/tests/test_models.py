@@ -1,4 +1,4 @@
-# Check stored terms, status defaults and protection of linked accounts.
+"""Check stored terms, status defaults and protection of linked accounts."""
 
 from decimal import Decimal
 

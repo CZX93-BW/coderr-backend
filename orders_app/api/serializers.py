@@ -1,5 +1,5 @@
-# Read booked terms, resolve the package for creation and limit status
-# edits.
+"""Read booked terms, resolve the package for creation and limit status edits.
+"""
 
 from collections.abc import Mapping
 
@@ -12,6 +12,8 @@ from orders_app.services import create_order
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    """Return the participants, booked terms and status of an order."""
+
     price = serializers.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -20,6 +22,8 @@ class OrderSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
+        """Expose stored order fields as read-only values."""
+
         model = Order
         fields = (
             "id",
@@ -39,12 +43,16 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class OrderCreateSerializer(OrderSerializer):
+    """Resolve the selected package and book it for the customer."""
+
     offer_detail_id = serializers.IntegerField(
         min_value=1,
         write_only=True,
     )
 
     class Meta(OrderSerializer.Meta):
+        """Configure the fields used to book a package."""
+
         fields = OrderSerializer.Meta.fields + ("offer_detail_id",)
 
     def create(self, validated_data):
@@ -62,9 +70,13 @@ class OrderCreateSerializer(OrderSerializer):
 
 
 class OrderStatusSerializer(OrderSerializer):
+    """Validate a status change and reject other order edits."""
+
     status = serializers.ChoiceField(choices=Order.Status.choices)
 
     class Meta(OrderSerializer.Meta):
+        """Keep all stored order fields except the status read-only."""
+
         read_only_fields = tuple(
             field
             for field in OrderSerializer.Meta.fields

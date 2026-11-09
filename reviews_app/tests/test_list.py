@@ -1,4 +1,4 @@
-# Check authenticated review listing, participant filters and ordering.
+"""Check authenticated review listing, participant filters and ordering."""
 
 from datetime import timedelta
 

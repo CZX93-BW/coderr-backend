@@ -1,4 +1,4 @@
-# Inspect reviews by author, business account, rating and creation date.
+"""Inspect reviews by author, business account, rating and creation date."""
 
 from django.contrib import admin
 
@@ -7,6 +7,8 @@ from .models import Review
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
+    """Inspect provider reviews by author, rating and creation date."""
+
     list_display = (
         "id",
         "business_user",

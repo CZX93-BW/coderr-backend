@@ -1,4 +1,4 @@
-# Check public listing, filters, ordering and page boundaries.
+"""Check public listing, filters, ordering and page boundaries."""
 
 from datetime import timedelta
 from decimal import Decimal

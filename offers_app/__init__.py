@@ -1,1 +1,1 @@
-# Django application for offers and package tiers.
+"""Django application for offers and package tiers."""

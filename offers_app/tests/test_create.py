@@ -1,4 +1,4 @@
-# Verify tier validation, business-only creation and rollback on failure.
+"""Verify tier validation, business-only creation and rollback on failure."""
 
 from copy import deepcopy
 from decimal import Decimal

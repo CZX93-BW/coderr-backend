@@ -1,4 +1,4 @@
-# Record package terms at booking time for the customer and provider.
+"""Record package terms at booking time for the customer and provider."""
 
 from copy import deepcopy
 

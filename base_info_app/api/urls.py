@@ -1,4 +1,4 @@
-# Map API paths for platform statistics to their DRF views.
+"""Map API paths for platform statistics to their DRF views."""
 
 from django.urls import path
 

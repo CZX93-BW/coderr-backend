@@ -1,5 +1,5 @@
-# Aggregate review ratings and count providers and offers for the public
-# API.
+"""Aggregate review ratings and count providers and offers for the public API.
+"""
 
 from django.db.models import Avg, Count
 

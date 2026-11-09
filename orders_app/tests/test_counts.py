@@ -1,4 +1,4 @@
-# Check provider-specific counts for in-progress and completed orders.
+"""Check provider-specific counts for in-progress and completed orders."""
 
 from decimal import Decimal
 

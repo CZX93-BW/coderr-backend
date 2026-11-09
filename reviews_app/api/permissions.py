@@ -1,4 +1,5 @@
-# Restrict review creation to customers and edits or deletion to the author.
+"""Restrict review creation to customers and edits or deletion to the author.
+"""
 
 from rest_framework.permissions import BasePermission
 
@@ -6,6 +7,8 @@ from accounts_app.models import UserProfile
 
 
 class IsCustomerUser(BasePermission):
+    """Require an authenticated customer account."""
+
     message = "Only customers may create reviews."
 
     def has_permission(self, request, view):
@@ -20,6 +23,8 @@ class IsCustomerUser(BasePermission):
 
 
 class IsReviewAuthor(BasePermission):
+    """Restrict changes and deletion to the review's author."""
+
     message = "Only the author may modify this review."
 
     def has_object_permission(self, request, view, obj):

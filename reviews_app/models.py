@@ -1,4 +1,4 @@
-# Store customer ratings with a unique reviewer and provider pair.
+"""Store customer ratings with a unique reviewer and provider pair."""
 
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -6,6 +6,8 @@ from django.db import models
 
 
 class Review(models.Model):
+    """Store one customer's rating and description for a provider."""
+
     business_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -27,6 +29,8 @@ class Review(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        """Enforce one review for each customer and provider pair."""
+
         constraints = [
             models.UniqueConstraint(
                 fields=["reviewer", "business_user"],

@@ -1,5 +1,5 @@
-# Verify guest login and stable record IDs when the demo command is
-# repeated.
+"""Verify guest login and stable record IDs when the demo command is repeated.
+"""
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command

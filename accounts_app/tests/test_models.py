@@ -1,4 +1,4 @@
-# Check the one-to-one user relationship, profile defaults and deletion.
+"""Check the one-to-one user relationship, profile defaults and deletion."""
 
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction

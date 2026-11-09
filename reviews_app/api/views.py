@@ -1,4 +1,4 @@
-# List and create reviews and enforce authorship for detail writes.
+"""List and create reviews and enforce authorship for detail writes."""
 
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import (
@@ -15,6 +15,8 @@ from .serializers import ReviewCreateSerializer, ReviewUpdateSerializer
 
 
 class ReviewListCreateView(ListCreateAPIView):
+    """List reviews and accept new reviews from customers."""
+
     queryset = Review.objects.order_by("-updated_at", "-id")
     serializer_class = ReviewCreateSerializer
     authentication_classes = [TokenAuthentication]
@@ -36,6 +38,8 @@ class ReviewListCreateView(ListCreateAPIView):
 
 
 class ReviewDetailView(RetrieveUpdateDestroyAPIView):
+    """Allow the author to update or delete a review."""
+
     queryset = Review.objects.all()
     serializer_class = ReviewUpdateSerializer
     authentication_classes = [TokenAuthentication]

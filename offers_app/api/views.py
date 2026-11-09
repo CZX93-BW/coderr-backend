@@ -1,4 +1,5 @@
-# List public offers and enforce action-specific access to offers and tiers.
+"""List public offers and enforce action-specific access to offers and tiers.
+"""
 
 from django.db.models import Min
 from rest_framework.authentication import TokenAuthentication
@@ -21,6 +22,8 @@ from .serializers import (
 
 
 class OfferViewSet(ModelViewSet):
+    """Browse marketplace offers and handle provider-owned changes."""
+
     queryset = (
         Offer.objects.select_related("user")
         .prefetch_related("details")
@@ -75,6 +78,8 @@ class OfferViewSet(ModelViewSet):
 
 
 class OfferDetailView(RetrieveAPIView):
+    """Retrieve the terms of a single bookable package."""
+
     queryset = OfferDetail.objects.all()
     serializer_class = OfferDetailSerializer
     authentication_classes = [TokenAuthentication]

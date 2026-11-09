@@ -1,11 +1,15 @@
-# Extend each Django user with one marketplace profile and account role.
+"""Extend each Django user with one marketplace profile and account role."""
 
 from django.conf import settings
 from django.db import models
 
 
 class UserProfile(models.Model):
+    """Store the role and marketplace details for one Django user."""
+
     class AccountType(models.TextChoices):
+        """Identify a marketplace user as a customer or a provider."""
+
         CUSTOMER = "customer", "Customer"
         BUSINESS = "business", "Business"
 

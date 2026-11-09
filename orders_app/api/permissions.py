@@ -1,4 +1,4 @@
-# Allow customer bookings, provider status updates and staff deletions.
+"""Allow customer bookings, provider status updates and staff deletions."""
 
 from rest_framework.permissions import BasePermission
 
@@ -6,6 +6,8 @@ from accounts_app.models import UserProfile
 
 
 class IsCustomerUser(BasePermission):
+    """Require an authenticated customer account."""
+
     message = "Only customers may create orders."
 
     def has_permission(self, request, view):
@@ -20,6 +22,8 @@ class IsCustomerUser(BasePermission):
 
 
 class CanModifyOrder(BasePermission):
+    """Allow status updates by the assigned provider and deletion by staff."""
+
     message = "You do not have permission to modify this order."
 
     def has_object_permission(self, request, view, obj):

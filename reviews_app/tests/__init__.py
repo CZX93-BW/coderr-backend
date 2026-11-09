@@ -1,1 +1,1 @@
-# Django test discovery package for provider reviews.
+"""Django test discovery package for provider reviews."""

@@ -1,4 +1,4 @@
-# Verify each user sees orders where they are the customer or provider.
+"""Verify each user sees orders where they are the customer or provider."""
 
 from decimal import Decimal
 

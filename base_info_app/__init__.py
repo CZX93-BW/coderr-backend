@@ -1,1 +1,1 @@
-# Django application for platform statistics.
+"""Django application for platform statistics."""

@@ -1,4 +1,5 @@
-# Store provider offers and the price, delivery time and terms of each tier.
+"""Store provider offers and the price, delivery time and terms of each tier.
+"""
 
 from decimal import Decimal
 
@@ -8,6 +9,8 @@ from django.db import models
 
 
 class Offer(models.Model):
+    """Store a provider's listing and its descriptive information."""
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -29,7 +32,11 @@ class Offer(models.Model):
 
 
 class OfferDetail(models.Model):
+    """Store the terms of a single package tier within an offer."""
+
     class OfferType(models.TextChoices):
+        """Identify the basic, standard and premium package tiers."""
+
         BASIC = "basic", "Basic"
         STANDARD = "standard", "Standard"
         PREMIUM = "premium", "Premium"
@@ -56,6 +63,8 @@ class OfferDetail(models.Model):
     )
 
     class Meta:
+        """Enforce one package per tier within each offer."""
+
         constraints = [
             models.UniqueConstraint(
                 fields=["offer", "offer_type"],

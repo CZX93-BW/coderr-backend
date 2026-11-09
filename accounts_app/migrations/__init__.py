@@ -1,1 +1,1 @@
-# Django schema migration package for accounts and role-specific profiles.
+"""Django schema migration package for accounts and role-specific profiles."""

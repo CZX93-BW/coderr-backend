@@ -1,1 +1,1 @@
-# HTTP interface for provider reviews.
+"""HTTP interface for provider reviews."""

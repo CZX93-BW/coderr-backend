@@ -1,4 +1,4 @@
-# Inspect bookings by participant, package tier and order status.
+"""Inspect bookings by participant, package tier and order status."""
 
 from django.contrib import admin
 
@@ -7,6 +7,8 @@ from .models import Order
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
+    """Inspect orders by participant, package tier and status."""
+
     list_display = (
         "id",
         "title",

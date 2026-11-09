@@ -1,1 +1,1 @@
-# Django application for accounts and role-specific profiles.
+"""Django application for accounts and role-specific profiles."""

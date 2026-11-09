@@ -1,4 +1,4 @@
-# Scope orders to participants and count provider orders by status.
+"""Scope orders to participants and count provider orders by status."""
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -21,6 +21,8 @@ from .serializers import (
 
 
 class OrderListCreateView(ListCreateAPIView):
+    """List a participant's orders or let a customer book a package."""
+
     serializer_class = OrderSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -59,6 +61,9 @@ class OrderDetailView(
     DestroyModelMixin,
     GenericAPIView,
 ):
+    """Update an order's status or delete it according to caller permissions.
+    """
+
     queryset = Order.objects.all()
     serializer_class = OrderStatusSerializer
     authentication_classes = [TokenAuthentication]
@@ -75,6 +80,8 @@ class OrderDetailView(
 
 
 class OrderCountView(APIView):
+    """Count a provider's orders currently in progress."""
+
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     http_method_names = ["get", "head", "options"]
@@ -98,5 +105,7 @@ class OrderCountView(APIView):
 
 
 class CompletedOrderCountView(OrderCountView):
+    """Count a provider's completed orders."""
+
     order_status = Order.Status.COMPLETED
     response_key = "completed_order_count"

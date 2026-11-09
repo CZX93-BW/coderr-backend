@@ -1,1 +1,1 @@
-# Django schema migration package for customer bookings.
+"""Django schema migration package for customer bookings."""

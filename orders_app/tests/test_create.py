@@ -1,4 +1,4 @@
-# Verify booking permissions and the package snapshot captured at purchase.
+"""Verify booking permissions and the package snapshot captured at purchase."""
 
 from decimal import Decimal
 

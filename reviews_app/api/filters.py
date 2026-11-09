@@ -1,10 +1,12 @@
-# Filter reviews by participant and validate rating or date ordering.
+"""Filter reviews by participant and validate rating or date ordering."""
 
 from rest_framework import serializers
 from rest_framework.filters import BaseFilterBackend
 
 
 class ReviewFilterSerializer(serializers.Serializer):
+    """Validate reviewer and provider filters and review ordering."""
+
     business_user_id = serializers.IntegerField(
         required=False,
         min_value=1,
@@ -25,6 +27,8 @@ class ReviewFilterSerializer(serializers.Serializer):
 
 
 class ReviewFilterBackend(BaseFilterBackend):
+    """Filter reviews by participant and apply the requested ordering."""
+
     def filter_queryset(self, request, queryset, view):
         """Validate participant filters and apply deterministic rating or
         date ordering.

@@ -1,5 +1,5 @@
-# Check tier constraints and the effect of deleting an offer on related
-# rows.
+"""Check tier constraints and the effect of deleting an offer on related rows.
+"""
 
 from decimal import Decimal
 

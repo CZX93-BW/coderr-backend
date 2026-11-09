@@ -1,1 +1,1 @@
-# Django test discovery package for accounts and role-specific profiles.
+"""Django test discovery package for accounts and role-specific profiles."""

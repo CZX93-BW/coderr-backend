@@ -1,4 +1,4 @@
-# Manage provider offers and edit their package tiers inline.
+"""Manage provider offers and edit their package tiers inline."""
 
 from django.contrib import admin
 
@@ -6,12 +6,16 @@ from .models import Offer, OfferDetail
 
 
 class OfferDetailInline(admin.StackedInline):
+    """Edit package tiers alongside their parent offer in the admin."""
+
     model = OfferDetail
     extra = 0
 
 
 @admin.register(Offer)
 class OfferAdmin(admin.ModelAdmin):
+    """Manage marketplace offers and their packages in the admin."""
+
     list_display = ("id", "title", "user", "created_at", "updated_at")
     list_select_related = ("user",)
     search_fields = ("title", "description", "user__username")
@@ -21,6 +25,8 @@ class OfferAdmin(admin.ModelAdmin):
 
 @admin.register(OfferDetail)
 class OfferDetailAdmin(admin.ModelAdmin):
+    """Inspect individual package tiers in the admin."""
+
     list_display = (
         "id",
         "title",
