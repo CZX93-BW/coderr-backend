@@ -138,7 +138,11 @@ class ProfileDetailAPITests(APITestCase):
                 self.assertEqual(response.data[field], expected_value)
 
     def test_profile_created_at_matches_user_date_joined(self):
-        """Verify that profile created at matches user date joined."""
+        """Return the join time in UTC at whole-second precision."""
+        self.user.date_joined = datetime.fromisoformat(
+            "2026-11-09T08:48:52.174453+01:00"
+        )
+        self.user.save(update_fields=["date_joined"])
         self.client.credentials(
             HTTP_AUTHORIZATION=f"Token {self.token.key}",
         )
@@ -146,8 +150,7 @@ class ProfileDetailAPITests(APITestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        created_at = datetime.fromisoformat(response.data["created_at"])
-        self.assertEqual(created_at, self.user.date_joined)
+        self.assertEqual(response.data["created_at"], "2026-11-09T07:48:52Z")
 
     def test_missing_profile_returns_not_found(self):
         """Verify that missing profile returns not found."""

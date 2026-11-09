@@ -1,9 +1,9 @@
 # Check authenticated offer retrieval, package links and detail responses.
 
+from datetime import UTC
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
-from django.utils.dateparse import parse_datetime
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
@@ -77,12 +77,11 @@ class OfferRetrieveAPITests(APITestCase):
             OFFER_DETAIL_FIELDS,
         )
         self.assert_offer_values(data)
-        self.assertEqual(
-            parse_datetime(data["created_at"]), self.offer.created_at
-        )
-        self.assertEqual(
-            parse_datetime(data["updated_at"]), self.offer.updated_at
-        )
+        for field in ("created_at", "updated_at"):
+            with self.subTest(field=field):
+                stored = getattr(self.offer, field).astimezone(UTC)
+                expected = stored.strftime("%Y-%m-%dT%H:%M:%SZ")
+                self.assertEqual(data[field], expected)
 
     def assert_offer_values(self, data):
         """Check offer values."""
