@@ -1,0 +1,19 @@
+name: coderr
+
+services:
+  backend:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DJANGO_DB_PATH: /app/data/db.sqlite3
+    volumes:
+      - database:/app/data
+      - media:/app/media
+      - static:/app/staticfiles
+
+volumes:
+  database:
+  media:
+  static:
