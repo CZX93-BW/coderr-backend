@@ -13,7 +13,30 @@ services:
       - media:/app/media
       - static:/app/staticfiles
 
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/caddy:/etc/caddy:ro
+      - type: bind
+        source: ../coderr-frontend-public
+        target: /srv/frontend
+        read_only: true
+        bind:
+          create_host_path: false
+      - media:/srv/media:ro
+      - static:/srv/static:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
 volumes:
   database:
   media:
   static:
+  caddy_data:
+  caddy_config:
