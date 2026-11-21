@@ -8,6 +8,7 @@ services:
       - .env
     environment:
       DJANGO_DB_PATH: /app/data/db.sqlite3
+      DJANGO_BEHIND_PROXY: "True"
     volumes:
       - database:/app/data
       - media:/app/media
