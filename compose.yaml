@@ -17,6 +17,9 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    networks:
+      - default
+      - proxy
     depends_on:
       - backend
     ports:
@@ -32,6 +35,13 @@ services:
           create_host_path: false
       - media:/srv/media:ro
       - static:/srv/static:ro
+      - type: bind
+        source: /opt/kanmind/kanmind-frontend-public
+        target: /srv/kanmind/frontend
+        read_only: true
+        bind:
+          create_host_path: false
+      - kanmind_static:/srv/kanmind/static:ro
       - caddy_data:/data
       - caddy_config:/config
 
@@ -41,3 +51,12 @@ volumes:
   static:
   caddy_data:
   caddy_config:
+  kanmind_static:
+    external: true
+    name: kanmind_static
+
+networks:
+  default:
+  proxy:
+    external: true
+    name: web_proxy

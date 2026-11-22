@@ -19,3 +19,21 @@ coderr.bastian-wollny.de {
         file_server
     }
 }
+
+kanmind.bastian-wollny.de {
+    @django path /api /api/* /admin /admin/*
+
+    handle @django {
+        reverse_proxy kanmind-backend:8000
+    }
+
+    handle_path /static/* {
+        root * /srv/kanmind/static
+        file_server
+    }
+
+    handle {
+        root * /srv/kanmind/frontend
+        file_server
+    }
+}
